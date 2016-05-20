@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../css/base.css"/>
+    <style>
+        html,body{
+            height:100%;
+        }
+        body{
+            background-color: #EFEFEF;
+        }
+        header{
+            background-color: #FFFFFF;
+        }
+        .header{
+            height: 4rem;
+            position: relative;
+            font-size:1.2rem;
+            font-weight:bold;
+            padding:0.5rem 0;
+        }
+        .divider{
+            border-top:0;
+        }
+
+        .header p{
+            height:4rem;
+            line-height:4rem;
+        }
+        .back{
+            position:absolute;
+            top:0.5rem;
+            padding-left:2rem;
+            background-size:2rem;
+            background-position: 1rem 50%;
+            background-repeat:no-repeat;
+            background-image:url('../image/icons/arrow-left-black.png'); 
+        }
+
+        .title {
+            font-size:1.4rem;
+        }
+
+        .field-group{
+            height:4rem;
+            padding:1rem 0;
+            margin:0 1rem;
+            line-height:4rem;
+            border-bottom: 1px solid #EFEFEF;
+            background-color:#FFFFFF;
+        }
+        .field-group.last{
+            border-bottom:0;
+        }
+        input{
+            height:4rem;
+            line-height:normal;
+            outline:none;
+            width:70%;
+            font-size:1.2rem;
+            font-weight:bold;
+        }
+        .role{
+           height:4rem;
+           width:70%;
+           font-size:1.2rem;
+           display:inline-block;
+        }
+        .label{
+           height:4rem;
+           width:25%;
+           font-size:1.2rem;
+           font-weight:bold;
+           float:left;
+           text-indent:1rem;
+        }
+        .role .checkbox{
+            width:50%;
+            float:left;
+            height:100%;
+            font-size:1.2rem;
+            font-weight:bold;
+        }
+        .role .checkbox span{
+            display:inline-block;
+            vertical-align: middle;
+        }
+        .role .checkbox .icon{
+            width:2rem;
+            height:2rem;
+            background-color:#FFFFFF;
+            border:1px solid #EFEFEF;
+            border-radius:1rem;
+            position:relative;
+        }
+        .role .checkbox .icon a{
+            position:absolute;
+            display:inline-block;
+            width:1.6rem;
+            height:1.6rem;
+            border-radius:0.8rem;
+            top:0.2rem;
+            left:0.2rem;
+        }
+        .role .checkbox.checked .icon a{
+            background-color: #FFD705;
+        }
+
+        label{
+            display:inline-block;
+            width:25%;
+            font-weight:bold;
+            font-size:1.2rem;
+            text-indent:1rem;
+        }
+
+        .field{
+            padding:0 1rem;
+        }
+        button{
+            height:4rem;
+            width:100%;
+            background:#FFD705;
+            font-size:1.4rem;
+            font-weight:bold;
+            color:#6b450a;
+            border-radius: 1rem;
+        }
+        .button-loading{
+            background-image:url("../image/loading.gif");
+            background-size:3rem;
+            background-repeat:no-repeat;
+            background-position:50%;
+            text-indent: -150%;
+        }
+        .protocol-wrapper{
+            text-align:center;
+            height:3rem;
+            line-height:3rem;
+            font-size:1.1rem;
+        }
+        .protocol{
+            color:#FFD705;
+        }
+        .protocol-wrapper .checkbox{
+            height:2rem;
+            width:2rem;
+            margin-right:0.5rem;
+            border:1px solid #FFD705;
+            display:inline-block;
+            line-height:2rem;
+            border-radius:2rem;
+        }
+        .protocol-wrapper .checkbox.checked{
+            background-size:1.5rem;
+            background-repeat:no-repeat;
+            background-image:url("../image/icons/agree.png");
+            background-position:50%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <section class="header text-center">
+            <p tapmode="touch-down" class="back">返回</p>
+            <p class="title">商户/配送入驻申请</p>
+        </section>
+    </header>
+
+    <section class="container" >
+        <section class="divider"></section>
+        <section class="field-group last">
+            <label for="market">城市/区县</label>
+            <input readonly="readonly" id="market" name="market" />
+        </section>
+        <section class="field-group">
+            <p class="label">商户/配送</p>
+            <section class="role">
+                <p tapmode="touch-down" class="checkbox checked" data-value="100">
+                    <span class="icon"><a></a></span>
+                    <span>商户</span>
+                </p>
+                <p tapmode="touch-down" class="checkbox" data-value="101">
+                    <span class="icon"><a></a></span>
+                    <span>配送员</span>
+                </p>
+            </section>
+        </section>
+
+        <section class="divider"></section>
+        <section class="field save">
+            <button class="submit" tapmode="touch-down">提交</button>
+        </section>
+        <section class="divider"></section>
+        <section class="field">
+            <p class="protocol-wrapper">
+                <span class="checkbox checked">&nbsp;</span><span>我已阅读并同意<span class="protocol">《小小家用户协议》<span></span>
+            </p>
+        </section>
+    </section>
+
+</body>
+</html>
+
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/model/market.js"></script>
+<script type="text/javascript" src="../script/model/user.js"></script>
+<script type="text/javascript" src="../script/api/server.js"></script>
+<script type="text/javascript">
+function request(){
+    var role = $('.role .checkbox.checked').attr('data-value');
+    var protocol = $('.protocol-wrapper .checkbox');
+    if(!protocol.hasClass('checked')){
+        api.toast({
+	        msg:'请同意' + $('.protocol').text()
+        });
+        return;
+    }
+    var server = new Server();
+    var url = server.getOne() + "/user/apply/index";
+    var market = new Market();
+    var current = market.getCurrent();
+    var dom = $('.submit');
+    if(dom.hasClass('button-loading')){
+        return;
+    }
+    dom.addClass('button-loading');
+    api.ajax({
+        url:url,
+        cache:false,
+        timeout:10,
+        dataType:'text',
+        returnAll:true,
+        method:"post",
+        data: {
+           values : {
+                id : current.id,
+                role:role,
+                SID:server.getCookie()
+            }
+        }
+    },function(ret, err){
+        if(!err && 200 == ret.statusCode){
+            try{
+                var body = JSON.parse(ret.body);
+                console.log(ret.body);
+                if(body.code == 0){
+                    api.toast({
+	                    msg:'申请成功，请静候佳音'
+                    });
+                }
+                else if(body.code == 1){
+                    api.toast({
+	                    msg:'您还没有登陆，请登陆后进行操作'
+                    });
+                }
+                else{
+                    api.toast({
+	                    msg:'您已经申请过了'
+                    });
+                }
+
+            }catch(e){
+                api.toast({
+                    msg:'服务器忙，请稍后再试'
+                });
+            }
+        }
+        else{
+            api.toast({
+                msg:err.msg
+            });
+        }
+        dom.removeClass('button-loading');
+    });
+
+}
+
+function delegateEvent(){
+    $(document).on('touchend', '.role .checkbox', function(){
+        if(!$(this).hasClass('checked')){
+            $('.role .checkbox').toggleClass('checked');
+        }
+    });
+    $(document).on('touchend', '.protocol-wrapper .checkbox', function(){
+        $(this).toggleClass('checked');
+    });
+    $(document).on('touchstart', '#market', function(){
+        showMarket();
+    });
+    onMarketChange(function(){
+        initMarket();
+    });
+    $('.back').on('touchend', function(){
+        api.closeWin();
+    });
+    $('.submit').on('touchend', function(){
+        request();
+    });
+}
+
+function initMarket(){
+    var market = new Market();
+    var current = market.getCurrent();
+    if(current){
+        $('#market').val(current.city.concat(current.district));
+    }
+}
+function initFront(){
+    fixStatusBar($('header'));
+    initMarket();
+}
+
+apiready = function(){
+    delegateEvent();
+    initFront();
+}
+
+</script>

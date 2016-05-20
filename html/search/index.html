@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+		<style>
+			html{
+				height:100%;
+			}
+			body.loading{
+				height:100%;
+			}
+			.container{
+				display:none;
+				overflow:auto;
+				padding-bottom:6rem;
+			}
+			.goods {
+				text-align:center;
+				overflow: auto;
+				border-top:0.2rem solid #EFEFEF;
+			}
+			.goods-wrapper{
+				width:50%;
+				float:left;
+				overflow:auto;
+				background-color:#EFEFEF; 
+			}
+			.goods .item {
+				position: relative;
+				margin-bottom:0.2rem;
+				background-color:#FFFFFF;
+			}
+			.goods .goods-wrapper:nth-child(odd) .item{
+				margin-right:0.1rem;
+			}
+			.goods .goods-wrapper:nth-child(even) .item{
+				margin-left:0.1rem;
+			}
+			.item .goods-thumb {
+				width: 80%;
+			}
+			.item .title {
+				height: 1.5rem;
+				font-size: 1.3rem;
+				line-height: 1.5rem;
+				padding:0 1rem;
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+
+			.item .bottom {
+				width: 100%;
+				height:3rem;
+				position: relative;
+				font-weight: bold;
+				padding-bottom:0.5rem;
+			}
+
+			.bottom .operation {
+				text-align: right;
+				position:absolute;
+				right:0;
+				display: inline-block;
+				width: 75%;
+				height:3rem;
+			}
+
+			.bottom .add {
+				height:3rem;
+				padding-right: 1rem;
+				display: inline-block;
+			}
+
+			.bottom .icon {
+				height: 2.5rem;
+				width: 2.5rem;
+				background-size: 1.5rem;
+				background-position: 50%;
+				border: 1px solid #EFEFEF;
+				display: inline-block;
+				border-radius: 100%;
+				background-repeat: no-repeat;
+                margin-top:0.15rem;
+			}
+
+			.bottom .add .icon {
+				background-image: url("../../image/icons/add.png");
+			}
+
+			.money-symbol {
+			    position:absolute;
+				text-align: left;
+				font-size:1.5rem;
+				left: 1rem;
+				display: inline-block;
+				width: 20%;
+				height: 3rem;
+				line-height:3rem;
+				color:red;
+			}
+
+			.bottom .sub {
+				height:3rem;
+				padding-left: 1rem;
+				display: inline-block;
+				visibility: hidden;
+			}
+
+			.bottom .sub.show {
+				visibility: visible;
+			}
+
+			.bottom .sub .icon {
+				background-image: url("../../image/icons/sub.png");
+			}
+
+			.bottom .number {
+				visibility: hidden;
+				display:inline-block;
+				width:1.8rem;
+				height:3rem;
+				line-height:3rem;
+				color:#808080;
+				font-size:1.2rem;
+				text-align: center;
+				text-overflow: ellipsis;
+				word-wrap: normal;
+				overflow: hidden;
+				vertical-align:top;
+			}
+			
+			.bottom .number.show {
+				visibility: visible;
+			}
+
+			.cart{
+				position:fixed;
+				bottom: 0;
+				right:0;
+				padding-right: 2rem;
+				width:6rem;
+				height:6rem;
+				border-radius:50%;
+			}
+			.cart .icon {
+				display:block;
+				background-image: url(../../image/icons/cart-active.png);
+				width: 6rem;
+				height: 6rem;
+				background-repeat: no-repeat;
+				background-size: 4rem;
+				background-position: 50%;
+			}
+			.cart .number {
+			    width: 2rem;
+			    height: 2rem;
+			    line-height: 2rem;
+			    text-align:center;
+			    position: absolute;
+			    right:1rem;
+			    bottom:3rem;
+			    color: #FFFFFF;
+			    border: 1px solid #EFEFEF;
+			    border-radius: 50%;
+			    overflow: hidden;
+			    text-overflow: ellipsis;
+			    background-color: red;
+			}
+		</style>
+	</head>
+	<body class="loading">
+		<p class="network-error"></p>
+		<section class="container">
+		</section>
+
+		<section tapmode="touch-down" class="cart hidden">
+			<div class="icon">
+				<span class="number empty">0</span>
+			</div>
+		</section>	
+
+		<script id="goods" type="text/html">
+			<section class="goods">
+			<%for(var i = 0; i < goods.length; i++){%>
+				<section class="goods-wrapper">
+					<section class="item" data-id="<%=goods[i].id%>" data-price="<%=goods[i].price%>" data-title="<%=goods[i].title%>" data-slogan="<%=goods[i].slogan%>">
+						<p class="text-center">
+							<img tapmode="touch-down" class="goods-thumb" src="../../image/products/<%=goods[i].id%>.JPG"/>
+						</p>
+						<p class="title">
+							<span><%=goods[i].title%></span>
+						</p>
+						<section class="bottom text-ellipsis">
+							<p>
+								<span class="money-symbol"><%=goods[i].price%></span>
+								<span class="operation"> 
+									<span tapmode="touch-down" class="sub"> 
+										<span class="icon"></span> 
+									</span> 
+									<span class="number">1</span> 
+									<span tapmode="touch-down" class="add"> 
+										<span class="icon"></span> 
+									</span> 
+								</span>
+							</p>
+						</section>
+					</section>
+				</section>
+			<%}%>
+			</section>
+		</script>
+	</body>
+</html>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/frame.js"></script>
+<script type="text/javascript" src="../../script/vendor/template.js"></script>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+
+<script type="text/javascript" src="../../script/model/goods.js"></script>
+<script type="text/javascript" src="../../script/model/market.js"></script>
+<script type="text/javascript" src="../../script/model/cart.js"></script>
+<script type="text/javascript" src="../../script/api/server.js"></script>
+<script type="text/javascript">
+	var lastUpdated = 0;//数据最后更新时间
+	var title;
+	var iosOverScroll = false;
+	apiready = function() {
+		var res = api.pageParam;
+		title = res.title;
+
+		request();	
+
+		delegateEvent();
+		
+		onNetworkChanged(request, function(){
+			var now = timestamp();
+			if(now - lastUpdated > 10){
+				api.refreshHeaderLoading();
+			}
+		});
+
+		api.addEventListener({
+	        name:'viewappear'
+        },function(ret,err){
+			showNumber();
+        });
+
+		api.addEventListener({
+		    name:'resume'
+		},function(ret,err){
+			var now = timestamp();
+			if(now - lastUpdated > 3600){
+				setTimeout(function(){
+					api.refreshHeaderLoading();
+				}, 200);
+			}
+		});
+
+		$(".cart").on('touchend', function(){
+			api.openWin({
+				name:'cart',
+				url:'widget://html/cart.html',
+				animation:{
+					type:'none',
+					duration:300
+				}
+			});
+		});
+	}
+	
+	function request(){
+		var market = new Market();
+		var current = market.getCurrent();
+		var server = new Server();
+		var data = {values:{id:current.id,title:title}};
+		var url = server.getOne() + "/customer/search/index";
+		api.ajax({
+	        url:url,
+	        method:'post',
+	        cache:true,
+	        timeout:10,
+	        data:data,
+	        dataType:'text',
+	        returnAll:true,
+    	},function(ret,err){
+	    	if(!err && 200 == ret.statusCode){
+	            try{
+	                var result = JSON.parse(ret.body);
+					var goodsModel = new Goods();
+					goodsModel.load(function(){
+						var data = goodsModel.merge(result.data.all);
+					  	  render(data);
+					});
+					lastUpdated = timestamp();
+	            }catch(e){
+	            }
+	        }
+		  	ajaxComplete();
+		});
+	}
+	
+	function ajaxComplete(){
+		api.refreshHeaderLoadDone();
+	}
+
+	function openGoodsDetail(obj){
+		var _this = $(obj).parents('.item');
+		var goods = [];
+		goods.push($(_this).attr('data-id'));
+		goods.push("'" + $(_this).attr('data-price') + "'");
+		goods.push("'" + $(_this).attr('data-title') + "'");
+		goods.push("'" + $(_this).attr('data-slogan') + "'");
+
+		api.execScript({
+            script: 'openGoodsFrame(' + goods.join(',') + ')'
+        });
+	}
+	
+	function delegateEvent(){
+		if ('ios' == api.systemType) {
+			$(document).on('touchmove', function(event) {
+				if (window.scrollY == 0) {
+					iosOverScroll = true;
+				} else {
+					iosOverScroll = false;
+				}
+			});
+			$(document).on('touchend', function(event) {
+				if (event.touches.length == 0) {
+					iosOverScroll = false;
+				}
+			});
+			$(document).on('touchmove','.add', function(event) {
+				event.stopPropagation();
+				$(this).removeClass('not-moved');
+			});
+			$(document).on('touchstart','.add',function(event) {
+				if (!iosOverScroll) {
+					$(this).addClass('not-moved');
+				}
+			});
+			$(document).on('touchend','.add', function(event) {
+				if (!$(this).hasClass('not-moved') || iosOverScroll) {
+					return true;
+				}
+				$(this).removeClass('not-moved');
+				var origin = $(this).parents('.item').find('.goods-thumb');
+				var offset = origin.offset();
+				var width = origin.width();
+				var height = origin.height();
+				var image = origin.attr('src');
+				var offset_x = offset.left;
+				var page_y = offset.top - $(window).scrollTop();
+				var cart = $('.cart .icon');
+				var cart_x = cart.offset().left + cart.width()/2;
+				var cart_y = cart.offset().top + cart.height()/2;
+				var params = [];
+				params.push($(this).parents('.item').attr('data-id'));
+				params.push(offset_x);
+				params.push(page_y);
+				params.push(width);
+				params.push(height);
+				params.push(0.01);
+				params.push(cart_x);
+				params.push(cart_y);
+				api.execScript({
+					script : 'iosGoodsToCart(' + params.join(',') + ');'
+				});
+				addCart($(this));
+
+			});
+		} else {
+			touchEvent('.add',addCart);
+		}
+		
+		touchEvent(".goods-thumb",openGoodsDetail);
+		
+		touchEvent('.sub',subCart);
+	
+	}
+	
+	function initFront() {
+		showNumber();
+		
+		api.parseTapmode();
+	}
+
+	function render(goods){
+		
+		var data = {
+			goods:goods
+		}
+		var html=baidu.template('goods',data);
+		$('.container').html(html);
+
+		$('body').removeClass('loading');
+		initFront();
+		if('none' == $('.container').css('display')){
+			setTimeout(function(){
+				$('.container').fadeIn(200);
+			}, 200);
+		}
+		api.parseTapmode();
+	}
+
+	function showNumber(){
+		$.each($('.item'), function(i, dom){
+			var market = new Market();
+			var current = market.getCurrent();
+			var cart = new Cart();
+			var cartGoods = cart.list(current.id);
+			var inCart = false;
+			var number = 0;
+			$.each(cartGoods, function(j, goods){
+				if($(dom).attr('data-id') == goods.id){
+					inCart = true;
+					number = goods.number;
+					return false;
+				}				
+			});
+			if(inCart){
+				$(dom).find('.sub').addClass('show');
+				$(dom).find('.number').html(number).addClass('show');
+			}
+			else{
+				$(dom).find('.sub').removeClass('show');
+				$(dom).find('.number').html(number).removeClass('show');
+			}
+		});
+
+		var marketModel = new Market();
+		var current = marketModel.getCurrent();
+		var cart = new Cart();
+		var number = cart.length(current.id);
+		$('.cart').show();
+		$('.number.empty').html(number);
+		
+	}
+
+	function addCart(obj){
+		var marketModel = new Market();
+		var current = marketModel.getCurrent();
+		var cart = new Cart();
+		var goodsID = $(obj).parents('.item').attr('data-id');
+		cart.add(current.id, goodsID);
+		api.execScript({
+        	script: 'updateCartNumber();'
+    	});
+    	showNumber();
+	}
+
+	function subCart(obj){
+		var marketModel = new Market();
+		var current = marketModel.getCurrent();
+		var cart = new Cart();
+		var goodsID = $(obj).parents('.item').attr('data-id');
+		cart.sub(current.id, goodsID);
+		api.execScript({
+        	script: 'updateCartNumber();'
+    	});
+    	showNumber();
+	}
+</script>

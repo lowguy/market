@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../css/base.css"/>
+	<style>
+	    html,body{
+	       height:100%;
+	    }
+		.header{
+			height: 4rem;
+			background-color: #FFFFFF;
+			position: relative;
+			font-size:1.2rem;
+			font-weight:bold;
+			padding:0.5rem 0;
+            border-bottom:1px solid #EFEFEF;
+
+		}
+
+		.header p{
+			height:4rem;
+			line-height:4rem;
+		}
+		.back{
+			position:absolute;
+			top:0.5rem;
+			padding-left:2rem;
+			background-size:2rem;
+			background-position: 1rem 50%;
+			background-repeat:no-repeat;
+			background-image:url('../image/icons/arrow-left-black.png');
+		}
+		.title{
+			font-size:1.4rem;
+		}
+		.history{
+		    position: absolute;
+            top: 0.5rem;
+            right: 0;
+            height: 4rem;
+            padding-right: 1rem;
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<section class="header text-center">
+			<p tapmode="touch-down" class="back">返回</p>
+			<p class="title">钱包</p>
+			<p class="history">历史提现</p>
+		</section>
+	</header>
+</body>
+</html>
+
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/window.js"></script>
+<script type="text/javascript">
+
+function initFrames(){
+
+    var header = parseInt($('header').height());
+    var winHeight = parseInt(api.winHeight);
+    var winWidth = parseInt(api.winWidth);
+	var height = winHeight - header;
+	api.openFrame({
+	    name: 'wallet_index',
+	    url: 'widget://html/wallet/index.html',
+	    rect: {
+		    x:0,
+		    y:header,
+		    w:'auto',
+		    h:height
+	    },
+	    vScrollBarEnabled:false,
+	    bounces:true
+    });
+
+}
+
+function initFront(){
+   	fixStatusBar($('header'));
+   	$('.back').on('touchend', function(){
+   		api.closeWin();
+   	});
+    touchEvent('.history', function(){
+        api.openWin({
+            name: 'balance_history',
+            url: 'widget://html/balance_history.html'
+        });
+    });
+}
+
+apiready = function(){
+	initFront();
+	initFrames();
+}
+
+</script>

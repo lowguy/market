@@ -1,0 +1,127 @@
+* {
+	padding: 0;
+	margin: 0;
+}
+
+html {
+	font-size: 62.5%;
+}
+
+html, body {
+	-webkit-touch-callout: none;
+	-webkit-text-size-adjust: none;
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+	-webkit-user-select: none;
+	background-color: #fff;
+	color: #222222;
+}
+body.loading{
+	background-image:url("../image/loading.gif");
+	background-size:8rem;
+	background-repeat:no-repeat;
+	background-position:center;
+}
+input, button, textarea {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	font-size: 1.2rem;
+	-webkit-appearance: none;
+	background-color: rgba(0, 0, 0, 0);
+	outline: rgba(0,0,0,0);
+}
+input::-webkit-input-placeholder {
+    text-align: left;
+    line-height: normal;
+    font-size:1.2rem;
+    color:#808080;
+}
+button{
+    outline:none;
+}
+
+.number{
+	font-family: Helvetica;
+}
+.divider {
+
+	background-color: #EFEFEF;
+	height: 0.5rem;
+}
+
+.left {
+	float: left;
+}
+
+.right {
+	float: right;
+}
+
+.clear-all {
+	clear: both;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.text-left {
+	text-align: left;
+}
+
+.text-right {
+	text-align: right;
+}
+
+.hidden {
+	display: none;
+}
+
+.text-ellipsis {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.network-error {
+	width: 100%;
+	text-align: center;
+	height: 0;
+	font-size:1.2rem;
+	font-weight: bold;
+	line-height: 2rem;
+	background: #FFFFFF;
+	background-image: url('../image/icons/warning.png');
+	background-repeat: no-repeat;
+	background-size: contain;
+	background-position: 5% 50%;
+	-webkit-transition: height 0.2s;
+	opacity:0;
+	overflow: hidden;
+    webkit-transform: translate3d(0,0,0); 
+    transform: translate3d(0,0,0);
+}
+.network-error:after {
+	content: "您掉线啦..."
+}
+.network-error.show {
+    padding:1rem 0;
+	height: 2rem;
+	opacity:1;
+}
+
+.container {
+	position: relative;
+	font-size:1.2rem;
+}
+.money-symbol {
+	font-family: Helvetica;
+	font-size:1.2rem;
+}
+.money-symbol:before {
+	content: "￥";
+}
+
+.touch-down {
+	opacity: 0.6;
+}

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../css/base.css"/>
+	<style>
+	    html, body{
+	        height:100%;
+	    }
+	    header{
+            background-color: #FFFFFF;
+	    }
+		.header{
+			height: 4rem;
+			position: relative;
+			font-size:1.2rem;
+			font-weight:bold;
+			padding:0.5rem 0;
+			border-bottom: 1px solid #F2F2F2;
+		}
+
+		.header p{
+			height:4rem;
+			line-height:4rem;
+		}
+		.back{
+			position:absolute;
+			top:0.5rem;
+			padding-left:2rem;
+			background-size:2rem;
+			background-position: 1rem 50%;
+			background-repeat:no-repeat;
+			background-image:url('../image/icons/arrow-left-black.png');
+		}
+		.title{
+			font-size:1.4rem;
+		}
+        .navbar{
+            overflow:auto;
+        }
+		.item{
+		    width:25%;
+		    position: relative;
+		    display: block;
+		    float:left;
+		    padding: 1rem 0;
+		    text-align: center;
+		    font-size: 1.3rem;
+		    border-bottom: 1px solid #EFEFEF;
+		    -webkit-tap-highlight-color: transparent;
+		}
+		.item p{
+		    border-right:#EFEFEF 1px solid;
+		}
+		.item:last-child p{
+		    border-right:none;
+		}
+
+		.item.on{
+		    color:#FFD705;
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<section class="header text-center">
+			<p tapmode="touch-down" class="back">返回</p>
+			<p class="title">我的订单</p>
+		</section>
+	</header>
+	<section class="navbar">
+		<section class="item" data-status='1'>
+			<p>待付款</p>
+		</section>
+		<section class="item" data-status='2'>
+			<p>待收货</p>
+		</section>
+		<section class="item" data-status='4'>
+			<p>待评价</p>
+		</section>
+		<section class="item" data-status='5'>
+			<p>已完成</p>
+		</section>
+	</section>
+</body>
+</html>
+
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/window.js"></script>
+<script type="text/javascript">
+var status;
+function delegateEvent(){
+	touchEvent('.navbar .item',orderStatus);
+}
+
+function initFront(){
+    status = api.pageParam.status;
+    status = status ? status : 1;
+    $('.item[data-status="' + status +'"]').addClass('on');
+   	fixStatusBar($('header'));
+   	$('.back').on('touchend', function(){
+   		var storage = getStorage();
+   		api.closeWin();
+   	});
+   	api.addEventListener({name: 'keyback'}, function(ret, err){
+        var storage = getStorage();
+   	    api.closeWin();
+    });   
+}
+
+function orderStatus(obj){
+	if(!$(obj).hasClass('on')){
+		$('.item.on').removeClass('on');
+		$(obj).addClass('on');
+		var storage = getStorage();
+		api.execScript({
+			frameName:"order_index",
+	        script: 'statusChange(' + $(obj).attr('data-status') + ')'
+        });
+	}
+}
+
+function initFrames(){
+	var header = $('header').height();
+	var navbar = $('.navbar').height();
+	var height = api.winHeight - header  - navbar;
+	api.openFrame({
+	    name: 'order_index',
+	    url: 'widget://html/order/index.html',
+	    rect: {
+	        x: 0,
+	        y: header + navbar,
+	        w: api.winWidth,
+	        h: height
+	    },
+	    bounces: true,
+	    reload:true,
+	    bgColor: 'rgba(0,0,0,0)',
+	    vScrollBarEnabled: false,
+	    hScrollBarEnabled: false,
+	    pageParam:{
+	        status:status
+	    }
+	});
+}
+apiready = function(){
+	initFront();
+	delegateEvent();
+	initFrames();
+}
+
+</script>

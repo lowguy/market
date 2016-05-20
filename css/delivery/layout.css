@@ -1,0 +1,88 @@
+html, body{
+	height:100%;
+}
+
+
+header{
+	background-color: #FFD705;
+}
+header button{
+    color:#6b450a;
+}
+.header {
+	padding: 0.5rem 1rem;
+	height: 4rem;
+	position:relative;
+}
+header .market{
+    position:absolute;
+    left:25%;
+    width:50%;
+    height:4rem;
+}
+
+header .market span{
+    display:inline-block;
+    height:4rem;
+    line-height:4rem;
+    text-indent:2rem;
+    background-image:url('../../image/icons/location-coffee.png');
+    background-repeat:no-repeat;
+    background-size: 2rem;
+    background-position:0 50%; 
+    background-position-y:50%;
+    font-weight:bold;
+    font-size:1.4rem;
+    text-align:center;
+}
+
+.navigator{
+	width:100%;
+	padding:0.5rem 0;
+	height:4rem;
+	position: fixed;
+	bottom: 0;
+	font-weight:bold;
+	border-top:1px solid #EFEFEF;
+	font-size:1.2rem;
+}
+
+.navigator section{
+	height:100%;
+	width:50%;
+	background-repeat: no-repeat;
+	background-position: 50%;
+	float:left;
+	position:relative;
+	color:#808080;
+}
+
+.navigator.delivery section{
+    width:50%;
+}
+
+.navigator .icon{
+	width:2.5rem;
+	height:2.5rem;
+	margin:0 auto;
+	background-repeat: no-repeat;
+	background-size: 80%;
+	background-position: 50%;
+}
+
+.navigator .home .icon{
+	background-image: url(../../image/icons/order.png);
+}
+
+
+.navigator .active.home .icon{
+	background-image: url(../../image/icons/order-active.png);
+}
+
+.navigator .user .icon{
+	background-image: url(../../image/icons/user.png);
+}
+
+.navigator .active.user .icon{
+	background-image: url(../../image/icons/user-active.png);
+}

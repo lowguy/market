@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+        <meta name="format-detection" content="telephone=no" />
+        <link rel="stylesheet" type="text/css" href="../css/base.css"/>
+        <style>
+            html, body{
+            height:100%;
+            }
+            header{
+                background-color: #FFFFFF;
+            }
+            .header{
+                height: 4rem;
+                position: relative;
+                font-size:1.2rem;
+                font-weight:bold;
+                border-bottom:1px solid #EFEFEF;
+                padding:0.5rem 0;
+            }
+    
+            .header p{
+                height:4rem;
+                line-height:4rem;
+            }
+            .back{
+                position:absolute;
+                top:0.5rem;
+                padding-left:2rem;
+                background-size:2rem;
+                background-position: 1rem 50%;
+                background-repeat:no-repeat;
+                background-image:url('../image/icons/arrow-left-black.png');
+            }
+            .title{
+                font-size:1.4rem;
+            }
+            .result{
+                padding:10rem 1rem;
+                font-size:1.3rem;
+                font-weight:bold;
+                display:none;
+                text-align:center;
+            }
+            .result.success{
+                display:block;
+            }
+            .result.success:after{
+                content:'添加成功';
+                color:#F6BB43;
+            }
+            .result.login{
+                display:block;
+            }
+            .result.login:after{
+                content:'请登陆后再试';
+            }
+            .result.invited{
+                display:block;
+            }
+            .result.invited:after{
+                content:'您已经添加过了';
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <section class="header text-center">
+                <p tapmode="touch-down" class="back">返回</p>
+                <p class="title">添加邀请人</p>
+            </section>
+        </header>
+        <section class="container">
+            <p class="result"></p>
+        </section>
+    </body>
+
+</html>
+
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/window.js"></script>
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/api/server.js"></script>
+<script type="text/javascript">
+    var id = 0;
+    function ajaxComplete(){
+        loaded();
+    }
+    function initFront(){
+        fixStatusBar($('header'));
+        $('.back').on('touchend', function(){
+            api.closeWin({
+                animation:{
+                    type:'none'
+                }
+            });
+        });
+    }
+    function request(){
+        var server = new Server();
+        var url = server.getOne() + '/user/fans/add';
+        console.log(url);
+        api.ajax({
+            url:url,
+            cache:false,
+            timeout:10,
+            dataType:'text',
+            returnAll:true,
+            method:"post",
+            data:{
+                values:{
+                    id:id,
+                    SID:server.getCookie()
+                }
+            }
+        },function(ret,err){
+            ajaxComplete();
+            if(!err && 200 == ret.statusCode){
+                try{
+                   var body = JSON.parse(ret.body);
+                   console.log(ret.body);
+                   var dom = $('.result');
+                   if(body.code == 0){
+                       dom.addClass('success');
+                   }
+                   else if(body.code == 1){
+                       dom.addClass('login');
+                   }
+                   else if(body.code == 2){
+                        dom.addClass('invited');
+                   }
+                }catch(e){
+                    api.toast({
+                        msg:'服务器忙，请稍后再试'
+                    });
+                }
+            }
+            else{
+                api.toast({
+                    msg:err.msg
+                });
+            }
+        });
+    }
+    apiready = function() {
+        initFront();
+        loading();
+        var uri = api.pageParam.uri;
+        id = uri.replace('xiaoxiaojia://', '');
+        request();
+        api.addEventListener({
+            name:'viewappear'
+        },function(ret,err){
+            api.setStatusBarStyle({
+                style: 'dark' 
+            });
+        });
+    }
+</script>

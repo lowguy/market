@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+    <style>
+    	html,body{
+    		height:100%;
+    		background: transparent;
+    		/*display:none;*/
+    	}
+    	html{
+    	   display:none;
+    	}
+    	.cover{
+    	    background-color:#000000;
+    	    opacity: 0.6;
+    	}
+    	.left{
+    	    height:100%;
+    	    width:15%;
+    	}
+
+    	.view{
+    	    width:70%;
+    	    float:left;
+            background-image:url('../../image/icons/scanner-bar.png');
+            background-repeat:no-repeat;
+            background-position-x:50%;
+            background-position-y: 0%;
+            background-size:80% 5px;
+
+    	}
+    	.view div{
+    	    border:1px solid #EFEFEF;
+    	    position:relative;
+    	}
+
+    	.corner{
+            border:solid 0 #FFD705;
+    	    height:10%;
+    	    width:10%;
+    	    position: absolute;
+    	}
+    	.left-top{
+    	    left:0;
+    	    top:0;
+    	    border-top-width:3px;
+    	    border-left-width:3px;
+    	}
+        .right-top{
+            right:0;
+            top:0;
+            border-top-width:3px;
+            border-right-width:3px;
+        }
+        .left-bottom{
+            left:0;
+            bottom:0;
+            border-left-width:3px;
+            border-bottom-width:3px;
+        }
+        .right-bottom{
+            right:0;
+            bottom:0;
+            border-right-width:3px;
+            border-bottom-width:3px;
+        }
+    </style>
+</head>
+<body>
+	<section class="top cover"></section>
+	<section class="middle">
+	   <section class="cover left">
+	   </section>
+	   <section class="view">
+	       <div>
+	           <section class="corner left-top">
+	           </section>
+	           <section class="corner right-top">
+               </section>
+               <section class="corner left-bottom">
+               </section>
+               <section class="corner right-bottom">
+               </section>
+	       </div>
+	   </section>
+	   <section class="cover left">
+	   </section>
+	</section>
+	<section class="bottom cover"></section>
+</body>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript">
+    function scannerBarAnimation(){
+        var dom = $(".view");
+        var target = 100;
+        var y = dom.css('background-position-y');
+        y = parseInt(y);
+        if(y >= 100){
+            dom.css('background-position-y', '0%');
+        }
+        dom.animate({
+            'background-position-y': target + '%'
+        }, 2000, 'linear' , function(){
+            scannerBarAnimation();
+        });
+    }
+    function initFront(){
+        var width = parseInt(api.frameWidth);
+        width = width * 0.7;
+        var height = parseInt(api.frameHeight);
+        var topHeight = Math.floor((height - width) / 2);
+        $('.top, .bottom').height(topHeight);
+        $('.middle').height(width);
+        $('.view').height(width);
+        $('.view div').height(width - 2);
+        $('html').fadeIn(200);
+        scannerBarAnimation();
+    }
+	apiready = function(){
+		initFront();
+	};
+</script>
+</html>

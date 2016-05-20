@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<link rel="stylesheet" type="text/css" href="../css/base.css"/>
+		<style>
+            header{
+                background-color: #FFD705;
+            }
+            .header {
+                padding: 0.5rem 0;
+                height: 4rem;
+                color: #EFEFEF;
+                position:relative;
+            }
+			.back {
+				height: 4rem;
+				line-height: 4rem;
+				font-size: 1.2rem;
+				font-weight: bold;
+				padding-left:2rem;
+				background-image:url('../image/icons/arrow-left-coffee.png');
+				background-size:2rem;
+				background-position: 1rem 50%;
+				background-repeat:no-repeat;
+				color:#6b450a;
+			}
+			header .search {
+				width: 80%;
+				height: 3rem;
+				border-radius:1rem;
+                background: #FFFFFF;
+                position:absolute;
+                right:1rem;
+                top:1rem;
+			}
+
+			header .search input {
+				height: 3rem;
+				width: 100%;
+				padding-left: 3rem;
+				line-height: normal;
+				background-image: url('../image/icons/search.png');
+				background-repeat: no-repeat;
+				background-size: 1.7rem;
+				background-position-x: 0.25rem;
+				background-position-y: 50%;
+				outline: none;
+				font-size:1.3rem;
+				border:0;
+			}
+			.history-title{
+				height:3rem;
+				font-size:1.4rem;
+				line-height: 3rem;
+				text-indent:1rem;
+			}
+			.keyword {
+				overflow: auto;
+				text-align: center;
+				padding:0 1rem;
+			}
+			.keyword p {
+				width: 33.33%;
+				display:inline-block;
+				height:3rem;
+				line-height:3rem;
+				float:left;
+				padding:1rem 0;
+
+			}
+
+			.keyword p span{
+				display:inline-block;
+				width:90%;
+				border:1px solid #EFEFEF;
+				text-align:center;
+				border-radius:2.9rem;
+				height:2.9rem;
+				line-height:2.9rem;
+				font-size:1.4rem;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.clear{
+				width: 100%;
+				text-align: center;
+			}
+			.clear span{
+				display: block;
+				width:40%;
+				margin:1rem auto;
+				background:#EFEFEF;
+				height:3rem;
+				line-height:3rem;
+				border-radius:0.3rem;
+				font-size:1.2rem;
+			}
+			footer{
+				display:none;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<section class="header">
+				<section tapmode="touch-down" class="back left">
+					<p>
+						返回
+					</p>
+				</section>
+				<form class="search">
+					<input type="search" autofocus="autofocus" class="search-input" placeholder="请输入商品名称" oninput="closeFrame(this.value)"/>
+				</form>
+			</section>
+		</header>
+		<section class="container hidden">	
+		</section>
+		<section class="clear hidden" tapmode="touch-down"><span>清除历史记录</span></section>
+		<footer></footer>
+		<script id="history" type="text/html">
+		<%if(history.length > 0){%>
+			<section class="divider"></section>
+			<section class="history-title">最近搜索</section>
+			<section class="divider"></section>
+			<section class="keyword">
+				<%for(var i = 0; i < history.length; i++){%>
+					<p data-object="<%=JSON.stringify(history[i])%>">
+						<span tapmode="touch-down"><%=history[i]%></span>
+					</p>
+				<%}%>
+			</section>
+		<%}%>
+		</script>
+	</body>
+</html>
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/window.js"></script>
+<script type="text/javascript" src="../script/goods.frame.js"></script>
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/vendor/template.js"></script>
+
+<script type="text/javascript" src="../script/model/search.js"></script>
+<script type="text/javascript">
+	//重载， 空定义
+	function updateCartNumber(){
+		
+	}
+	function initFront() {
+		$('.keyword p').on('touchend',function(){
+			var title = $(this).attr('data-object').replace(/\"/g, "");
+
+			$('.search input').val(title);
+			searchRes(title);
+		});
+
+		$('.clear').on('touchend',function(){
+			var search = new Search();
+			search.clear();
+			$('.container,.clear').fadeOut('slow',history);
+		});
+		
+	}
+
+	function closeFrame(title){
+		if(!title){
+			api.closeFrame({
+			    name: 'search_goods'
+			});
+			history();
+		}
+	}
+
+	function history(){
+		var search = new Search();	
+		var history = search.list();
+		if(history.length){
+			var html=baidu.template('history',{history:history});
+			$('.container').html(html);
+			$('.container,.clear').fadeIn('slow');
+			initFront();
+		}
+	}
+
+	function searchRes(title){
+	    if('ios' != api.systemType){
+            keyBoard = api.require('keyBoard');
+            setTimeout(function(){
+                keyBoard.closeKeyBoard();
+            },200);
+        }
+		var header = parseInt($('header').height());
+		var winHeight = parseInt(api.winHeight);
+		var height = winHeight - header;
+		var search = new Search();
+		search.add(title);
+		$('.search input').blur();
+		api.openFrame({
+		    name: 'search_index',
+		    url: 'widget://html/search/index.html',
+		    rect: {
+			    x:0,
+			    y:header,
+			    w:'auto',
+			    h:height
+		    },
+		    vScrollBarEnabled:false,
+		    reload:true,
+		    animation:{
+		    	type:'fade',
+		    	subType:'from_bottom',
+		    	duration:300
+		    },
+		    pageParam:{
+		    	title:title
+		    },
+		    bounces:true
+	    });
+	}
+
+	apiready = function() {
+		fixStatusBar($('header'));
+        if('ios' != api.systemType){
+            keyBoard = api.require('keyBoard');
+            setTimeout(function(){
+                keyBoard.openKeyBoard();
+            },200);
+        }
+		$('.back').on('touchend', function() {
+			var animation = {
+				type : 'fade',
+				duration : 300
+			};
+			api.closeWin({
+				animation : animation
+			});
+		});
+
+		$('.search input').keydown(function(event) {		
+			if (13 == event.keyCode) {
+				searchRes($('input').val());
+				event.preventDefault();
+			}					
+		});
+		
+		api.addEventListener({
+	        name:'viewappear'
+        },function(ret,err){
+            api.setStatusBarStyle({
+                style: 'dark' 
+            });
+        });
+
+		history();
+
+	}
+</script>

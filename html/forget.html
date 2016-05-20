@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../css/base.css"/>
+	<style>
+		.header{
+			height: 4rem;
+			background-color: #FFFFFF;
+			position: relative;
+			font-size:1.2rem;
+			font-weight:bold;
+			border-bottom:1px solid #EFEFEF;
+			padding:0.5rem 0;
+		}
+
+		.header p{
+			height:4rem;
+			line-height:4rem;
+		}
+		.step{
+			height:3rem;
+		}
+		.step section{
+			width:33.33%;
+			float:left;
+			text-align:center;
+		}
+		.step p{
+			height:3rem;
+			line-height:3rem;
+			font-size:1.2rem;
+			color:#808080;
+		}
+		.step p.not-end{
+			background-repeat:no-repeat;
+			background-size:1rem;
+			background-position:right 50%;
+			background-image:url("../image/icons/arrow-right.png");			
+		}
+		.step p.current{
+			color:#FFD705;
+		}
+		.back{
+			position:absolute;
+			top:0.5rem;
+			padding-left:2rem;
+			background-size:2rem;
+			background-position: 1rem 50%;
+			background-repeat:no-repeat;
+			background-image:url('../image/icons/arrow-left-black.png');
+		}
+		.title{
+			font-size:1.4rem;
+		}
+
+	</style>
+</head>
+<body>
+	<header>
+		<section class="header text-center">
+			<p tapmode="touch-down" class="back">返回</p>
+			<p class="title">找回密码</p>
+		</section>
+		<section class="step">
+			<section class="item">
+				<p class="not-end">1.输入手机号码</p>
+			</section>
+			<section class="item">
+				<p class="not-end">2.输入验证码</p>
+			</section>
+			<section class="item">
+				<p>3.设置密码</p>
+			</section>
+		</section>
+	</header>
+
+    <section class="container" >
+
+    </section>
+
+</body>
+</html>
+
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+
+<script type="text/javascript" src="../script/app.js"></script>
+
+<script type="text/javascript">
+
+function initFront(){
+   	fixStatusBar($('header'));
+   	$('.back').on('touchend', function(){
+   	    var storage = getStorage();
+   	    storage.removeItem('FORGET_PHONE');
+   	    storage.removeItem('FORGET_CODE');
+   		api.closeWin();
+   	});
+}
+
+function changeFrame(index){
+	api.setFrameGroupIndex({
+	    name: 'forget_frames',
+	    index:index
+    });
+}
+
+function initFrames(){
+	var header = $('header').height();
+	var winHeight = parseInt(api.winHeight);
+	api.openFrameGroup ({
+   	    name: 'forget_frames',
+        background: '#fff',
+        scrollEnabled: false,
+        rect: {
+        	x: 0, 
+         	y: header, 
+            w: 'auto', 
+            h: winHeight - header
+    	},
+    	index: 0,
+    	preload:0,
+    	frames: [{
+        	name: 'forget_frames_phone', 
+        	url: 'widget://html/forget/phone.html',
+        	bgColor: '#fff',
+        	bounces:false
+    	},{
+        	name: 'forget_frames_code', 
+        	url: 'widget://html/forget/code.html', 
+        	bgColor: '#fff',
+        	bounces:false
+    	},{
+        	name: 'forget_frames_password', 
+        	url: 'widget://html/forget/password.html', 
+        	bgColor: '#fff',
+        	bounces:false
+    	}]
+	}, function( ret, err ){
+	    $('.step p.current').removeClass('current');
+	    $('.step p').eq(ret.index).addClass('current');
+	});
+}
+
+apiready = function(){
+	initFront();
+	initFrames();
+	api.addEventListener({
+	    name:'viewappear'
+    },function(ret,err){
+
+        api.setStatusBarStyle({
+            style: 'dark' 
+        });
+    });
+}
+
+</script>

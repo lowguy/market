@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<link rel="stylesheet" type="text/css" href="../css/base.css"/>
+		<link rel="stylesheet" type="text/css" href="../css/layout.css"/>
+		<style>
+			.activity-area {
+				background-color: #FFFFFF;
+				position: relative;
+				height: 4rem;
+				clear: both;
+				font-size:1.3rem;
+                font-weight:bold;
+				color:#808080;
+				border-bottom:1px solid #EFEFEF;
+			}
+
+			.activity-area .back{
+				width:10%;
+				position: absolute;
+				height: 100%;
+				background-size: 1rem;
+				background-position:left 50%;
+				background-repeat: no-repeat;
+				left: 1rem;
+				background-image: url("../image/icons/arrow-left.png");
+			}
+
+			.activity-area .forward {
+				width: 10%;
+				position: absolute;
+				height: 100%;
+				background-size: 1rem;
+				background-position:right 50%;
+				background-repeat: no-repeat;
+				right: 1rem;
+				background-image: url("../image/icons/arrow-right.png");
+			}
+
+			.activities {
+				position: absolute;
+			}
+			.activities li {
+				float: left;
+				list-style:none;
+				background: #FFFFFF;
+				text-align:center;
+			}
+
+			.activities li span{
+				display:inline-block;
+				width:30%;
+				height:3rem;
+				line-height:3rem;
+				margin-top:0.5rem;
+			}
+			.activities li span.current{
+				color:#6B450A;
+			}
+
+			.scroll-wrapper {
+				position: absolute;
+				left: 10%;
+				width: 80%;
+				height: 4rem;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body class="loading">
+		<header>
+            <section class="header">
+                <button tapmode="touch-down" class="scanner">扫一扫</button>
+                <button tapmode="touch-down" class="market"><span>定位...</span></button>
+                <button tapmode="touch-down" class="search">搜一搜</button>
+            </section>
+
+			<section class="activity-area">
+				<p class="back"></p>
+				<section class="scroll-wrapper">
+					<ul class="activities">
+					   <li>
+					       <span tapmode="touch-down" data-id="1">爆款特卖</span>
+                           <span tapmode="touch-down" data-id="2">天天低价</span>
+					   </li>
+					</ul>
+				</section>
+				<p class="forward"></p>
+			</section>
+		</header>
+		<section class="container" >
+
+		</section>
+		<footer class="navigator text-center">
+			<section class="home">
+				<div class="icon">
+				</div>
+				<span>首页</span>
+			</section>
+			<section class="mall">
+				<div class="icon">
+				</div>
+				<span>商城</span>
+			</section>
+            <section class="activity active">
+                <div class="icon">
+                </div>
+                <span>特惠</span>
+            </section>
+			<section class="cart">
+				<div class="icon"><span class="number empty">0</span></div>
+				<span>购物车</span>
+			</section>
+			<section class="user">
+				<div class="icon "></div>
+				<span>我的</span>
+			</section>
+		</footer>
+	</body>
+</html>
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/vendor/template.js"></script>
+<script type="text/javascript" src="../script/vendor/iscroll.js"></script>
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/window.js"></script>
+
+<script type="text/javascript" src="../script/goods.frame.js"></script>
+<script type="text/javascript" src="../script/model/market.js"></script>
+<script type="text/javascript" src="../script/model/cart.js"></script>
+<script type="text/javascript">
+	var scroll = null;
+	var activityID = 0;
+	function _iosGoodsToCart(goods_id, offset_x, page_y, width, height, ratio){
+		iosGoodsToCart(goods_id, offset_x, page_y - $('.activity-area').height(), width, height, ratio);
+	}
+
+	function initScroll(){
+		var width = $('.scroll-wrapper').width();
+		$('.activities li').width(width);
+		$('.activities').width(width * $('.activities li').length);
+		if(null != scroll){
+			scroll.refresh();
+		}
+		scroll = new IScroll('.scroll-wrapper', {
+			scrollX : true,
+			scrollY : false,
+			snap:true,
+			snapThreshold:0.01,
+			momentum:false,
+            tap:true
+		});
+	}
+
+	function activityChange(obj){
+	    if(!isNaN(obj)){
+            obj = $('.activities span[data-id="' + obj + '"]');
+	    }
+        if(!$(obj).hasClass('current')){
+            $('.activities .current').removeClass('current');
+            $(obj).addClass('current');
+            var id = $(obj).attr('data-id');
+            activityID = id;
+            api.execScript({
+                frameName:'activity_index',
+                script: 'activityChange(' + id + ')'
+            });
+        }
+	}
+
+	function initFrames() {
+		var header = parseInt($('header').height());
+		var winHeight = parseInt(api.winHeight);
+		var footer = parseInt($('footer').height());
+		var height = winHeight - header - footer;
+		var winWidth = parseInt(api.winWidth);
+		api.openFrame({
+			name : 'activity_index',
+			url : 'widget://html/activity/index.html',
+        	rect:{
+        		x:0,
+        		y:header,
+        		w:winWidth,
+        		h:height
+        	},
+			vScrollBarEnabled : false,
+			bounces : true,
+			scrollToTop : false,
+			animation:{
+				type:'none'
+			},
+			reload:true,
+			pageParam:{
+        		activityID:activityID
+        	},
+		});
+	}
+
+	function delegateEvent(){
+	    if('ios' == api.systemType){
+            touchEvent('.activities span',activityChange);
+	    }
+	    else{
+	        $(document).on('tap', '.activities span', function(){
+	            activityChange($(this));
+	        });
+	    }
+	}
+	function initFront() {
+        initNavigator();
+		fixStatusBar($('header'));
+		initScroll();
+		$('.activities span[data-id="' + activityID + '"]').addClass('current');
+	}
+
+	apiready = function() {
+		activityID = api.pageParam.activityID || 1;
+		initFront();
+		delegateEvent();
+		initFrames();
+		onMarketChange(function(){
+			var market = new Market();
+			var current = market.getCurrent();
+			$('header .market span').html(current.district);
+			api.closeFrame({
+	            name: 'activity_index'
+            });
+			initFrames();
+		});
+
+		api.addEventListener({
+	        name:'viewappear'
+        },function(ret,err){
+            api.setStatusBarStyle({
+                style: 'dark' 
+            });
+			updateCartNumber();
+        });
+
+	}
+</script>

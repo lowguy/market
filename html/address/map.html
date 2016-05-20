@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+        <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+        <style>
+            .header {
+                height: 4rem;
+                background-color: #FFFFFF;
+                position: relative;
+                font-size: 1.2rem;
+                font-weight: bold;
+                padding: 0.5rem 0;
+            }
+            .divider {
+                border-top: 0;
+            }
+            .header p {
+                height: 4rem;
+                line-height: 4rem;
+            }
+            .back {
+                position: absolute;
+                top: 0.5rem;
+                padding-left: 2rem;
+                background-size: 2rem;
+                background-position: 1rem 50%;
+                background-repeat: no-repeat;
+                background-image: url('../../image/icons/arrow-left-black.png');
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <section class="header text-center">
+                <p tapmode="touch-down" class="back">
+                    返回
+                </p>
+            </section>
+        </header>
+        <section class="container" ></section>
+    </body>
+</html>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/model/address.js"></script>
+<script type="text/javascript" src="../../script/api/server.js"></script>
+<script type="text/javascript" src="../../script/model/market.js"></script>
+<script type="text/javascript">
+    function initFront() {
+        fixStatusBar($('header'));
+        $('.back').on('touchend', function() {
+            api.closeWin();
+        });
+    }
+
+    function updatePois(lon, lat) {
+        api.execScript({
+            frameName : 'map_data',
+            script : 'locationChange(' + lon + ',' + lat + ')'
+        });
+    }
+
+    function openFrame() {
+        var header = $('header').height();
+        var winHeight = parseInt(api.winHeight);
+        var mapHeight = (winHeight - header) * 0.4;
+        api.openFrame({
+            name : 'map_data',
+            url : 'widget://html/address/map_data.html',
+            rect : {
+                x : 0,
+                y : header + mapHeight,
+                w : 'auto',
+                h : api.winHeight - header - mapHeight
+            },
+            bounces : false,
+            vScrollBarEnabled : false
+        });
+    }
+
+    function request() {
+        var server = new Server();
+        var url = server.getOne() + "/customer/market/index";
+        var market = new Market();
+        var current = market.getCurrent();
+        api.ajax({
+            url : url,
+            method : 'post',
+            cache : true,
+            timeout : 10,
+            data : {
+                values : {
+                    id : current.id
+                }
+            },
+            dataType : 'text',
+            returnAll : true,
+        }, function(ret, err) {
+            if (!err && 200 == ret.statusCode) {
+                try {
+                    var result = JSON.parse(ret.body);
+                    if (result.code == 0) {
+                        console.log(JSON.stringify(result.data.free_area));
+                        initFreeArea(result.data.free_area);
+                    }
+                } catch(e) {
+                }
+            }
+        });
+    }
+
+    function initFreeArea(pointStr) {
+        var points = pointStr.split(';');
+        freeArea = [];
+        for (var i = 0; i < points.length; i++) {
+            var temp = points[i].split(',');
+            freeArea.push({
+                lon : parseFloat(temp[0]),
+                lat : parseFloat(temp[1])
+            });
+        }
+        freeArea.pop();
+        var map = api.require('xMap');
+        map.getLocation({
+            accuracy : '10m',
+            autoStop : true,
+            filter : 1
+        }, function(ret, err) {
+            var center = {};
+            if (ret.status) {
+                center = {
+                    lon : ret.lon,
+                    lat : ret.lat
+                };
+                map.isPolygonContantsPoint({
+                    point :center,
+                    points:freeArea
+                }, function(ret) {
+                    if (ret.status == true) {
+                        openMap(center);
+                    } else { 
+                        openMap(getCenter(freeArea));
+                    }
+                });
+            }
+        });
+    }
+    function getCenter(points) {
+        var result = {
+            lon : 0,
+            lat : 0
+        };
+        for (var i = 0; i < points.length; i++) {
+            result.lon += points[i].lon;
+            result.lat += points[i].lat;
+        }
+        result.lon = result.lon / points.length;
+        result.lat = result.lat / points.length;
+        return result;
+    }
+    function openMap(center) {
+        var map = api.require('xMap');
+        var header = $('header').height();
+        var winHeight = parseInt(api.winHeight);
+        var mapHeight = (winHeight - header) * 0.4;
+        var time = 1;
+        if ('ios' == api.systemType) {
+            time = 300;
+        }
+        setTimeout(function() {
+            updatePois(center.lon, center.lat);
+        }, time);
+        map.open({
+            rect : {
+                x : 0,
+                y : header,
+                w : api.winWidth,
+                h : mapHeight
+            },
+            zoomLevel : 18,
+            center : center,
+            showUserLocation : false
+        }, function(ret) {
+            api.openFrame({
+                name : 'map_indicator',
+                url : 'widget://html/address/map_indicator.html',
+                rect : {
+                    x : api.winWidth / 2 - 20,
+                    y : header + mapHeight / 2 - 40,
+                    w : 40,
+                    h : 40
+                },
+                bounces : false
+            });
+            map.addEventListener({
+                name : 'viewChange'
+            }, function(ret) {
+                updatePois(ret.lon, ret.lat);
+            });
+        });
+    }
+
+    apiready = function() {
+        request();
+        initFront();
+        openFrame();
+    }
+</script>

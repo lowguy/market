@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../css/base.css"/>
+	<style>
+	    html,body{
+	        height:100%;
+	    }
+	    header{
+            background-color: #FFFFFF;
+	    }
+		.header{
+			height: 4rem;
+			position: relative;
+			font-size:1.2rem;
+			font-weight:bold;
+			padding:0.5rem 0;
+		}
+
+		.header p{
+			height:4rem;
+			line-height:4rem;
+		}
+		.back{
+			position:absolute;
+			top:0.5rem;
+			padding-left:2rem;
+			background-size:2rem;
+			background-position: 1rem 50%;
+			background-repeat:no-repeat;
+			background-image:url('../image/icons/arrow-left-black.png');
+		}
+		.title{
+			font-size:1.4rem;
+		}
+		
+		.pay-warning{
+			width: 100%;
+			text-align: center;
+			height: 0;
+			font-size: 1.4rem;
+			line-height: 4rem;
+			background: #FFD705;
+			color: #6b450a;
+			background-repeat: no-repeat;
+			background-size: 2rem;
+			background-position: 5% 50%;
+			-webkit-transition: height 0.4s;
+			opacity:0;
+			overflow: hidden;
+		}
+		.pay-warning.show {
+			height: 4rem;
+			opacity:1;
+		}
+		.buy-wrapper{
+			position:fixed;
+			width:100%;
+			bottom:0;
+			overflow:auto;
+			height:auto;
+            background: #FFFFFF;
+            z-index:1;
+            border-top:1px solid #EFEFEF; 
+
+		}
+		.buy-wrapper div{
+		    padding:0 1rem;
+		    position:relative;
+            height:6rem;
+		}
+		.buy-wrapper .delivery-notice{
+		    height:2.9rem;
+		    line-height: 2.9rem;
+		    border-bottom:1px solid #EFEFEF;
+            border-top:1px solid #EFEFEF;
+		    font-size:1.2rem;
+		    color:#666666;
+		    text-align:center;
+		}
+		.buy-wrapper span{
+		    line-height:3rem;
+		    font-weight:bold;
+		    font-size:1.4rem;
+		}
+		.buy-wrapper .money-symbol{
+			line-height:3rem;
+			color: red;
+			padding-left:0;
+		}
+        .buy-wrapper .button{
+            background-color:#FFD705;
+            font-weight:bold;
+            font-size:1.4rem;
+            color:#6B450A;
+            height:4rem;
+            position:absolute;
+            right:1rem;
+            top:1rem;
+            width:40%;
+            border-radius: 1rem;
+        }
+	</style>
+</head>
+<body>
+	<header>
+		<section class="header text-center">
+			<p tapmode="touch-down" class="back">返回</p>
+			<p class="title">订单支付</p>
+		</section>
+	</header>
+	<p class="pay-warning show"><time></time>后订单自动取消，请您尽快支付</p>
+	<section class="buy-wrapper">
+        <div>
+            <span>合计:</span><span class="money-symbol amount"></span>
+            <br/>
+            <span>配送:</span><span class="money-symbol deliver">0</span>
+            <button tapmode="touch-down" class="button buy-button">立即支付</button>
+        </div>
+    </section>
+</body>
+</html>
+
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/api/server.js"></script>
+<script type="text/javascript" src="../script/window.js"></script>
+<script type="text/javascript">
+var   order_no,
+		order = null,
+		interval = 0,
+		countdown =300;
+
+function setOrder(obj){
+    order = obj;
+}
+
+function delegateEvent(){
+	touchEvent('.buy-button',payModel);
+}
+
+function ajaxComplete(){
+		api.refreshHeaderLoadDone();
+}
+function initFront(){
+   	fixStatusBar($('header'));
+   	$('.back').on('touchend', function(){
+   		api.closeWin();
+   	});
+   	
+}
+function setLimitTime(time){
+	countdown = time;
+	if(countdown != -1){
+		timer();
+	}
+}
+
+function timer(){
+	clearInterval(interval);
+	countdown--;
+	var minutes = parseInt(countdown/60);
+	var seconds = parseInt(countdown%60);
+	if(minutes>0){
+		seconds = seconds >= 10 ? seconds : "0"+seconds;　
+		$('time').html(minutes + ":" +seconds);
+	}else if(seconds > 0){
+		$('time').html(seconds + "秒");
+	}else{
+		api.closeWin();
+	}
+	interval = setInterval(timer,1000);
+}
+
+function initFrames(){
+	openFrame('pay','index');
+}
+
+function openFrame(model,action){
+	var header = $('header').height();
+	var pay= $('.pay-warning').height();
+	var winHeight = parseInt(api.winHeight);
+	var footer = parseInt($('.buy-wrapper').height());
+	var height = winHeight - header - footer - pay;
+	api.openFrame({
+	    name: model + '_' + action,
+	    url: 'widget://html/' + model + '/' + action + '.html',
+	    rect: {
+	        x: 0,
+	        y: header+pay,
+	        w: api.winWidth,
+	        h: height
+	    },
+	    pageParam:{
+	    	order:order_no
+	    },
+	    bounces: true,
+	    bgColor: 'rgba(0,0,0,0)',
+	    vScrollBarEnabled: false,
+	    hScrollBarEnabled: false
+	});
+}
+function payModel(){
+	var obj = api.require('MNActionButton');
+	obj.open({
+	    layout: {
+	        row: 1, 
+	        col: 4, 
+	        rowSpacing: 15, 
+	        colSpacing: 10, 
+	        offset: 0  
+	    },
+	    animation: true, 
+	    autoHide: true,  
+	    styles: {
+	        maskBg: 'rgba(0,0,0,0.2)',  
+	        bg: '#fff',    
+	        cancelButton: {  
+	            size: 40,    
+	            bg: '#FFF',    
+	            icon: 'widget://image/icons/close.png' 
+	        },
+	        item: { 
+	            titleColor: '#888888',       
+	            titleHighlight: '#dd2727',  
+	            titleSize: 12  
+	        },
+	        indicator: {        
+	            color: '#c4c4c4',          
+	            highlight: '#9e9e9e'   
+	        }
+	    },
+	    items:[{ 
+	        icon: 'widget://image/icons/weixin.png', 
+	        title: '微信支付',  
+	    }, {
+	        icon: 'widget://image/icons/alipay.png',
+	        title: '支付宝'
+	    },{ 
+	        icon: 'widget://image/icons/integral.png', 
+	        title: '积分支付',  
+	    }, {
+	        icon: 'widget://image/icons/cash.png',
+	        title: '货到付款'
+	    }]
+	}, function(ret, err) {
+	    if (ret) {    	
+	        if(ret.index == 0){
+	        	wxPay();
+	        }else if(ret.index == 1){
+	        	aliPay();
+	        }else if(ret.index == 2){
+	        	integralPay();
+	        }else if(ret.index == 3){
+	        	cashPay();
+	        }else{
+	        	api.toast({
+				    msg:'订单即将取消，尽快支付'
+			    });
+	        }
+	    } 
+	});
+}
+function wxPay(){
+	api.toast({
+	    msg:'微信支付'
+    });
+}
+function integralPay(){
+	var server = new Server();
+	var url = server.getOne() + "/pay/integral/index";
+	api.ajax({
+        url:url,
+        method:'post',
+        cache:false,
+        data:{
+        	values:{
+        		order_no:order_no,
+        		SID:server.getCookie()
+        	}
+        },
+        timeout:10,
+        dataType:'text',
+        returnAll:true,
+    },function(ret,err){
+    	var tip = true;
+    	if(!err && 200 == ret.statusCode){
+			try{
+				var result = JSON.parse(ret.body);				
+				if(result.code == 0){
+					paySuccess();
+                	return;
+				}
+			}catch(e){
+			}	
+		}
+		api.toast({
+	        msg:'支付失败',
+	        location:'middle'
+        });	
+	});
+}
+function cashPay(){
+	var server = new Server();
+	var url = server.getOne() + "/pay/cash/index";
+	api.ajax({
+        url:url,
+        method:'post',
+        cache:false,
+        data:{
+        	values:{
+        		order_no:order_no,
+        		SID:server.getCookie()
+        	}
+        },
+        timeout:10,
+        dataType:'text',
+        returnAll:true,
+    },function(ret,err){
+    	if(!err && 200 == ret.statusCode){
+			try{
+				var result = JSON.parse(ret.body);				
+				if(result.code == 0){
+					paySuccess();
+                	return;
+				}
+			}catch(e){
+			}	
+		}
+		api.toast({
+	        msg:'支付失败',
+	        location:'middle'
+        });
+	});
+}
+function paySuccess(){
+    var header = $('header').height();
+    var winHeight = parseInt(api.winHeight);
+    var height = winHeight - header;
+    api.openFrame({
+        name: 'pay_success',
+        url: 'widget://html/pay/success.html',
+        rect: {
+            x: 0,
+            y: header,
+            w: api.winWidth,
+            h: height
+        },
+        bounces: true,
+        bgColor: 'rgba(255,255,255,1)',
+        vScrollBarEnabled: false,
+        hScrollBarEnabled: false,
+        animation:{
+            type:'fade',
+            duration:300
+        }
+    });
+}
+
+function aliPay(){
+	var obj = api.require('aliPay');
+    var subject = '小小家－生活助手';
+    var body = '订单描述';
+    obj.pay({
+        subject:subject,
+        body:body,
+        amount:order.amount,
+        tradeNO:order.order_no
+    },function(ret,err) {
+        if(!err){
+            if(9000 == ret.code){
+                paySuccess();
+                return;
+            }
+        }
+        api.toast({
+	        msg:'支付失败',
+	        location:'middle'
+        });
+    });
+}
+
+apiready = function(){
+	var params = api.pageParam;
+	order_no = params.order;
+	initFront();
+	delegateEvent();
+	initFrames();
+	
+	api.addEventListener({
+	    name:'viewappear'
+    },function(ret,err){
+        api.setStatusBarStyle({
+            style: 'dark' 
+        });
+    });
+}
+
+</script>

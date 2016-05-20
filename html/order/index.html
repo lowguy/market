@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+    <style>
+        .container{
+           display:none;
+        }
+        .order{
+            margin:1rem;
+            background:#FFD705;
+            border-radius: 1rem;
+        }
+        .no-order{
+            margin:1rem;
+            background:#FFD705;
+            border-radius: 1rem;
+            color:#6B450A;
+            height:9rem;
+            line-height:9rem;
+            font-size:1.4rem;
+            text-align:center;
+        }
+        .order p{
+            line-height:2rem;
+            padding:0 1rem;
+        }
+        .order .order-header{
+            height:3rem;
+            padding:1rem;
+            font-size:1.3rem;
+            line-height:3rem;
+            color:#6B450A;
+            position: relative;
+            border-bottom:1px dashed #6B450A;
+
+        }
+        .order-header button{
+            position:absolute;
+            right:1rem;
+            padding:0 1rem;
+            height:3rem;
+            color:red;
+            border:1px dashed #6B450A;
+            border-radius:1.5rem;
+        }
+
+        .order.need-pay .order-header .operation:before{
+            content:'去支付';
+        }
+
+        .order.praise .order-header .operation:before{
+            content:'去评价';
+        }
+
+        .order.delivery .order-header .operation{
+            display:none;
+        }
+
+        .order.finished .order-header .operation{
+            display:none;
+        }
+
+        .order-info label{
+            color:#6B450A;
+        }
+        .goods{
+            position:relative;
+            border:1px dashed #FFD705;
+            border-bottom:0;
+            background:#FFFFFF;
+            display:none;
+        }
+        .goods.show{
+            display: block;
+        }
+        .goods:first-child{
+            height:4rem;
+            border-top:0;
+            display: block;
+        }
+
+        .goods .img{
+            height:4rem;
+            width:4rem;
+            background-repeat:no-repeat;
+            background-size:contain;
+        }
+        .goods-info{
+            margin-left:4rem;
+            position:absolute;
+            top:0rem;
+        }
+        .arrow-down-wrapper{
+            background:#FFFFFF;
+        }
+        .more{
+            background:#FFFFFF;
+        }
+        .more p{
+            background:#FFD705;
+            border-radius:0 0 1rem 1rem;
+        }
+        .more .up {
+            display:none;
+        }
+        .more.expanded .up{
+            display:block;
+            border:1px dashed #FFD705;
+            border-top:0;
+            border-bottom:0;
+        }
+        .more.expanded .down{
+            display:none;
+        }
+        .more p{
+            text-align:center;
+            color:#6B450A;
+            font-size:1rem;
+            height:1rem;
+            line-height:2rem;
+        }
+        .more.expanded p{
+            line-height:0rem;
+        }
+        .more p:before{
+            content:'展开';
+        }
+        .more.expanded p:before{
+            content:'收缩'
+        }
+        .down .arrow{
+            width:0rem; 
+            height:0rem;
+            border-left:5rem solid transparent;
+            border-right:5rem solid transparent;
+            border-top:1rem solid #FFD705;
+            margin:0 auto;
+        }
+        .up .arrow{
+            width:0rem; 
+            height:0rem;
+            border-left:5rem solid transparent;
+            border-right:5rem solid transparent;
+            border-bottom:1rem solid #FFD705;
+            margin:0 auto;
+        }
+        .money-symbol{
+            color:red;
+        }
+
+        .pushup {
+            height:6rem;
+            background-repeat:no-repeat;
+            background-size:contain;
+            background-position:50%;
+            background-image:url('../../image/loading.gif');
+            display:none;
+        }
+        .pushup.show{
+            display:block;
+        }
+    </style>
+</head>
+<body>
+    <p class="network-error"></p>
+    <section class="container" >
+    </section>
+    <p class="pushup"></p>
+</body>
+</html>
+<script type="text/html" id="template">
+    <%if(order.length > 0){%>
+        <%for(var i = 0; i < order.length; i++){%>
+            <section 
+                class="order 
+                <%if(order[i].status == 1){%>
+                    need-pay
+                <%}else if(order[i].status == 2 || order[i].status == 3){%>
+                    delivery
+                <%}else if(order[i].status == 4){%>
+                    praise
+                <%}else{%>
+                    finished
+                <%}%>" data-id="<%=order[i].order_no%>" >
+                <p class="order-header">
+                    <span><%=order[i].created_at%></span>
+                    <button class="operation" data-id="<%=order[i].order_no%>" ></button>
+                </p>
+                <section class="order-info">
+                    <p class="total"><label>商品总价：</label><span class="value money-symbol"><%=order[i].amount%>（含配送费<%=order[i].deliver%>）</span></p>
+                    <p class="order-no"><label>订单编号：</label><span class="value"><%=order[i].order_no%></span></p>
+                    <p class="address"><label>收货地址：</label><span class="value"><%=order[i].address%></span></p>
+                    <p class="phone"><label>联系电话：</label><span class="value"><%=order[i].phone%></span></p>
+                </section>
+                <section class="order-goods">
+                    <%for(var j = 0; j < order[i].goods.length; j++){%>
+                         <section class="goods">
+                            <section class="img" style="background-image:url('../../image/products/<%=order[i].goods[j].product_id%>.JPG')">
+                            </section>
+                            <section class="goods-info">
+                                <p class="title"><%=order[i].goods[j].title%> X <%=order[i].goods[j].number%></p>
+                                <p class="money-symbol"><%=order[i].goods[j].amount%></p>
+                            </section>
+                         </section>
+                    <%}%>
+                    <%if(order[i].goods.length > 1){%>
+                        <section tapmode="touch-down" class="more">
+                            <section class="arrow-down-wrapper up">
+                                <section class="arrow"></section>
+                            </section>
+                            <p></p>
+                            <section class="arrow-down-wrapper down">
+                                <section class="arrow"></section>
+                            </section>
+                        </section>
+                    <%}else{%>
+                        <p style="height:1rem;"></p>
+                    <%}%>
+                </section>
+            </section>
+        </section>
+        <%}%>
+    <%}else if(1 == page){%>
+        <p class="no-order">暂无订单</p>
+    <%}%>
+</script>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/frame.js"></script>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/api/server.js"></script>
+<script type="text/javascript" src="../../script/vendor/template.js"></script>
+
+<script type="text/javascript">
+var first = true;
+var status = 1;
+var page = 1;
+function addPushUp(){
+    api.addEventListener({
+        name:'scrolltobottom',
+        extra:{
+            threshold:0
+        }
+    }, function(ret, err){
+        if(!$('.pushup').hasClass('show')){
+            if($('.no-order').length == 0){
+                $('.pushup').addClass('show');
+                request();
+            }
+        }
+    });
+}
+
+function removeOrder(number){
+    $('.order[data-id="' + number +'"]').remove();
+}
+
+function delegateEvent(){
+    addPushUp();
+
+    touchEvent('.more', function(obj){
+        var dom = $(obj);
+        dom.siblings().toggleClass('show');
+        dom.toggleClass('expanded');
+    });
+
+    touchEvent('.order.need-pay .operation', function(obj){
+        var dom = $(obj);
+        var order_no = dom.attr('data-id');
+        api.openWin({
+             name: 'pay',
+             url: 'widget://html/pay.html',
+             pageParam:{
+                order:order_no
+             }
+        });
+    });
+    touchEvent('.order.praise .operation', function(obj){
+        var dom = $(obj);
+        var order_no = dom.attr('data-id');
+        api.openFrame({
+	        name: 'order_praise',
+	        url: 'widget://html/order/praise.html',
+	        rect: {
+		        x:0,
+		        y:0,
+		        w:'auto',
+		        h:'auto'
+	        },
+            pageParam:{
+                order:order_no
+            },
+            bounces:false,
+            animation:{
+                type:'movein',
+                subType:'from_bottom',
+                duration:300
+            },
+        });
+    });
+}
+
+function initFront(){
+    status = api.pageParam.status;
+    status = status ? status : 1;
+}
+
+function request(){
+    var server = new Server();
+    var url = server.getOne() + "/order/index/index";
+    api.ajax({
+        url:url,
+        method:'post',
+        cache:false,
+        data:{
+            values:{
+                status:status,
+                SID:server.getCookie(),
+                page:page
+            }
+        },
+        timeout:10,
+        dataType:'text',
+        returnAll:true,
+    },function(ret,err){
+        if(!err && 200 == ret.statusCode){
+            try{
+                var result = JSON.parse(ret.body);
+                if(result.code == 0){
+                    render(result.data);
+                    if(0 != result.data.length){
+                        page += 1;
+                    }
+                    else{
+                        if(page != 1){
+                            api.toast({
+                                location:'middle',
+                                msg:'没有数据啦～'
+                            });
+                        }
+                    }
+                }
+            }catch(e){
+            }
+        }
+        ajaxComplete();
+    });
+}
+
+function render(order){
+    var data = {
+        order:order,
+        page:page
+    };
+    var html=baidu.template('template',data);
+    if(1 == page){
+        $('.container').html(html);
+    }
+    else{
+        $('.container').append(html);
+    }
+    api.parseTapmode();
+    if('none' == $('.container').css('display')){
+        $('.container').fadeIn(200);
+    }
+}
+
+function ajaxComplete(){
+    api.refreshHeaderLoadDone();
+    $('.pushup').removeClass('show');
+    if(first){
+       first = false;
+       api.setFrameAttr({
+           name: api.frameName,
+           hidden:false
+       });
+       api.execScript({
+            script: 'loaded();'
+       });
+    }
+}
+
+function statusChange(number){
+    first = true;
+    page = 1;
+    status = number;
+    api.setFrameAttr({
+        name: api.frameName,
+        hidden:true
+    });
+    api.execScript({
+        script: 'loading()'
+    });
+    $('.container').css('display', 'none');
+    request();
+}
+
+apiready = function(){
+    api.setFrameAttr({
+        name: api.frameName,
+        hidden:true
+    });
+
+    api.execScript({
+        script: 'loading();'
+    });
+    initFront();
+    delegateEvent();
+    onNetworkChanged(function(){
+        page = 1;
+        request();
+    }, function(){
+        page = 1;
+        request();
+    });
+    api.addEventListener({
+        name:'viewappear'
+    },function(ret,err){
+        page = 1;
+        request();
+    });
+
+    api.addEventListener({
+        name:'resume'
+    },function(ret,err){
+        page = 1;
+        request();
+    })
+    
+}
+
+</script>

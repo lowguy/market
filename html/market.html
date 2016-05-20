@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<title>云API</title>
+		<link rel="stylesheet" type="text/css" href="../css/base.css"/>
+		<style>
+			.header{
+				height: 4rem;
+				background-color: #FFFFFF;
+				position: relative;
+				font-size:1.2rem;
+				font-weight:bold;
+				padding: 0.5rem 0;
+			}
+			.title{
+				height:3rem;
+				font-size:1.4rem;
+				line-height: 3rem;
+				text-align:center;
+			}
+
+			.header p{
+				height:4rem;
+				line-height:4rem;
+			}
+
+			.back{
+				position:absolute;
+				top:0.5rem;
+				padding-left:2rem;
+				background-size:2rem;
+				background-position: 1rem 50%;
+				background-repeat:no-repeat;
+				background-image:url('../image/icons/arrow-left-black.png'); 
+			}
+			.container .title{
+				border-bottom:dashed 1px #EFEFEF;
+				margin:0 auto;
+				font-size:1.4rem;
+				color:#666666;
+			}
+			.district {
+				overflow: auto;
+				text-align: center;
+				padding:0 1rem;
+			}
+			.district p {
+				width: 33.33%;
+				display:inline-block;
+				height:3rem;
+				line-height:3rem;
+				float:left;
+				padding:1rem 0;
+
+			}
+
+			.district p span{
+				display:inline-block;
+				width:90%;
+				border:1px solid #EFEFEF;
+				text-align:center;
+				border-radius:2.9rem;
+				height:2.9rem;
+				line-height:2.9rem;
+				font-size:1.3rem;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				font-weight:bold;
+			}
+
+			.district p span.current{
+				background-color:#FFD705;
+				color:#6b450a;
+			}
+
+			.cities{
+				height:4rem;
+				line-height:4rem;
+				padding:1rem 1rem;
+				position: relative;
+				text-align: center;
+				font-size:1.3rem;
+			}
+			.scroll-wrapper{
+				position: relative;
+				overflow: hidden;
+				height:4rem;
+			}
+			.cities li{
+				list-style: none;
+			}
+			.city{
+				display:inline-block;
+				width:33.33%;
+				float:left;
+				border-radius: 2.9rem;
+				height:3rem;
+				line-height:3rem;
+			}
+			.city span{
+				display:inline-block;
+				width:90%;
+				border-radius: 2.9rem;
+				border:1px solid #EFEFEF;
+				height:2.9rem;
+				line-height:2.9rem;
+				margin-top:0.3rem;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				font-weight:bold;
+			}
+			.city span.current{
+				background-color:#FFD705;
+				color:#6b450a;
+			}
+			.divider{
+				height:0.5rem;
+			}
+		</style>
+	</head>
+	<body>
+		<header>
+			<section class="header text-center">
+				<p tapmode="touch-down" class="back">返回</p>
+				<p class="title">城市列表</p>
+			</section>
+		</header>
+		<section class="container">
+		</section>
+	</body>
+	<script id="history" type="text/html">
+		<%if(history.length > 0){%>
+			<section class="divider"></section>
+			<section class="title">最近访问</section>
+			<section class="district">
+				<%for(var i = 0; i < history.length; i++){%>
+					<p>
+						<span tapmode="touch-down" data-object="<%=JSON.stringify(history[i])%>"><%=history[i].district%></span>
+					</p>
+				<%}%>
+			</section>
+		<%}%>
+	</script>
+	<script id="cities" type="text/html">
+	<section class="divider"></section>
+	<section class="title">城市</section>
+		<section class="cities">
+			<section class="scroll-wrapper">
+				<ul>
+					<%for(var i = 0; i < cities.length; i++){%>
+						<li>
+							<%for(var j = 0; j < cities[i].length; j++){%>
+								<p class="city">
+									<span  <%if(current.city == cities[i][j]){%> class="current" <%}%> tapmode="touch-down"><%=cities[i][j]%></span>
+								</p>
+							<%}%>
+						<li>
+					<%}%>
+				</ul>
+			</section>
+		</section>
+		<section class="divider"></section>
+		<section class="title">区/县</section>
+	</script>
+	<script id="markets" type="text/html">
+
+		<section class="clear-all district" id="districts">
+			<%for(var i = 0; i < districts.length; i++){%>
+				<%if(current.id != districts[i].id){%>
+					<p>
+						<span  tapmode="touch-down" data-object="<%=JSON.stringify(districts[i])%>"><%=districts[i].district%></span>
+					</p>
+				<%}else{%>
+					<p>
+						<span  class="current" tapmode="touch-down" data-object="<%=JSON.stringify(districts[i])%>"><%=districts[i].district%></span>
+					</p>
+				<%}%>
+			<%}%>
+		</section>
+	</script>
+</html>
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/vendor/template.js"></script>
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/model/market.js"></script>
+<script type="text/javascript">
+	function initFront() {
+
+		$('.district p span').off('touchend').on('touchend', function(event){
+			if(!$(this).hasClass('current')){
+				var current = JSON.parse($(this).attr('data-object'));
+				var market = new Market();
+				market.setCurrent(current);
+
+				marketChange();
+				hideMarket();
+			}
+		});
+
+		$('.city span').off('touchend').on('touchend', function(event){
+			if(!$(this).hasClass('current')){
+				$('.city span.current').removeClass('current');
+				$(this).addClass('current');
+				var market = new Market();
+				var city = $(this).text();
+				market.load(function(){
+					var markets = market.getMarketsOfCity(city);
+					renderDistricts(markets);
+				});
+			}
+		});
+	}
+
+	function renderDistricts(districts){
+		var market = new Market();
+		var current = market.getCurrent();
+		var data = {
+			districts:districts,
+			current:current
+		}
+		var districts = baidu.template('markets', data);
+		$('#districts').replaceWith(districts);
+		api.parseTapmode();
+		initFront();
+	}
+
+	function render(markets, cities){
+		var market = new Market();
+		var history = market.getHistory();
+		var current = market.getCurrent();
+		history.reverse();
+		var data = {
+			districts:markets,
+			current:current
+		}
+		var history=baidu.template('history',{history:history});
+		
+		$('.container').html(history);
+
+		var cities2D = [];
+		while(cities.length > 0){
+			cities2D.push(cities.splice(0, 3));
+		}
+
+		var cities = baidu.template('cities', {cities:cities2D, current:current});
+		$('.container').append(cities);
+		var districts = baidu.template('markets', data);
+		$('.container').append(districts);
+		api.parseTapmode();
+		initFront();
+
+	}
+
+	function load(){
+		var market = new Market();
+		market.load(function(){
+			var current = market.getCurrent();
+			var markets = market.getMarketsOfCity(current.city);
+			var cities = market.getCities();
+			render(markets, cities);
+		});
+	}
+	apiready = function() {
+		fixStatusBar($('header'));
+	   	$('.back').on('touchend', function(){
+   			hideMarket();
+   		});
+
+		onMarketChange(function(){
+			load();
+		});
+
+		load();
+        api.addEventListener({
+	        name:'viewappear'
+        },function(ret,err){
+            api.setStatusBarStyle({
+                style: 'dark' 
+            });
+        });
+	}
+</script>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../css/base.css"/>
+	<style>
+		html, body{
+			height:100%;
+		}
+
+		body {
+			background: #EFEFEF;
+		}
+		header{
+			background-color: #FFFFFF;
+		}
+		.header{
+			height: 4rem;
+			position: relative;
+			font-size:1.2rem;
+			font-weight:bold;
+			padding:0.5rem 0;
+		}
+
+		.header p{
+			height:4rem;
+			line-height:4rem;
+		}
+		.back{
+			position:absolute;
+			top:0.5rem;
+			padding-left:2rem;
+			background-size:2rem;
+			background-position: 1rem 50%;
+			background-repeat:no-repeat;
+			background-image:url('../image/icons/arrow-left-black.png');
+		}
+		.title{
+			font-size:1.4rem;
+		}
+		.add{
+			position:absolute;
+			top:0.5rem;
+			right:0;
+			height:4rem;
+			padding-right:1rem;
+		}
+		.field{
+			border-top:1px solid #EFEFEF;
+			padding:0 1rem;
+		}
+		.field.login{
+			margin-top:0.5rem;
+			border-top:0;
+		}
+		input {
+			padding:0.5rem 0;
+			outline:none;
+			height:4rem;
+			line-height: normal;
+			width:100%;
+			font-size:1.4rem;
+		}
+
+		.wrapper{
+			padding-left:4rem;
+			background-repeat:no-repeat;
+			background-size:2rem;
+			background-position:1rem 50%;
+			background-color:#FFFFFF;
+			position: relative;
+		}
+		.phone{
+			background-image:url("../image/icons/phone.png");
+		}
+		.password {
+			background-image:url("../image/icons/lock.png");
+		}
+		button{
+			height:4rem;
+			width:100%;
+			background:#FFD705;
+			font-size:1.4rem;
+			font-weight:bold;
+			color:#6b450a;
+			border-radius: 1rem;
+		}
+		.button-loading{
+		    background-image:url("../image/loading.gif");
+            background-size:3rem;
+            background-repeat:no-repeat;
+            background-position:50%;
+            text-indent: -150%;
+		}
+		.forget-password{
+			color:#FFD705;
+			font-size:1.2rem;
+			font-weight:bold;
+			float:right;
+			background-color: transparent;
+            width: auto;
+            padding:0 1rem;
+            text-align: right;
+            margin-top:1rem;
+		}
+	</style>
+</head>
+<body>
+	<header>
+		<section class="header text-center">
+			<p tapmode="touch-down" class="back">返回</p>
+			<p class="title">登录</p>
+			<p tapmode="touch-down" class="add">立即注册</p>
+		</section>
+	</header>
+
+    <section class="container" >
+    	<section class="divider">
+    	</section>
+ 		<section class="field">
+ 			<section class="wrapper phone">
+ 				<input type="tel" placeholder="请输入手机号码"/>
+ 			</section>
+ 		</section>
+ 		<section class="field">
+ 			<section class="wrapper password">
+ 				<input type="password" placeholder="请输入密码"/>
+ 			</section>
+ 		</section>
+ 		<section class="field login">
+ 			<button tapmode="touch-down">登录</button>
+ 		</section>
+		<button tapmode="touch-down" class="forget-password">忘记密码</button>
+    </section>
+
+</body>
+</html>
+
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/api/server.js"></script>
+<script type="text/javascript" src="../script/model/user.js"></script>
+<script type="text/javascript">
+
+function initFront(){
+   	fixStatusBar($('header'));
+   	$('.back').on('touchend', function(){
+   		api.closeWin();
+   	});
+
+   	$('.add').on('touchend', function(){
+   		api.openWin({
+   			name:'register',
+   			url:'widget://html/register.html'
+   		});
+   	});
+
+   	$('.forget-password').on('touchend', function(){
+        api.openWin({
+            name:'forget',
+            url:'widget://html/forget.html'
+        });
+   	});
+
+   	$('.login button').on('touchend', function(){
+   	    var dom = $(this);
+   	    if(!dom.hasClass('button-loading')){
+            var phone = $('.phone input').val();
+            var password = $('.password input').val();
+            if(!phone || !password){
+                api.toast({
+                   msg:'请输入您的账号信息'
+                });
+            }else{
+                dom.addClass('button-loading');
+                var server = new Server();
+                var url = server.getOne() + '/user/sign/in';
+                api.ajax({
+                    url:url,
+                    cache:false,
+                    timeout:10,
+                    dataType:'text',
+                    returnAll:true,
+                    method:"post",
+                    data:{
+                        values:{
+                            phone:phone,
+                            password:password,
+                            device:api.deviceId,
+                            platform:'ios' == api.systemType ? 1 :0
+                        }
+                    }
+                },function(ret,err){
+                    if(!err && 200 == ret.statusCode){
+                        try{
+                           var body = JSON.parse(ret.body);
+                           if(body.code == 0){
+                               server.setCookie(ret.headers);
+                               var user = new User();
+                               user.set(body.data[0],body.data[1], phone, password);
+                               pushAddAlias(phone);
+                               user.setLogin(1);
+                               api.closeWin({});
+                           }
+                           else{
+                               api.toast({
+	                               msg:'账号信息有误， 请重新输入'
+                               });
+                           }
+                        }catch(e){
+                            api.toast({
+	                            msg:'服务器忙，请稍后再试'
+                            });
+                        }
+                    }
+                    else{
+                        api.toast({
+	                        msg:err.msg
+                        });
+                    }
+                    dom.removeClass('button-loading');
+                });
+            }
+   	    }
+   	});
+}
+
+apiready = function(){
+	initFront();
+
+	api.addEventListener({
+	    name:'viewappear'
+    },function(ret,err){
+        api.setStatusBarStyle({
+            style: 'dark' 
+        });
+        var userModel = new User();
+        var user = userModel.get();
+        if(user){
+            $('.phone input').val(user.account);
+            $('.password input').val(user.password);
+        }
+    });
+}
+
+</script>

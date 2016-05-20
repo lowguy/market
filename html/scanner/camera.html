@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+</head>
+<body>
+</body>
+<script type="text/javascript" src="../../script/model/schema.js"></script>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/api/server.js"></script>
+<script type="text/javascript">
+    function close(){
+        api.closeWin({
+            animation:{
+                type:'none'
+            }
+        });
+    }
+
+    function openInvite(uri){
+        var server = new Server();
+        if(server.cookieIsExpired()){
+            api.openWin({
+                name: 'login',
+                url: 'widget://html/login.html'
+            });
+        }
+        else{
+            api.openWin({
+                name: 'invite',
+                url: 'widget://html/invite.html',
+                reload:true,
+                animation:{
+                   type:'none'
+                },
+                bgColor:'#FFFFFF',
+                pageParam:{
+                    uri:uri
+                }
+            });
+        }
+    }
+
+    function openScanner(){
+        var FNScanner = api.require('FNScanner');
+        FNScanner.openView({
+            rect:{
+                x:0,
+                y:0,
+                h:api.frameHeight
+            },
+            fixedOn:api.frameName,
+            sound:'widget://sound/scanner.wav'
+        },function( ret, err ){
+            if(!err){
+                switch(ret.eventType){
+                    case 'success':
+                        render(ret.content);
+                    break;
+                }
+                console.log(JSON.stringify(ret));
+            }
+        });
+    }
+
+    function render(uri){
+        var schema = new Schema();
+        if(schema.isHTTP(uri)){
+            close();
+            openURL(uri);
+        }
+        else if(schema.isInvited(uri)){
+            close();
+            openInvite(uri);
+        }
+    }
+
+	apiready = function(){
+		openScanner();
+		if('ios' != api.systemType){
+		    api.addEventListener({
+	            name:'resume'
+            },function(ret,err){
+            	openScanner();
+            });
+		}
+	};
+</script>
+</html>

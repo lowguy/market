@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+        <link rel="stylesheet" type="text/css" href="../css/base.css"/>
+        <link rel="stylesheet" type="text/css" href="../css/layout.css"/>
+        <style>
+             html, body{
+                 height:100%;
+             }
+             .refresh-header{
+                 height:0;
+                 background-position:50%;
+                 background-repeat:no-repeat;
+                 background-size:contain;
+                 background-image: url('../image/loading.gif');
+                 z-index:3;
+                 width:100%;
+                 position:fixed;
+                 top:0;
+             }
+             .refresh-header.loading{
+                 position:relative;
+             }
+             header{
+                 position:fixed;
+                 top:0;
+                 width:100%;
+                 z-index:2;
+                 background-color:transparent;
+             }
+             header.white button{
+                 color:#FFFFFF;
+             }
+             header.white .market{
+                 background-color:rgba(0,0,0,0.4);
+                 border-radius: 2rem
+             }
+             header.white .market span{
+                 background-image:url('../image/icons/location-white.png');
+             }
+             header.white .search{
+                 background-image: url('../image/icons/search-white.png');
+             }
+
+             header.white .scanner{
+                 background-image: url('../image/icons/scanner-white.png');
+             }
+
+             .header{
+                 padding:0.5rem 1rem;
+             }
+             .navigator{
+                 z-index:2;
+                 background-color: #FFFFFF;
+             }
+            .scroll-wrapper{
+                position:absolute;
+                height:100%;
+                width:100%;
+                background-color:#FFFFFF;
+                overflow:hidden;
+            }
+            .scroll{
+                position: absolute;
+                z-index: 1;
+                width: 100%;
+                -webkit-transform: translateZ(0);
+            }
+            .container {
+                display:none;
+                margin-bottom:5rem;
+            }
+            .category-icon {
+                max-width: 100%;
+                border-radius: 1.5rem;
+                width: 4rem;
+                height: 4rem;
+            }
+            .recommend {
+                overflow: auto;
+                font-size:1.2rem;
+            }
+            .activity-wrapper{
+                padding:1rem 0;
+                font-size:1.3rem;
+                overflow:auto;
+                position: relative;
+            }
+            .activity-wrapper .vertical-divider{
+                width:1px;
+                background:#EFEFEF;
+                height:100%;
+                position:absolute;
+                left:50%;
+                top:0;
+            }
+            .activity-item{
+                width:50%;
+                float: left;
+            }
+
+            .recommend-title{
+                font-size:1.2rem;
+                color:#808080;
+                height:3rem;
+                line-height:3rem;
+                text-indent:1rem;
+                border-left:0.5rem solid #FFD705;
+            }
+            .categories {
+                overflow: auto;
+                font-size: 1.3rem;
+                padding:0.5rem 0;
+            }
+            .categories .four-column {
+                padding: 0.5rem 0;
+            }
+            .banner{
+                width:100%;
+            }   
+            .four-column{
+                width:25%;
+                float:left;
+                overflow: auto;
+            }           
+            .two-column{
+                padding:0 0.5rem;
+            }
+
+            .goods {
+                text-align:center;
+                overflow: auto;
+                border-bottom:0.3rem solid #EFEFEF;
+            }
+            .goods-wrapper{
+                width:50%;
+                float:left;
+                overflow:auto;
+                background-color: #EFEFEF;
+            }
+            .goods .item {
+                position: relative;
+                margin-bottom:0.2rem;
+                background: #FFFFFF;
+            }
+            .goods .goods-wrapper:nth-child(odd) .item{
+                margin-left:0.2rem;
+                margin-right:0.1rem;
+            }
+            .goods .goods-wrapper:nth-child(even) .item{
+                margin-left:0.1rem;
+                margin-right:0.2rem;
+            }
+
+            .goods .goods-price{
+                color:red;
+                font-size:1.2rem;
+                font-weight:bold;
+            }
+            .item .goods-thumb {
+                max-width: 80%;
+            }
+            .item .title {
+                height: 1.5rem;
+                font-size: 1.3rem;
+                line-height: 1.5rem;
+                padding:0 1rem;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+            .item .advertisement{
+                height: 1.4rem;
+                font-size: 1.2rem;
+                line-height: 1.4rem;
+                padding:0 1rem;
+                color:#808080;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+            .item .bottom {
+                width: 100%;
+                height:3rem;
+                position: relative;
+                font-weight: bold;
+                padding-bottom:0.5rem;
+            }
+            .bottom .operation {
+                text-align: right;
+                position:absolute;
+                right:0;
+                display: inline-block;
+                width: 75%;
+                height:3rem;
+            }
+            .bottom .add {
+                height:3rem;
+                padding-right: 1rem;
+                display: inline-block;
+            }
+            .bottom .icon {
+                height: 2.5rem;
+                width: 2.5rem;
+                background-size: 1.5rem;
+                background-position: 50%;
+                border: 1px solid #EFEFEF;
+                display: inline-block;
+                border-radius: 100%;
+                background-repeat: no-repeat;
+                margin-top:0.15rem;
+            }
+            .bottom .add .icon {
+                background-image: url("../image/icons/add.png");
+            }
+            .money-symbol {
+                text-align: left;
+                font-size:1.5rem;
+                position:absolute;
+                left: 1rem;
+                display: inline-block;
+                width: 20%;
+                height: 3rem;
+                line-height:3rem;
+                color:red;
+            }
+            .bottom .sub {
+                height:3rem;
+                padding-left: 1rem;
+                display: inline-block;
+                visibility: hidden;
+            }
+            .bottom .sub.show {
+                visibility: visible;
+            }
+            .bottom .sub .icon {
+                background-image: url("../image/icons/sub.png");
+            }
+            .bottom .number {
+                visibility: hidden;
+                display:inline-block;
+                width:1.8rem;
+                height:3rem;
+                line-height:3rem;
+                color:#808080;
+                font-size:1.3rem;
+                text-align: center;
+                text-overflow: ellipsis;
+                word-wrap: normal;
+                overflow: hidden;
+                vertical-align:top;
+            }       
+            .bottom .number.show {
+                visibility: visible;
+            }
+        </style>
+    </head>
+    <body>
+        <header class="white">
+            <section class="header">
+                <button tapmode="touch-down" class="scanner">扫一扫</button>
+                <button tapmode="touch-down" class="market"><span>定位...</span></button>
+                <button tapmode="touch-down" class="search">搜一搜</button>
+            </section>
+        </header>
+        <section class="refresh-header"></section>
+        <section class="scroll-wrapper">
+            <section class="scroll">
+                <section class="container">
+                    <section>
+                        <img class="banner" src="../image/banners/mall.png"/>
+                    </section>
+                    <p class="network-error"></p>
+                    <section class="categories text-center">
+                    </section>
+                    <section class="divider"></section>
+                    <section class="recommend-title">
+                        特惠活动
+                    </section>
+                    <section class="divider"></section>
+                    <section class="activity-wrapper">
+                        <img tapmode="touch-down" class="activity-item hot" src="../image/icons/activity-hot.png" data-id="1" />
+                        <img tapmode="touch-down" class="activity-item daily" src="../image/icons/activity-daily.png" data-id="2" />
+                        <p class="vertical-divider"></p>
+                    </section>
+                    <section class="divider"></section>
+                    <section class="recommend-title">
+                        实时推荐
+                    </section>
+                    <section class="divider"></section>
+                    <section class="recommend clear-all text-center">
+                    </section>
+                </section>
+            </section>
+        </section>
+        <footer class="navigator text-center">
+            <section class="home active">
+                <div class="icon">
+                </div>
+                <span>首页</span>
+            </section>
+            <section class="mall">
+                <div class="icon">
+                </div>
+                <span>商城</span>
+            </section>
+            <section class="activity">
+                <div class="icon">
+                </div>
+                <span>特惠</span>
+            </section>
+            <section class="cart">
+                <div class="icon"><span class="number empty">0</span></div>
+                <span>购物车</span>
+            </section>
+            <section class="user">
+                <div class="icon "></div>
+                <span>我的</span>
+            </section>
+        </footer>
+        <script id="categories" type="text/html">
+            <%for(var i = 0; i < categories.length; i++){%>
+                <section tapmode="touch-down" class="four-column" data-id="<%=categories[i].id%>">
+                    <img class="category-icon" src="../image/categories/<%=categories[i].id%>.png"/>
+                    <p>
+                        <%=categories[i].name%>
+                    </p>
+                </section>
+            <%}%>
+        </script>
+        <script id="goods" type="text/html">
+            <section class="goods">
+            <%for(var i = 0; i < goods.length; i++){%>
+                <section class="goods-wrapper">
+                    <section class="item" data-id="<%=goods[i].id%>" data-price="<%=goods[i].price%>" data-title="<%=goods[i].title%>" data-slogan="<%=goods[i].slogan%>">
+                        <p class="text-center">
+                            <img tapmode="touch-down" class="goods-thumb" src="../image/products/<%=goods[i].id%>.JPG"/>
+                        </p>
+                        <p class="title">
+                            <span><%=goods[i].title%></span>
+                        </p>
+                        <p class="advertisement"><%=goods[i].slogan%></p>
+                        <section class="bottom text-ellipsis">
+                            <p>
+                                <span class="money-symbol"><%=goods[i].price%></span>
+                                <span class="operation"> 
+                                    <span tapmode="touch-down" class="sub"> 
+                                        <span class="icon"></span> 
+                                    </span> 
+                                    <span class="number">1</span> 
+                                    <span tapmode="touch-down" class="add"> 
+                                        <span class="icon"></span> 
+                                    </span> 
+                                </span>
+                            </p>
+                        </section>
+                    </section>
+                </section>
+            <%}%>
+            </section>
+        </script>
+    </body>
+</html>
+
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/window.js"></script>
+<script type="text/javascript" src="../script/goods.frame.js"></script>
+<script type="text/javascript" src="../script/model/market.js"></script>
+<script type="text/javascript" src="../script/model/category.js"></script>
+<script type="text/javascript" src="../script/model/goods.js"></script>
+<script type="text/javascript" src="../script/model/cart.js"></script>
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/vendor/template.js"></script>
+<script type="text/javascript" src="../script/vendor/iscroll-probe.js"></script>
+<script type="text/javascript" src="../script/api/server.js"></script>
+<script type="text/javascript">
+    var scroll;
+    var first = true;//标志变量
+    var lastUpdated = 0;//数据最后更新时间
+    function openGoodsDetail(obj){
+        var _this = $(obj).parents('.item');
+
+        openGoodsFrame($(_this).attr('data-id'),$(_this).attr('data-price'), $(_this).attr('data-title'), $(_this).attr('data-slogan'));
+    }
+
+    function openMall(obj){
+        var animation = {
+            type:'none',
+            duration:300
+        };
+
+        var delay = 0;
+        var id = $(obj).attr('data-id');
+        api.execScript({
+            name:'mall',
+            script: 'categoryChange(' + id + ');'
+        });
+        pageParam={categoryID:id}
+        openWin('mall','mall',animation,delay,pageParam,false);
+    }
+    function refreshHeaderLoading(){
+        var dom = $('.refresh-header');
+        dom.addClass('loading');
+        hideHeader();
+        dom.animate({
+            'height': $('header').height()
+        }, 300, 'ease', function(){
+            request();
+        });
+    }
+
+    function refreshHeaderDone(){
+        var dom = $('.refresh-header');
+        dom.animate({
+            'height': 0
+        }, 200, 'ease' , function(){
+            dom.removeClass('loading');
+            showHeader();
+        });
+    }
+
+    function hideHeader(){
+        var dom = $('header');
+        if(!dom.hasClass('js-hide')){
+            dom.addClass('js-hide');
+            $('header').animate({
+                'opacity': 0
+            }, 200);
+        }
+    }
+
+    function showHeader(){
+        var dom = $('header');
+        if(dom.hasClass('js-hide')){
+            dom.removeClass('js-hide');
+            $('header').animate({
+                'opacity': 1
+            }, 200);
+        }
+    }
+
+    function opacityHeader(percent){
+        percent = percent > 1 ? 1:percent;
+        var dom = $('header');
+        dom.css('background-color', 'rgba(255,215,5,' + percent +')');
+        dom.attr('data-percent', percent);
+        statusBarStyle();
+        if(percent < 0.5){
+            $('header').addClass('white');
+        }
+        else{
+            $('header').removeClass('white');
+        }
+    }
+
+    function onScroll(){
+        var header = $('header');
+        var dom = $('.refresh-header');
+        if(scroll.y >0){
+            hideHeader();
+            if(scroll.y < header.height() + 1){
+                if(!dom.hasClass('loading')){
+                    dom.height(scroll.y);
+                }
+                else{
+                    dom.css('top', scroll.y);
+                }
+            }
+            else{
+                if(!dom.hasClass('loading')){
+                    dom.css('top', scroll.y - dom.height());
+                }
+                else{
+                    dom.css('top', scroll.y);
+                }
+            }
+        }
+        else{
+            if(!dom.hasClass('loading')){
+                showHeader();
+                opacityHeader(-scroll.y / header.height() * 0.5);
+            }
+        }
+    }
+
+    function onScrollEnd(){
+        if($('.refresh-header').hasClass('loading')){
+            request();
+        }
+        else{
+            if(scroll.y == 0){
+                showHeader();
+                opacityHeader(0);
+            }
+        }
+    }
+
+    function scrollEvent(){
+        scroll = new IScroll('.scroll-wrapper' 
+            ,{
+                tap:true,
+                deceleration:0.0006,
+                probeType: 3,
+                disableMouse:true,
+                disablePointer:true,
+                bindToWrapper:true,
+            }
+        );
+
+        scroll.on('scroll', onScroll);
+        scroll.on('scrollEnd', onScrollEnd);
+        $(document).on('touchend', '.scroll-wrapper', function(){
+            var headerHeight = $('header').height();
+            if(scroll.y > headerHeight){
+                $('.refresh-header').addClass('loading');
+            }
+        });
+    }
+
+    function openActivity(obj){
+        var animation = {
+            type:'none',
+            duration:300
+        };
+
+        var delay = 0;
+        var id = $(obj).attr('data-id');
+        api.execScript({
+            name:'activity',
+            script: 'activityChange(' + id + ');'
+        });
+        pageParam={activityID:id}
+        openWin('activity','activity',animation,delay,pageParam,false);
+    }
+    function delegateEvent(){
+
+        scrollEvent();
+        $(document).on('tap', '.goods-thumb', function(){
+            openGoodsDetail($(this));
+        });
+
+        $(document).on('tap', '.four-column', function(){
+            openMall($(this));
+        });
+
+        $(document).on('tap', '.add', function(){
+            if('ios' == api.systemType){
+                var origin = $(this).parents('.item').find('.goods-thumb');
+                var offset = origin.offset();
+                var width = origin.width();
+                var height = origin.height();
+                var offset_x = offset.left;
+                var page_y = offset.top - parseInt($('header').height());
+                iosGoodsToCart($(this).parents('.item').attr('data-id'), offset_x, page_y, width, height);
+            }
+            addCart(this);
+        });
+
+        $(document).on('tap', '.sub', function(){
+            subCart($(this));
+        });
+        
+        $(document).on('tap', '.activity-item', function(){
+            openActivity($(this));
+        })
+
+    }
+
+    function initFront(){
+        showNumber();
+        updateCartNumber();
+    }
+
+
+    function showNumber(){
+        $.each($('.goods-wrapper'), function(i, dom){
+            var market = new Market();
+            var current = market.getCurrent();
+            var cart = new Cart();
+            var cartGoods = cart.list(current.id);
+            var inCart = false;
+            var number = 0;
+            var _this = $(dom).find('.item');
+            $.each(cartGoods, function(j, goods){
+                if($(_this).attr('data-id') == goods.id)
+                {
+                    inCart = true;
+                    number = goods.number;
+                    return false;
+                }               
+            });
+            
+            if(inCart)
+            {
+                $(_this).find('.sub').addClass('show');
+                $(_this).find('.number').html(number).addClass('show');
+            }
+            else
+            {
+                $(_this).find('.sub').removeClass('show');
+                $(_this).find('.number').html(number).removeClass('show');
+            }
+        });
+        
+    }
+    
+    function addCart(obj){
+        var marketModel = new Market();
+        var current = marketModel.getCurrent();
+        var cart = new Cart();
+        
+        var goodsID = $(obj).parents('.item').attr('data-id');
+        cart.add(current.id, goodsID);
+        updateCartNumber();
+
+        showNumber();
+    }
+
+    function subCart(obj){
+        var marketModel = new Market();
+        var current = marketModel.getCurrent();
+        var cart = new Cart();
+        
+        var goodsID = $(obj).parents('.item').attr('data-id');
+        cart.sub(current.id, goodsID);
+        updateCartNumber();
+        showNumber();
+    }
+
+    function render(ret){
+
+        var categoryModel = new Category();
+        categoryModel.load(function(){
+            var categories = categoryModel.listTop(ret.categories);
+            var html=baidu.template('categories',{categories:categories});
+            $('.categories').html(html);
+            var goodsModel = new Goods();
+            goodsModel.load(function(){
+                var goods = goodsModel.merge(ret.recommend);
+                var html=baidu.template('goods',{goods:goods});
+                $('.recommend').html(html);
+                initFront();
+                if('none' == $('.container').css('display'))
+                {
+                    $('.container').fadeIn(300, function(){
+                        $('.container').css('height', 'auto');
+                        if($('.container').height() < $('.scroll-wrapper').height()){
+                            $('.container').height($('.scroll-wrapper').height());
+                        }
+                        setTimeout(function(){scroll.refresh()}, 100);
+                    });
+                }
+                else{
+                    if(scroll){
+                        $('.container').css('height', 'auto');
+                        if($('.container').height() < $('.scroll-wrapper').height()){
+                            $('.container').height($('.scroll-wrapper').height());
+                        }
+                        setTimeout(function(){scroll.refresh()}, 100);
+                    }
+                }
+                api.parseTapmode();
+            });
+        });
+    }
+    
+    function ajaxComplete(){
+        refreshHeaderDone();
+        if(first){
+            first = false;
+            setTimeout(function(){
+                api.removeLaunchView({
+                    animation: {
+                        type: 'none',
+                        duration: 100
+                    }
+                });
+            }, 200);
+
+        }
+    }
+    
+    function request(){
+        var market = new Market();      
+        var current = market.getCurrent();
+        var server = new Server();
+        var url = server.getOne() + "/customer/home/index?id=" + current.id;
+
+        api.ajax({
+            url:url,
+            cache:true,
+            timeout:5,
+            dataType:'text',
+            returnAll:true,
+        },function(ret,err){
+            if(!err && 200 == ret.statusCode){
+                try{
+                    var body = JSON.parse(ret.body);
+                    render(body.data);
+                    lastUpdated = timestamp();
+                }catch(e){}
+            }
+
+            ajaxComplete();
+        });
+    }
+
+    function onNetworkChanged(lasyRequest){
+        if(api.connectionType == 'none' || api.connectionType == 'unknown'){
+            $('.network-error').addClass('show');
+        }
+        api.addEventListener({
+            name:'offline'
+        },function(ret,err){
+            $('.network-error').addClass('show');
+        });
+        api.addEventListener({
+            name:'online'
+        },function(ret,err){
+            $('.network-error').removeClass('show');
+            if(lasyRequest && $.isFunction(lasyRequest)){
+                setTimeout(lasyRequest,  2000);
+            }
+        });
+    }
+
+    function statusBarStyle(){
+        var opacity = $('header').attr('data-percent') || 0;
+        if(opacity < 0.5){
+            api.setStatusBarStyle({
+                style: 'light' 
+            });
+        }
+        else{
+            api.setStatusBarStyle({
+                style: 'dark' 
+            });
+        }
+    }
+    apiready = function() {
+        fixStatusBar($('header'));
+        statusBarStyle();
+        initNavigator();
+
+        onMarketChange(function(){
+            var market = new Market();
+            var current = market.getCurrent();
+            $('header .market span').html(current.district);
+            refreshHeaderLoading();
+        });
+
+        delegateEvent();
+
+        onNetworkChanged(function(){
+            var now = timestamp();
+            if(now - lastUpdated > 10){
+                refreshHeaderLoading();
+                request();
+            }
+        });
+        request();
+        api.addEventListener({
+            name:'viewappear'
+        },function(ret,err){
+            statusBarStyle();
+            if(!first){
+                showNumber();
+                updateCartNumber();
+            }
+            var dom = $('.refresh-header');
+            if(!dom.hasClass('loading')){
+                if(dom.height() > 0){
+                    dom.animate({
+                        'height': 0
+                    }, 100, 'ease' , function(){
+                        dom.css('top', 0);
+                        showHeader();
+                        scroll.scrollTo(0, 0);
+                    });
+                }
+            }
+            else{
+                if(0 != parseInt(dom.css('top'))){
+                    dom.css('top', 0);
+                }
+            }
+        });
+
+        api.addEventListener({
+            name:'resume'
+        },function(ret,err){
+            var now = timestamp();
+            if(now - lastUpdated > 3600){
+                setTimeout(function(){
+                    refreshHeaderLoading();
+                    request();
+                }, 200);
+            }
+        });
+    }
+</script>

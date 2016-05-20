@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../css/base.css"/>
+	<style>
+		html, body{
+			height:100%;
+			background: transparent;
+		}
+		body{
+		    background:#000000;
+		}
+		header{
+			background-color: #FFFFFF;
+		}
+		.header{
+			height: 4rem;
+			position: relative;
+			font-size:1.2rem;
+			font-weight:bold;
+			border-bottom:1px solid #EFEFEF;
+			padding:0.5rem 0;
+		}
+
+		.header p{
+			height:4rem;
+			line-height:4rem;
+		}
+		.back{
+			position:absolute;
+			top:0.5rem;
+			padding-left:2rem;
+			background-size:2rem;
+			background-position: 1rem 50%;
+			background-repeat:no-repeat;
+			background-image:url('../image/icons/arrow-left-black.png');
+		}
+		.title{
+			font-size:1.4rem;
+		}
+
+		footer{
+		    width:100%;
+            padding:0.5rem 0;
+            height:4rem;
+            position: absolute;
+            bottom: 0;
+            font-weight:bold;
+            font-size:1.2rem;
+            background-color:#FFFFFF;
+            display:none;
+        }
+        footer section{
+            height:100%;
+            width:25%;
+            background-repeat: no-repeat;
+            background-position: 50%;
+            margin:0 auto;
+            position:relative;
+            color:#666666;
+            text-align:center;
+        }
+        .light .icon{
+            width:2.5rem;
+            height:2.5rem;
+            margin:0 auto;
+            background-repeat: no-repeat;
+            background-size: 80%;
+            background-position: 50%;
+            background-image:url('../image/icons/light.png');
+        }
+        .light.on .icon{
+            background-image:url('../image/icons/light-on.png');
+        }
+	</style>
+</head>
+<body>
+	<header>
+		<section class="header text-center">
+			<p tapmode="touch-down" class="back">返回</p>
+			<p class="title">二维码/条码</p>
+		</section>
+	</header>
+    <footer>
+        <section tapmode="touch-down" class="light">
+            <div class="icon">
+            </div>
+            <span>灯光</span>
+        </section>
+    </footer>
+</body>
+</html>
+
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript">
+    function initFront(){
+        if('ios' == api.systemType){
+            $('footer').show();
+        }
+       	fixStatusBar($('header'));
+       	$('.back').on('touchend', function(){
+       		api.closeWin({
+   		        animation: {
+                    type: 'none'
+                }
+       		});
+       	});
+        $('.light').on('touchend', function(){
+            var FNScanner = api.require('FNScanner');
+            var status = 'on'
+            if($(this).hasClass('on')){
+                status = 'off';
+            }
+            FNScanner.switchLight({
+                    status: status
+            });
+            $(this).toggleClass('on');
+        });
+    }
+
+    function initFrames(){
+        var y = $('header').height();
+        var winHeight = parseInt(api.winHeight);
+        var h = winHeight - y - $('footer').height();
+        api.openFrame({
+            name: 'scanner_camera',
+            url: 'widget://html/scanner/camera.html',
+            rect: {
+                x:0,
+                y:y,
+                h:h
+            },
+            bounces:false
+        });
+        api.openFrame({
+            name: 'scanner_cover',
+            url: 'widget://html/scanner/cover.html',
+            rect: {
+                x:0,
+                y:y,
+                h:h
+            },
+            bounces:false
+        });
+    }
+
+    apiready = function(){
+    	initFront();
+    	api.addEventListener({
+	        name:'viewappear'
+        },function(ret,err){
+            api.setStatusBarStyle({
+                style: 'dark' 
+            });
+            initFrames();
+        });
+    }
+
+</script>

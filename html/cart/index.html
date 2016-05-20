@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no" />
+		<link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+		<style>
+			.container{
+				display:none;
+			}
+
+			.delivery{
+				margin: 0.5rem 0;
+				position:relative;
+				font-size:1.2rem;
+			}
+			.delivery p{
+				height:2rem;
+				line-height: 2rem;
+				width:75%;
+				display: inline-block;
+			}
+			.delivery .address{
+				height:4rem;
+				overflow:hidden;
+			}
+			.delivery .no-address{
+				text-indent:1rem;
+				font-size:1.2rem;
+				color:red;
+				height:6rem;
+				line-height:6rem;
+			}
+			.delivery .add-address{
+				width:20%;
+				position:absolute;
+				height:6rem;
+				line-height:6rem;
+				font-size:1.4rem;
+				font-weight:bold;
+				right:0;
+				top:0;
+				text-align:left;
+				background-image: url('../../image/icons/arrow-right.png');
+				background-repeat:no-repeat;
+				background-size:2rem;
+				background-position:75% 50%;
+				color:red;
+			}
+
+			.delivery .address label{
+				height:4rem;
+			}
+			
+			.delivery .address span{
+				height:4rem;
+				word-break:break-all;
+			}
+			.delivery label{
+                font-weight:bold;
+				float:left;
+				display:inline-block;
+				height:2rem;
+				width:35%;
+			    text-overflow: ellipsis;
+			    white-space: nowrap;
+			    overflow: hidden;
+			    text-indent:1rem;
+                color:#808080;
+
+			}
+
+			.delivery span{
+				display:inline-block;
+				width:60%;
+			}
+			.delivery .edit-address{
+
+				width:20%;
+				position:absolute;
+				height:6rem;
+				line-height:6rem;
+				right:0;
+				top:0;
+                font-size:1.4rem;
+                font-weight:bold;
+				text-align:left;
+				background-image: url('../../image/icons/arrow-right.png');
+				background-repeat:no-repeat;
+				background-size:2rem;
+				background-position:75% 50%;
+				color:red;
+			}
+			.goods {
+				width: 100%;
+				background: white;
+				margin-bottom:9rem;
+				border-bottom:0.5rem solid #EFEFEF;
+			}
+			.goods .item {
+				position: relative;
+				padding-top:0.25rem;
+                border-bottom:1px solid #EFEFEF;
+			}
+
+			.item .goods-thumb {
+				width: 20%;
+			}
+	        .item .hot{
+                position:absolute;
+                height:3rem;
+                width:3rem;
+                background-image: url('../../image/icons/product-hot.png');
+                background-size:contain;
+                background-repeat:no-repeat;
+            }
+
+            .item .discount{
+                position:absolute;
+                height:3rem;
+                width:3rem;
+                background-image: url('../../image/icons/product-discount.png');
+                background-size:contain;
+                background-repeat:no-repeat;
+            }
+			.item .title {
+				height: 2rem;
+				font-size: 1.3rem;
+				line-height: 2rem;
+				left: 20%;
+				width:80%;
+				overflow:hidden;
+				white-space: nowrap;
+    			text-overflow: ellipsis;
+    			position:absolute;
+			}
+			.item .title span{
+				padding:0 0.5rem;
+			}
+			.item{
+			    border-bottom:1px solid #FFFFFF;
+			}
+
+            .item .status{
+                color:red;
+                font-size:1.2rem;
+                font-weight:bold;
+                line-height: 3rem;
+                display: none;
+                padding-left:0.5rem;
+            }
+
+            .item .delete{
+                display:none;
+            }
+
+            .item.not-enough .add .icon{
+                background-image:url('../../image/icons/add-gray.png');
+            }
+
+            .item.not-enough .price-sales{
+                display:none;
+            }
+            .item.not-enough .status{
+                display:block;
+            }
+            .item.not-enough .status:after{
+                content:'库存不足'
+            }
+            .item.not-ready .status{
+                display:block;
+            }
+            .item.not-ready .status:after{
+                content:'补货中...'
+            }
+            .item.not-ready .price-sales{
+                display:none;
+            }
+            .item.not-ready .add{
+                display:none;
+            }
+            .item.not-ready .number{
+                display:none;
+            }
+            .item.not-ready .sub{
+                display:none;
+            }
+            .item.not-ready .delete{
+                display:inline-block;
+            }
+            .item.not-ready img{      
+                -webkit-filter: grayscale(1); 
+                filter: grayscale(1); 
+            }
+            .item.not-enough img{      
+				-webkit-filter: grayscale(1); 
+				filter: grayscale(1); 
+            }
+			.item .bottom {
+				width: 80%;
+				height:3rem;
+				position: absolute;
+				left: 20%;
+				bottom:0;
+				padding-bottom:0.5rem;
+			}
+			.bottom p{
+				position:absolute;
+				top:0;
+				color: red;
+				font-size:1.2rem;
+				font-weight:bold;
+				height:3rem;
+				line-height:3rem;
+			}
+            .bottom .price-sales{
+                line-height:3rem;
+                left:0;
+                color:red;
+                font-weight:bold;
+            }
+			.bottom .operation {
+				right:0;
+			}
+			.operation span{
+				height:3rem;
+			}
+			.bottom .add {
+				padding-right: 1rem;
+				display:inline-block;
+			}
+			.bottom .icon{
+				height: 2.5rem;
+				width: 2.5rem;
+                margin-top:0.15rem;
+
+				background-size: 1.5rem;
+				background-position: 50%;
+				border: 1px solid #EFEFEF;
+				display:inline-block;
+				border-radius: 100%;
+				background-repeat:no-repeat;
+			}
+			.bottom .add .icon {
+				background-image: url("../../image/icons/add.png");
+			}
+			.bottom .delete{
+			    padding-right:1rem;
+			}
+			.bottom .delete .icon{
+                 background-image: url("../../image/icons/delete.png");
+			}
+			.bottom .sub {
+				padding-left: 1rem;
+				display:inline-block;
+			}
+			.bottom .sub .icon {
+				background-image: url("../../image/icons/sub.png");
+			}
+
+			.bottom .number {
+				font-size:1.2rem;
+                line-height:3rem;
+				color: #808080;
+				vertical-align:top;
+				width:1.8rem;
+				display:inline-block;
+				text-align:center;
+				text-overflow: ellipsis;
+    			word-wrap: normal;
+    			overflow: hidden;
+			}
+
+			.item:nth-last-child(1) {
+				border-bottom: 0;
+			}
+
+			.money-symbol{
+				padding-left:0.5rem;
+				font-size:1.5rem;
+			}
+            .money-symbol.origin{
+                font-size:1rem;
+                text-decoration: line-through;
+                color:#808080;
+                font-weight:normal;
+            }
+			.cart-empty{
+				background-image:url("../../image/icons/cart-empty.png");
+				background-repeat:no-repeat;
+				background-size:10rem;
+				background-position: 50%;
+				height:20rem;
+				text-align:center;
+			    line-height: 5rem;
+    			font-size:1.4rem;
+    			font-weight:bold;
+    			color:#808080;
+			}
+
+			.buy-wrapper{
+				position:fixed;
+				width:100%;
+				bottom:0;
+				overflow:auto;
+				height:auto;
+                background: #FFFFFF;
+                z-index:1;
+
+			}
+			.buy-wrapper div{
+			    padding:0 1rem;
+			    position:relative;
+                height:6rem;
+			}
+			.buy-wrapper .delivery-notice{
+			    height:2.9rem;
+			    line-height: 2.9rem;
+			    border-bottom:1px solid #EFEFEF;
+                border-top:1px solid #EFEFEF;
+			    font-size:1.2rem;
+			    color:#808080;
+			    text-align:center;
+			}
+			.buy-wrapper span{
+			    line-height:3rem;
+			    font-weight:bold;
+			    font-size:1.4rem;
+			}
+			.buy-wrapper .money-symbol{
+				line-height:3rem;
+				color: red;
+				padding-left:0;
+			}
+			
+            .buy-wrapper .buy-button{
+                background-color:#FFD705;
+                font-weight:bold;
+                font-size:1.4rem;
+                color:#6B450A;
+                height:4rem;
+                position:absolute;
+                right:1rem;
+                top:1rem;
+                width:40%;
+                border-radius: 1rem;
+            }
+           .button-loading{
+                background-image:url("../../image/loading.gif");
+                background-size:3rem;
+                background-repeat:no-repeat;
+                background-position:50%;
+                text-indent: -150%;
+            }
+		</style>
+	</head>
+	<body>
+		  <p class="network-error"></p>
+          <section class="container" >
+		  </section>
+	</body>
+	<script type="text/html" id="template">
+		<%if(goods.length == 0){%>
+			<section class="cart-empty">
+				您还没有挑选任何商品
+			</section>
+		<%}else{%>
+            <section class="divider"></section>
+            <section class="delivery" tapmode="touch-down">
+                <%if(address){%>
+                    <p class="phone">
+                        <label>联系方式:</label>
+                        <span class="number"><%=address.phone%></span>
+                    </p>
+                    <p class="address">
+                        <label>收货地址:</label>
+                        <span><%=address.address%></span>
+                    </p>
+                    <p class="edit-address">
+                        修改
+                    </p>
+                <%}else{%>
+                    <p class="no-address">您还没有添加收货地址</p>
+                    <p class="add-address">
+                        添加
+                    </p>
+                <%}%>
+            </section>
+            <section class="divider"></section>
+			<section class="goods">
+				<%for(var i = 0; i < goods.length; i++){%>
+					<section 
+    				    <%if(!goods[i].status){%>
+    				        class = "item not-ready"
+    				    <%}else if(goods[i].stock < goods[i].number){%>
+    				        class = "item not-enough"
+    				    <%}else{%>
+    				        class = "item"
+    				    <%}%>
+					   data-activity="<%=goods[i].activity%>" data-discount="<%=goods[i].discount%>" data-id="<%=goods[i].id%>" data-price="<%=goods[i].price%>" data-title="<%=goods[i].title%>" data-slogan="<%=goods[i].slogan%>" data-stock="<%=goods[i].stock%>">
+                       <%if(1 == goods[i].activity){%>
+                            <p class="hot"></p>
+                        <%}else if(2 == goods[i].activity){%>
+                            <p class="discount"></p>
+                        <%}%>
+						<p class="title">
+							<span><%=goods[i].title%></span>
+						</p>
+						<img class="goods-thumb" src="../../image/products/<%=goods[i].id%>.JPG"/>
+
+						<section class="bottom text-ellipsis">
+                            <p class="price-sales">
+                                <span class="money-symbol current"><%=goods[i].price%></span>
+                                <%if(0 != goods[i].activity){%>
+                                <span class="money-symbol origin"><%=goods[i].price%></span>
+                                <%}%>
+                            </p>
+                            <p class="status"></p>
+                            <p class="operation"> 
+                                <span tapmode="touch-down" class="sub"> 
+                                    <span class="icon"></span> 
+                                </span> 
+                                <span class="number">0</span> 
+                                <span tapmode="touch-down" class="add"> 
+                                    <span class="icon"></span>
+                                </span>
+                                <span tapmode="touch-down" class="delete"> 
+                                    <span class="icon"></span>
+                                </span>
+                            </p>
+						</section>
+					</section>
+				<%}%>
+			</section>
+            <section class="buy-wrapper">
+                <p class="delivery-notice">0元起送，满29元免配送费</p>
+                <div>
+                    <span>合计:</span><span class="money-symbol"></span>
+                    <br/>
+                    <span>配送:</span><span class="money-symbol">0</span>
+                    <button tapmode="touch-down" class="buy-button">结算</button>
+                </div>
+            </section>
+		<%}%>
+	</script>
+	<script type="text/html" id="delivery">
+         <%if(address){%>
+             <p class="phone">
+                 <label>联系方式:</label>
+                 <span class="number"><%=address.phone%></span>
+             </p>
+             <p class="address">
+                 <label>收货地址:</label>
+                 <span><%=address.address%></span>
+             </p>
+             <p class="edit-address">
+                 修改
+             </p>
+          <%}%>
+	</script>
+</html>
+
+<script type="text/javascript" src="../../script/vendor/template.js"></script>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/frame.js"></script>
+<script type="text/javascript" src="../../script/model/goods.js"></script>
+<script type="text/javascript" src="../../script/model/market.js"></script>
+<script type="text/javascript" src="../../script/model/cart.js"></script>
+<script type="text/javascript" src="../../script/model/address.js"></script>
+<script type="text/javascript" src="../../script/api/server.js"></script>
+<script type="text/javascript" src="../../script/model/user.js"></script>
+<script type="text/javascript">
+	var first = true;
+	var iosOverScroll = false;
+	var freeArea = [];
+	function setDefaultAddress(){
+		var cartGoods = getCartGoods();
+		var server = new Server();
+	    var market = new Market();
+		var current = market.getCurrent();
+	    var address = new Address();
+		var defaultAddress = address.getDefault(current.id);
+		if(!server.cookieIsExpired() && !defaultAddress && cartGoods.length){
+			var userModel = new User();
+		   	var user = userModel.get();
+		   	if(user){
+		   	    addDefaultAddress(current.id,user.account);
+		   	}
+	    }
+	}
+	function addDefaultAddress(marketID,phone){
+		var map = api.require('xMap');
+		map.getLocation({
+		    accuracy: '10m',
+		    autoStop: false,
+		    filter: 1
+		}, function(ret, err){
+			var center = {};
+			map.stopLocation();
+		    if(ret.status){
+		        map.getNameFromCoords({
+				    lon: ret.lon,
+				    lat: ret.lat
+				},function(ret,err){
+				    if(ret.status){
+				    	var addressModel = new Address();
+				    	if(ret.poi.length == 0){
+				    	    ret.poi.push({
+				    	       lon:ret.lon,
+				    	       lat:ret.lat,
+				    	       name:ret.address,
+				    	       address:ret.address
+				    	    });
+				    	}
+				    	var lon = ret.poi[0]['lon'];
+				    	var lat = ret.poi[0]['lat'];
+				    	var address = ret.poi[0]['name'];
+				    	var detail = ret.poi[0]['address'];
+				    	addressModel.add(marketID, phone, lon, lat, address, detail);
+				    	renderDefaultAddress(marketID);
+				    }
+				});
+	        }
+		});
+	}
+	function renderDefaultAddress(marketID){
+	    var data = {};
+        var address = new Address();
+        var defaultAddress = address.getDefault(marketID);
+        data.address = defaultAddress;
+        var html=baidu.template('delivery',data);
+        $('.delivery').html(html);
+	}
+	function openAddress(){
+	    var name = 'address';
+	    var url = 'widget://html/address.html';
+	    if($('.delivery').find('.add-address').length > 0){
+	        name = 'address_form';
+	        url = 'widget://html/address/form.html';
+	    }
+		api.openWin({
+			name:name,
+			url:url,
+			pageParam:{
+			    autoClose:true
+			}
+		});
+	}
+	
+	function delegateEvent(){
+	
+		setDefaultAddress();
+		
+	    if('ios' == api.systemType){
+            $(document).on('touchmove', function(event) {
+                if (window.scrollY == 0) {
+                    iosOverScroll = true;
+                } else {
+                    iosOverScroll = false;
+                }
+            });
+            $(document).on('touchend', function(event) {
+                if (event.touches.length == 0) {
+                    iosOverScroll = false;
+                }
+            });
+            $(document).on('touchmove','.add', function(event) {
+                event.stopPropagation();
+                $(this).removeClass('not-moved');
+            });
+            $(document).on('touchstart','.add',function(event) {
+                if (!iosOverScroll) {
+                    $(this).addClass('not-moved');
+                }
+            });
+            $(document).on('touchend','.add', function(event) {
+                if (!$(this).hasClass('not-moved') || iosOverScroll) {
+                    return true;
+                }
+                $(this).removeClass('not-moved');
+                if(!$(this).parents('.item').hasClass('not-enough')){
+                    var origin = $(this).parents('.item').find('.goods-thumb');
+                    var offset = origin.offset();
+                    var width = origin.width();
+                    var height = origin.height();
+                    var offset_x = offset.left;
+                    var page_y = offset.top - $(window).scrollTop();
+                    var params = [];
+                    params.push($(this).parents('.item').attr('data-id'));
+                    params.push(offset_x);
+                    params.push(page_y);
+                    params.push(width);
+                    params.push(height);
+                    api.execScript({
+                        script : 'iosGoodsToCart(' + params.join(',') + ');'
+                    });
+                    addCart($(this));
+                }
+            });
+	    }
+	    else{
+            touchEvent('.add',addCart);
+	    }
+
+        touchEvent('.sub',subCart);
+		touchEvent('.delivery',openAddress);
+		touchEvent('.buy-button', buy);
+		touchEvent('.not-ready .delete',removeGoodsInCart);
+	}
+	function removeGoodsInCart(obj){
+		var goodsID = $(obj).parents('.item').attr('data-id');
+		var marketModel = new Market();
+        var market = marketModel.getCurrent();
+		var marketID = market.id;
+		var cart = new Cart();
+		cart.remove(marketID, goodsID);
+			
+		api.execScript({
+	        script: 'updateCartNumber();'
+        });      
+        
+        $(obj).parents('.item').remove();
+        if(!$('.item').length){
+        	renderEmpty();
+        }
+	}
+	function renderEmpty(){	
+		var data = {
+			goods:[],
+		}
+		var html=baidu.template('template',data);
+		$('.container').html(html);
+		initFront();
+		if('none' == $('.container').css('display')){
+		    setTimeout(function(){
+		        $('.container').fadeIn(200);
+		    }, 100);
+		}
+	}
+	function buy(obj){
+	    var server = new Server();
+	    if(server.cookieIsExpired()){
+	        api.openWin({
+	            name: 'login',
+	            url: 'widget://html/login.html'
+            });
+	    }
+	    else{
+	        if($('.delivery').find('.add-address').length > 0){
+	            api.toast({
+	                msg:'您还没有添加收货地址'
+                });
+                return;
+	        }
+	        else{
+	            var map = api.require('xMap');
+	            var addressModel = new Address();
+	            var marketModel = new Market();
+	            var market = marketModel.getCurrent();
+	            var address = addressModel.getDefault(market.id);
+                map.isPolygonContantsPoint({
+                    point: {
+                         lon:address.lon,
+                         lat:address.lat
+                     },
+                     points:freeArea
+                },function(ret){
+                     if(!ret.status){
+                         api.toast({
+	                         msg:'您的收货地址不在小小家（' + market.district + '）的配送范围内，暂时无法提供服务'
+                         });
+                     }
+                     else{
+                         addOrder();
+                     }
+                });
+	        }
+	    }
+	}
+	function addOrder(){
+		var market = new Market();
+		var current = market.getCurrent();
+		var marketID = current.id;
+		var goods= [];
+		$.each($('.item:not(.not-enough)'),function(i,e){
+		        if(!$(e).hasClass('not-ready')){
+                      var id = $(e).attr('data-id');
+                      var number = parseInt($(e).find('.number').text());
+                      goods.push({
+                          id:id,
+                          number:number
+                      });
+		        }
+		});
+		if(goods.length){
+		    var dom = $('.buy-button');
+            if(dom.hasClass('button-loading')){
+                 return;
+            }
+            dom.addClass('button-loading');
+			var address = new Address();
+	        var defaultAddress = address.getDefault(marketID);
+            var server = new Server();
+			var data = {
+                values:{
+                    id:marketID,
+                    goods:goods,
+                    address:defaultAddress,
+                    SID:server.getCookie()
+                }
+            };
+			var server = new Server();
+			var url = server.getOne() + "/order/index/add";	
+			api.ajax({
+			        url:url,
+			        method:'post',
+			        cache:false,
+			        timeout:10,
+			        data:data,
+			        dataType:'text',
+			        returnAll:true,
+		        },function(ret,err){
+			        if(!err && 200 == ret.statusCode){        
+						try{
+						  	var result = JSON.parse(ret.body);
+						  	if(result.code == 0){
+						  		manageCart(marketID,goods,result.data);
+						  	}else if(result.code == 1){
+						  		api.toast({
+		                         	msg:'您的收货地址不在小小家的配送范围内，暂时无法提供服务'
+	                         	});
+ 	                            dom.removeClass('button-loading');
+						  	}
+						}catch(e){
+		                    dom.removeClass('button-loading');
+						}	
+					}
+					else{
+                        dom.removeClass('button-loading');
+					}
+				});
+			}
+			else{
+			    api.toast({
+	                msg:'您的购物车中没有可结算的商品'
+                });
+			}
+	}
+	function manageCart(marketID,goods,order_no){
+		var cart = new Cart();
+		$.each(goods,function(i,e){
+			cart.sub(marketID, e.id, e.number);
+		});
+		api.execScript({
+	        script: 'updateCartNumber();'
+        });
+		api.openWin({
+             name: 'pay',
+             url: 'widget://html/pay.html',
+             pageParam:{
+             	order:order_no
+             }
+         });
+	}
+	function initFront() {
+		showNumber();
+		api.parseTapmode();
+	}
+	function addCart(obj){
+		var stock = parseInt($(obj).parents('.item').attr('data-stock'));
+		var number = parseInt($(obj).siblings('.number').text());
+		if($(obj).parents('.item').hasClass('not-enough')){
+		    return;
+		}
+		var marketModel = new Market();
+		var current = marketModel.getCurrent();
+		var cart = new Cart();
+		
+		var goodsID = $(obj).parents('.item').attr('data-id');
+		cart.add(current.id, goodsID);
+		number += 1;
+		if(number > stock){
+		    $(obj).parents('.item').addClass('not-enough');
+		}
+		api.execScript({
+	        script: 'updateCartNumber();'
+        });
+
+        showNumber();
+	}
+
+	function subCart(obj){
+
+		var marketModel = new Market();
+		var current = marketModel.getCurrent();
+		var cart = new Cart();
+
+		var goodsID = $(obj).parents('.item').attr('data-id');
+		cart.sub(current.id, goodsID);
+		var number = $(obj).siblings('.number').text();
+		var stock = $(obj).parents('.item').attr('data-stock');
+		stock = parseInt(stock);
+		number = parseInt(number);
+		number -= 1;
+		if(number > 0 && number <= stock){
+		    $(obj).parents('.item').removeClass('not-enough');
+		}
+		var list = cart.list(current.id);
+		
+		if(list.length == 0){
+			$('.container').hide();
+			render(current.id,[]);
+		}
+		
+		api.execScript({
+	        script: 'updateCartNumber();'
+        });
+        
+        showNumber();
+	}
+
+	function getCartGoods(){
+	
+		var market = new Market();
+		var current = market.getCurrent();
+		var cart = new Cart();
+		
+		return cart.list(current.id);
+		
+	}
+    function showPrice(dom, number){
+        var activity = dom.attr('data-activity') || 0;
+        if(0 != activity){
+            if(1 == activity){
+                if(number > 2){
+                    dom.find('.money-symbol.current').text(dom.attr('data-price'));
+                }
+                else{
+                    dom.find('.money-symbol.current').text(dom.attr('data-discount'));
+                }
+            }
+            else if(2== activity){
+                dom.find('.money-symbol.current').text(dom.attr('data-discount'));
+            }
+        }
+    }
+
+	function showNumber(){
+		var money = 0;
+		$.each($('.item'), function(i, dom){
+			var cartGoods = getCartGoods();
+			var number = 0;
+			var inCart = false;
+			$.each(cartGoods, function(j, goods){
+				var price = 0;
+				if($(dom).attr('data-id') == goods.id){
+					inCart = true;
+					showPrice($(dom), goods.number);
+					number = goods.number;
+					if(!$(dom).hasClass('not-enough') && !$(dom).hasClass('not-ready')){
+                        price = $(dom).attr('data-price');
+					    var activity = parseInt($(dom).attr('data-activity')) || 0;
+					    if([1,2].indexOf(activity) > -1){
+					        var discount = $(dom).attr('data-discount');
+					        if(1 == activity){
+                                if(goods.number > 2){
+                                    money += (goods.number - 2) * price;
+                                    money += (2 * discount);
+                                }
+                                else{
+                                    money += (goods.number * discount);
+                                }
+					        }
+					        else if(2 == activity){
+                                money += (goods.number * discount);
+					        }
+					    }
+					    else{
+                            money += (goods.number * price);
+					    }
+					}
+				}
+			});		
+			if(!inCart){
+				$(dom).remove();
+			}
+			else{
+				$(dom).find('.number').html(number);
+			}
+		});
+		
+		$('.buy-wrapper .money-symbol').first().text(money.toFixed(2));
+	}
+
+	function render(marketID,goods){
+
+		var address = new Address();
+		var defaultAddress = address.getDefault(marketID);
+		
+		var cart = new Cart();
+		var cartGoods = getCartGoods();
+		$.each(goods,function(index,item){
+			$.each(cartGoods,function(i,e){
+				if(e.id == item.id){
+					if(e.number > item.number && item.number > 0){
+						cart.sub(marketID,e.id,(e.number-item.number));
+						api.execScript({
+					        script: 'updateCartNumber();'
+				        });
+					}
+				}
+			});
+		});
+		
+		var data = {
+			goods:goods,
+			address:defaultAddress
+		}
+		
+		var html=baidu.template('template',data);
+		$('.container').html(html);
+		initFront();
+		if('none' == $('.container').css('display')){
+		    setTimeout(function(){
+		        $('.container').fadeIn(200);
+		    }, 100);
+		}
+
+	}
+
+	function ajaxComplete(){
+		api.refreshHeaderLoadDone();
+		if(first){
+			api.setFrameAttr({
+	            name: api.frameName,
+	            hidden:false
+            });
+        	api.execScript({
+	            script: 'loaded();'
+            });
+            
+        	first = false;
+		}
+	}
+
+    function initFreeArea(pointStr){
+        var points = pointStr.split(';');
+        freeArea = [];
+        for(var i = 0; i < points.length; i++){
+            var temp = points[i].split(',');
+            freeArea.push({
+                lon:parseFloat(temp[0]),
+                lat:parseFloat(temp[1])
+            });
+        }
+        freeArea.pop();
+    }
+
+	function request(){
+
+		var cartGoods = getCartGoods();
+		var market = new Market();
+		var current = market.getCurrent();
+		if(0 == cartGoods.length){
+			render(current.id,[]);
+			ajaxComplete();
+		}
+		else{
+			var market = new Market();
+			var current = market.getCurrent();
+			var goodsIDs = [];
+			$.each(cartGoods,function(i,e){
+					goodsIDs.push(e.id);
+			});
+			var data = {values:{id:current.id,goods:goodsIDs}};
+			var server = new Server();
+            data.values.SID = server.getCookie();
+			var url = server.getOne() + "/customer/cart/index";	
+			api.ajax({
+		        url:url,
+		        method:'post',
+		        cache:false,
+		        timeout:10,
+		        data:data,
+		        dataType:'text',
+		        returnAll:true,
+	        },function(ret,err){
+		        if(!err && 200 == ret.statusCode){        
+					try{
+						var result = JSON.parse(ret.body);
+                        initFreeArea(result.data.free_area);
+                        var goods = result.data.goods;
+                        for(var i = 0; i < goods.length; i++){
+                            for(var j = 0; j < cartGoods.length; j++){
+                                if(goods[i].id == cartGoods[j].id){
+                                    goods[i].number = cartGoods[j].number;
+                                }
+                            }
+                        }
+                        var data = [];
+                        for(var i = 0; i < goods.length; i++){
+                            if(goods[i].status && goods[i].stock >= goods[i].number){
+                                data.unshift(goods[i]);
+                            }
+                            else{
+                                data.push(goods[i]);
+                            }
+                        }
+						var goodsModel = new Goods();
+						goodsModel.load(function(){
+					      	goods= goodsModel.merge(data);
+					  	  	render(current.id,goods);
+			  	  		});
+					}catch(e){
+					}	
+				}		
+			  	ajaxComplete();
+			});
+		}
+	}
+
+	function restore(){
+		api.setFrameAttr({
+            name: 'cart_index',
+            hidden:true
+        });
+        $('.container').css('display', 'none');
+    	first = true;
+	}
+
+	apiready = function() {
+		api.setFrameAttr({
+            name: api.frameName,
+            hidden:true
+        });
+		onNetworkChanged(request,request);
+
+		api.execScript({
+	        script: 'loading();'
+        });
+
+        request();
+
+		delegateEvent();		
+	    api.addEventListener({
+		    name:'viewappear'
+	    },function(ret,err){
+    		api.execScript({
+	        	script: 'loading();'
+        	});
+        	setDefaultAddress();
+			restore();
+	    	request();
+	    });
+
+	    api.addEventListener({
+		    name:'resume'
+	    },function(ret,err){
+    		api.execScript({
+	        	script: 'loading();'
+        	});
+        	
+	    	request();
+	    });
+
+	}
+</script>

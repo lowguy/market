@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+    <style>
+        .container{
+        }
+        .block {
+            margin:1rem;
+            background:#FFD705;
+            border-radius:1rem;
+        }
+        .title{
+            position:relative;
+            font-size:1.3rem;
+            font-weight:bold;
+            height:3rem;
+            line-height:3rem;
+            padding:0.5rem 1rem;
+            color:#6B450A;
+            border-bottom:1px dashed #6B450A;
+        }
+        .title .about{
+            padding:0 1rem;
+            position:absolute;
+            right:1rem;
+            font-size:1.2rem;
+            color:red;
+            border-radius:1rem;
+        }
+
+        .credit{
+            padding:0 1rem;
+            position:relative;
+            height:6rem;
+            line-height:3rem;
+        }
+        .credit section{
+            position:absolute;
+            width:50%;
+            text-align:center;
+            height:100%;
+        }
+
+        .credit .number{
+            font-size:1.3rem;
+            color:red;
+            font-weight:bold;
+        }
+        .tag{
+            font-size:1.2rem;
+            font-weight:normal;
+            color:#6B450A;
+        }
+        .credit section.now{
+            position:absolute;
+            left:0;
+        }
+        .now .cash{
+            height:3rem;
+            width:8rem;
+            margin:0 auto;
+            background-color:#FFD705;
+            color:#6B450A;
+            font-size:1.4rem;
+        }
+        .credit section.will{
+            position:absolute;
+            right:0;
+        }
+        .button-wrapper{
+            height:3rem;
+            position:relative;
+            padding:0.5rem 0;
+            border-top:1px dashed #6B450A;
+        }
+        .button-wrapper button{
+            width:80%;
+            height:3rem;
+            background:#6B450A;
+            color: #FFD705;
+            font-size:1.4rem;
+            font-weight:bold;
+            border-radius:2rem;
+            position:absolute;
+        }
+        .button-wrapper .cash{
+            left:10%;
+        }
+        .money{
+            height:6rem;
+        }
+        .money p{
+            height:3rem;
+            line-height:3rem;
+            text-align:center;
+        }
+        .money-symbol{
+            font-size:1.3rem;
+            color:red;
+            font-weight:bold;
+        }
+    </style>
+</head>
+<body>
+    <section class="container">
+        <section class="block">
+            <p class="title">
+                <label>积分</label>
+                <span tapmode="touch-down" class="about">关于积分</span>
+            </p>
+            <section class="credit">
+                <section class="now">
+                    <p class="tag">已有积分</p>
+                    <p class="number">0</p>
+                </section>
+                <section class="will">
+                    <p class="tag">待返积分</p>
+                    <p class="number">0</p>
+                </section>
+            </section>
+            <section class="button-wrapper">
+                <button tapmode="touch-down" class="cash" data-type="0">积分兑现</button>
+            </section>
+        </section>
+        <section class="block">
+            <p class="title">
+                <label>余额</label>
+            </p>
+            <section class="money">
+                <p class="tag">账户余额</p>
+                <p class="money-symbol">0</p>
+            </section>
+            <section class="button-wrapper">
+                <button tapmode="touch-down" class="cash" data-type="1">余额提现</button>
+            </section>
+        </section>
+    </section>
+</body>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/api/server.js"></script>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/frame.js"></script>
+
+<script type="text/javascript">
+    var first = true;
+    function render(data){
+        $('.now .number').text(data.score);
+        $('.will .number').text(data.frozen);
+        $('.money-symbol').text(data.money);
+    }
+
+    function delegateEvent(){
+        touchEvent('.cash', function(obj){
+            api.openWin({
+	            name: 'balance',
+	            url: 'widget://html/balance.html',
+	            pageParam:{
+	               type:$(obj).attr('data-type')
+	            }
+            });
+        });
+     touchEvent('.about', about);
+    }
+    function about(){
+    
+    }
+    function ajaxComplete(){
+        api.refreshHeaderLoadDone();
+        if(first){
+            first = false;
+            api.setFrameAttr({
+	            name: api.frameName,
+	            hidden:false
+            });
+            api.execScript({
+	            script: 'loaded();'
+            });
+        }
+    }
+
+    function request(){
+        var server = new Server();
+        var url = server.getOne() + '/user/mine/wallet';
+        api.ajax({
+            url:url,
+            cache:false,
+            timeout:10,
+            dataType:'text',
+            returnAll:true,
+            method:"post",
+            data:{
+                values:{
+                    SID:server.getCookie()
+                }
+            }
+        },function(ret,err){
+            if(!err && 200 == ret.statusCode){
+                try{
+                   var body = JSON.parse(ret.body);
+                    render(body.data);
+                }catch(e){
+                    api.toast({
+                        location:'middle',
+                        msg:'服务器忙，请稍后再试'
+                    });
+                }
+            }
+            ajaxComplete();
+        });
+    }
+    apiready = function(){
+        if('ios' != api.systemType){
+            request();
+        }
+        api.setFrameAttr({
+	        name: api.frameName,
+	        hidden:true
+        });
+        api.execScript({
+	        script: 'loading();'
+        });
+        onNetworkChanged(request, request);
+        delegateEvent();
+        api.addEventListener({
+	        name:'viewappear'
+        },function(ret,err){
+        	request();
+        });
+    };
+</script>
+</html>

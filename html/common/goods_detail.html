@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+    <style>
+    	html, body{
+    		height:100%;
+    		background:transparent;
+    	}
+
+    	.container{
+    		display:none;
+			background:#FFFFFF;
+			height:100%;
+    	}
+    	.thumb{
+			width:70%;
+			margin:0 auto;
+    	}
+		.thumb img{
+			width:100%;
+		}
+		.title{
+			text-align:center;
+			font-size:1.4rem;
+			height:2rem;
+			line-height:2rem;
+			padding:0 1rem;
+		}
+		.advertisement{
+			text-align:center;
+			font-size:1.2rem;
+			color:#808080;
+			height:2rem;
+			line-height:2rem;
+			padding:0 1rem;
+		}
+		.bottom {
+			font-size:1.4rem;
+			line-height:3rem;
+			color: red;
+			font-weight: bold;
+			padding:1rem;
+			overflow:auto;
+		}
+		.bottom .operation {
+			position:absolute;
+			right:0;
+		}
+		.bottom .money-symbol{
+			float:left;
+			text-align:left;
+			font-size:1.5rem;
+		}
+		.bottom .add {
+			padding-right: 1rem;
+			display: inline-block;
+		}
+		.bottom .add .icon {
+			height: 3rem;
+			width: 3rem;
+			background-image: url("../../image/icons/add.png");
+			background-repeat:no-repeat;
+			background-size: 2rem;
+			background-position: 50%;
+			display: inline-block;
+			vertical-align: middle;
+			border: 1px solid #EFEFEF;
+			border-radius: 100%;
+		}
+		.bottom .sub {
+			padding-left: 1rem;
+			display: inline-block;
+			visibility:hidden;
+		}
+		.bottom .sub.show{
+			visibility:visible;
+		}
+		.bottom .sub .icon {
+			height: 3rem;
+			width: 3rem;
+			background-image: url("../../image/icons/sub.png");
+			background-size: 2rem;
+			background-position: 50%;
+			background-repeat:no-repeat;
+			display: inline-block;
+			vertical-align: middle;
+			border: 1px solid #EFEFEF;
+			border-radius: 100%;
+		}
+		.bottom .touch-down .icon {
+			opacity: 0.3;
+		}
+		.bottom .number {
+			color: #808080;
+			vertical-align: middle;
+			font-size: 1.2rem;
+			visibility:hidden;
+			display:inline-block;
+			width:3rem;
+			text-align:center;
+			overflow: hidden;
+            text-overflow: ellipsis;
+		}
+		.bottom .number.show{
+			visibility:visible;
+		}
+		.close{
+			height:1rem;
+			display:none;
+			background-size:3rem;
+			background-position:50%;
+			background-repeat:no-repeat;
+			background-image:url("../../image/icons/close.png");
+		}
+    </style>
+</head>
+<body>
+	<section class="container">
+		<section class="thumb">
+			<img />
+		</section>
+		<section class="title">
+		</section>
+		<section class="advertisement">
+		</section>
+		<section class="bottom">
+			<span class="operation">
+				<span tapmode="touch-down" class="sub"> 
+					<span class="icon"></span>
+				</span> 
+					<span class="number">1</span>
+				<span tapmode="touch-down" class="add"> 
+					<span class="icon"></span> 
+				</span> 
+
+			</span>
+			<span class="money-symbol"></span>
+		</section>
+		<section class="divider"></section>
+		<section class="close">
+			
+		</section>
+	</section>
+</body>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/model/market.js"></script>
+<script type="text/javascript" src="../../script/model/cart.js"></script>
+<script type="text/javascript">
+	var id = 0;
+	function hideContainer(){
+		$('.container').fadeOut(200);
+	}
+	function showNumber(){
+
+		var market = new Market();
+		var current = market.getCurrent();
+		var cart = new Cart();
+		var cartGoods = cart.list(current.id);
+		var inCart = false;
+		var number = 0;
+		$.each(cartGoods, function(j, goods){
+			if(id == goods.id){
+				inCart = true;
+				number = goods.number;
+				return false;
+			}				
+		});
+		if(inCart){
+			$('.operation .sub').addClass('show');
+			$('.operation .number').html(number).addClass('show');
+		}
+		else{
+			$('.operation .sub').removeClass('show');
+			$('.operation .number').html(number).removeClass('show');
+		}
+
+	}
+
+	function addCart(){
+		var marketModel = new Market();
+		var current = marketModel.getCurrent();
+		var cart = new Cart();
+		cart.add(current.id, id);		
+		api.execScript({
+        		script: 'updateCartNumber();'
+		});
+    	showNumber();
+    	if(-1 != ['mall', 'search'].indexOf(api.winName)){
+	    	api.execScript({
+    			frameName:api.winName + '_index',
+	        	script: 'showNumber();'
+        	});	
+    	}
+	}
+
+	function subCart(){
+		var marketModel = new Market();
+		var current = marketModel.getCurrent();
+		var cart = new Cart();
+		cart.sub(current.id, id);
+		
+		api.execScript({
+        		script: 'updateCartNumber();'
+		});
+
+    	showNumber();
+		if(-1 != ['mall', 'search'].indexOf(api.winName)){
+	    	api.execScript({
+    			frameName:api.winName + '_index',
+	        	script: 'showNumber();'
+        	});	
+    	}
+	}
+
+	function initFront(){
+		showNumber();
+		var divider_offset =  $('.divider').offset();
+		var height = api.frameHeight - divider_offset.top - divider_offset.height;
+		$('.close').height(height);
+		$('.close').show();
+
+		$('.close').on('touchstart', function(event){
+			if(!$(event.target).is('img')){
+				api.execScript({
+	            	script: 'closeGoodsFrame()'
+            	});
+			}
+		});
+
+		if('ios' == api.systemType){
+			$('.add').on('touchstart', function(event) {
+				$(this).addClass('not-moved');	
+			});
+            $('.add').on('touchmove', function(event) {
+                $(this).removeClass('not-moved');  
+            });
+			$('.add').on('touchend', function(event) {
+				if (!$(this).hasClass('not-moved')) {
+					return true;
+				}
+	
+				$(this).removeClass('not-moved');
+				var origin = $(this).parents('.container').find('img');
+				var offset = origin.offset();
+				var width = origin.width();
+				var height = origin.height();
+				var image = origin.attr('src');
+				var offset_x = offset.left;
+				var page_y = offset.top - $(window).scrollTop();
+				var params = [];
+				params.push(id);
+				params.push(offset_x);
+				params.push(page_y);
+				params.push(width);
+				params.push(height);
+				params.push(0.02);
+				addCart();
+				if(api.winName != 'mall'){
+					if(api.winName != 'search'){
+						api.execScript({
+							script : 'iosGoodsToCart(' + params.join(',') + ');'
+						});		
+					}
+				}
+				else{
+					api.execScript({
+						script : '_iosGoodsToCart(' + params.join(',') + ');'
+					});
+				}
+				
+			});
+		}
+		else{
+			$('.add').on('click', function(event) {
+				addCart();
+			});
+		}
+
+		$('.sub').off('touchend').on('touchend', function(){
+			subCart();
+		});
+	}
+
+	apiready = function(){
+		var params = api.pageParam;
+		id = params.id;
+		title = params.title;
+		price = params.price;
+		slogan = params.slogan;
+		var image = '../../image/products/' + id + '.JPG';
+		$('img').attr('src', image);
+		$('.title').html(title);
+		$('.money-symbol').html(price);
+		$('.advertisement').html(slogan);
+		$('.container').fadeIn(300, initFront);	
+	};
+</script>
+</html>

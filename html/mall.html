@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<link rel="stylesheet" type="text/css" href="../css/base.css"/>
+		<link rel="stylesheet" type="text/css" href="../css/layout.css"/>
+		<style>
+			.top-category-area {
+				background-color: #FFFFFF;
+				position: relative;
+				height: 4rem;
+				clear: both;
+				font-size:1.3rem;
+                font-weight:bold;
+				color:#808080;
+				display:none;
+				border-bottom:1px solid #EFEFEF;
+			}
+
+			.top-category-area .back{
+				width:10%;
+				position: absolute;
+				height: 100%;
+				background-size: 1rem;
+				background-position:left 50%;
+				background-repeat: no-repeat;
+				left: 1rem;
+				background-image: url("../image/icons/arrow-left.png");
+			}
+
+			.top-category-area .forward {
+				width: 10%;
+				position: absolute;
+				height: 100%;
+				background-size: 1rem;
+				background-position:right 50%;
+				background-repeat: no-repeat;
+				right: 1rem;
+				background-image: url("../image/icons/arrow-right.png");
+			}
+
+			.top-category {
+				position: absolute;
+			}
+			.top-category li {
+				float: left;
+				list-style:none;
+				background: #FFFFFF;
+				text-align:center;
+			}
+
+			.top-category li span{
+				display:inline-block;
+				width:30%;
+				height:3rem;
+				line-height:3rem;
+				margin-top:0.5rem;
+			}
+			.top-category li span.current{
+				color:#6B450A;
+			}
+
+			.scroll-wrapper {
+				position: absolute;
+				left: 10%;
+				width: 80%;
+				height: 4rem;
+				overflow: hidden;
+			}
+
+			.categories {
+				width: 25%;
+				font-size: 1.3rem;
+                font-weight:bold;
+				color: #808080;
+				overflow-y: auto;
+				position:absolute;
+				display:none;
+			}
+			.categories p {
+				height: 4rem;
+				line-height: 4rem;
+				border-left: 0.5rem solid transparent;
+				border-top: solid 1px #EFEFEF;
+				text-indent:1rem;
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow:ellipsis;
+			}
+			.categories p.current{
+				color:#6B450A;
+				border-left-color:#FFD705;
+			}
+			.categories p:first-child {
+				border-top:0;
+			}
+		</style>
+	</head>
+	<body class="loading">
+		<header>
+            <section class="header">
+                <button tapmode="touch-down" class="scanner">扫一扫</button>
+                <button tapmode="touch-down" class="market"><span>定位...</span></button>
+                <button tapmode="touch-down" class="search">搜一搜</button>
+            </section>
+
+			<section class="top-category-area">
+				<p class="back"></p>
+				<section class="scroll-wrapper">
+					<ul class="top-category">
+					</ul>
+				</section>
+				<p class="forward"></p>
+			</section>
+		</header>
+		<section class="container" >
+
+		</section>
+		<footer class="navigator text-center">
+			<section class="home">
+				<div class="icon">
+				</div>
+				<span>首页</span>
+			</section>
+			<section class="mall active">
+				<div class="icon">
+				</div>
+				<span>商城</span>
+			</section>
+            <section class="activity">
+                <div class="icon">
+                </div>
+                <span>特惠</span>
+            </section>
+			<section class="cart">
+				<div class="icon"><span class="number empty">0</span></div>
+				<span>购物车</span>
+			</section>
+			<section class="user">
+				<div class="icon "></div>
+				<span>我的</span>
+			</section>
+		</footer>
+	</body>
+	<script id="top" type="text/html">
+		<ul class="top-category">
+			<%for(var i = 0; i < top.length; i++){%>
+				<li>
+					<% var row = top[i] %>
+					<%for(var j = 0; j < row.length; j++){%>
+						<%if(row[j].id == current){%>
+							<span tapmode="touch-down" data-id="<%=row[j].id%>" class="current"><%=row[j].name%></span>
+						<%}else{%>
+							<span tapmode="touch-down" data-id="<%=row[j].id%>" ><%=row[j].name%></span>
+						<%}%>
+					<%}%>
+				</li>
+			<%}%>
+		</ul>
+	</script>
+	<script id="low" type="text/html">
+		<section class="categories text-left">
+			<section>
+				<%for(var i = 0; i < low.length; i++){%>
+					<p tapmode="touch-down" data-id="<%=low[i].id%>"><%=low[i].name%></p>
+				<%}%>
+			</section>
+		</section>
+	</script>
+</html>
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/vendor/template.js"></script>
+<script type="text/javascript" src="../script/vendor/iscroll.js"></script>
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/window.js"></script>
+
+<script type="text/javascript" src="../script/goods.frame.js"></script>
+<script type="text/javascript" src="../script/model/market.js"></script>
+<script type="text/javascript" src="../script/model/cart.js"></script>
+<script type="text/javascript" src="../script/model/category.js"></script>
+<script type="text/javascript">
+	var frameResized = false;
+	var topScroll = null;
+	var lowScroll = null;
+	var categoryID = 0;
+	var lowCategoryID = 0;
+	function _iosGoodsToCart(goods_id, offset_x, page_y, width, height, ratio){
+		iosGoodsToCart(goods_id, offset_x, page_y - $('.top-category-area').height(), width, height, ratio);
+	}
+
+	function refreshTopScroll(){
+		var width = $('.scroll-wrapper').width();
+		$('.top-category li').width(width);
+		$('.top-category').width(width * $('.top-category li').length);
+		if(null != topScroll){
+			topScroll.destroy();
+			topScroll = null;
+		}
+		topScroll = new IScroll('.scroll-wrapper', {
+			scrollX : true,
+			scrollY : false,
+			snap:true,
+			snapThreshold:0.01,
+			momentum:false,
+            tap:true
+		});
+	}
+
+	function refreshLowScroll(){
+		$('.categories').height(api.winHeight - $('header').height() - $('footer').height());
+		if(null != lowScroll){
+			lowScroll.destroy();
+			lowScroll = null;
+		}
+		lowScroll = new IScroll('.categories', {
+			scrollX : false,
+			scrollY : true,
+			snap:true,
+			snapThreshold:0.01,
+			momentum:false,
+			tap:true
+		});
+	}
+
+	function resizeFrame(){
+		if(!frameResized){
+			frameResized = true;
+			var header = parseInt($('header').height());
+			var winHeight = parseInt(api.winHeight);
+			var winWidth = parseInt(api.winWidth);
+			var footer = parseInt($('footer').height());
+			var height = winHeight - header - footer;
+
+			api.setFrameAttr({
+	            name: 'mall_index',
+	        	rect:{
+	        		x:winWidth / 4 + 1,
+	        		y:header,
+	        		w:winWidth * 0.75 - 1,
+	        		h:height
+	        	}
+            });
+		}
+	}
+
+	function renderTop(topCategories, current){
+		var top = [];
+		while(topCategories.length > 0){
+			top.push(topCategories.splice(0, 3))
+		}
+
+		var data = {
+			'top':top,
+			'current':current
+		}
+
+		var html=baidu.template('top',data);
+		$('.top-category').replaceWith(html);
+		$('.top-category-area').show();
+		
+		refreshTopScroll();
+		var page = 1;
+		for(var i = 0; i < top.length; i++){
+			for(var j = 0; j < top[i].length; j++){
+				if(top[i][j].id == current){
+					page = i;
+				}
+			}
+		}
+		
+		topScroll.goToPage(page, 0, 0);
+	}
+	function exeCategoryChange(obj){
+		if(!$(obj).hasClass('current')){
+		    $('.top-category .current').removeClass('current');
+		    $(obj).addClass('current');
+			var id = $(obj).attr('data-id');
+			categoryID = id;
+			lowCategoryID = 0;
+			api.execScript({
+				frameName:'mall_index',
+                script: 'categoryChange(' + id + ')'
+            });
+		}
+	}
+	
+	function lowCategory(obj){
+	    if(obj){
+	        var id = $(obj).attr('data-id');
+            lowCategoryID = id;
+            api.execScript({
+                frameName:'mall_index',
+                script: 'lowCategory(' + id + ')'
+            }); 
+            $('.categories p.current').removeClass('current');
+            $(obj).addClass('current');
+	    }
+	}
+	function renderLow(lowCategories){
+		var data = {
+			'low':lowCategories
+		}
+		var html=baidu.template('low',data);
+		$('.container').html(html);
+		$('.categories').show();
+		refreshLowScroll();
+		resizeFrame();
+		var dom = null;
+		if(lowCategoryID == 0){
+		    dom = $('.categories section p').first();
+		}
+		else{
+		    dom = $('.categories p[data-id="' + lowCategoryID +'"]');
+		    if(!dom.length){
+		        dom = $('.categories section p').first()
+		    }
+		}
+		lowCategory(dom);
+        api.parseTapmode();
+	}
+
+	function render(top, low, current){
+
+		var category = new Category();
+
+		category.load(function(){
+			var topCategories = category.listTop(top);
+
+			var lowCategories = category.listLow(current, low);
+
+			renderTop(topCategories, current);
+			renderLow(lowCategories);
+		});
+	}
+
+	function initFrames() {
+		if(!frameResized){
+			var header = parseInt($('header').height());
+			var winHeight = parseInt(api.winHeight);
+			var footer = parseInt($('footer').height());
+			var height = winHeight - header - footer;
+			var winWidth = parseInt(api.winWidth);
+			api.openFrame({
+				name : 'mall_index',
+				url : 'widget://html/mall/index.html',
+	        	rect:{
+	        		x:winWidth / 8 + 1,
+	        		y:header,
+	        		w:winWidth * 0.75 - 1,
+	        		h:height
+	        	},
+				vScrollBarEnabled : false,
+				bounces : true,
+				scrollToTop : false,
+				animation:{
+					type:'none'
+				},
+				reload:true,
+				pageParam:{
+            		categoryID:categoryID
+            	},
+			});
+		}
+	}
+	function delegateEvent(){
+	    if('ios' == api.systemType){
+	        touchEvent('.categories p',lowCategory);
+            touchEvent('.top-category span',exeCategoryChange);
+	    }
+	    else{
+	        $(document).on('tap', '.categories p', function(){
+	            lowCategory($(this));
+	        });
+	        $(document).on('tap', '.top-category span', function(){
+	            exeCategoryChange($(this));
+	        });
+	    }
+	}
+	function initFront() {
+        initNavigator();
+		fixStatusBar($('header'));
+	}
+
+	function categoryChange(category_id){
+		if(categoryID == category_id){
+			return;
+		}
+		categoryID = category_id;
+		api.closeFrame({
+	        name: 'mall_index'
+        });
+        $('.top-category-area').hide();
+        $('.categories').hide();
+		loading();
+		frameResized = false;
+		initFrames();
+	}
+	
+	apiready = function() {
+		categoryID = api.pageParam.categoryID || 0;
+		initFront();
+		delegateEvent();
+		initFrames();
+		onMarketChange(function(){
+			var market = new Market();
+			var current = market.getCurrent();
+			$('header .market span').html(current.district);
+			frameResized = false;
+			api.closeFrame({
+	            name: 'mall_index'
+            });
+			initFrames();
+		});
+
+		api.addEventListener({
+	        name:'viewappear'
+        },function(ret,err){
+            api.setStatusBarStyle({
+                style: 'dark' 
+            });
+			updateCartNumber();
+        });
+
+	}
+</script>

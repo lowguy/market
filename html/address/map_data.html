@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+	<style>
+		.address{
+			height:4rem;
+			margin:0 1rem;
+			padding:1rem 0;
+			border-bottom:1px solid #EFEFEF;
+		}
+		.address span{
+			display:inline-block;
+			height:2rem;
+			line-height:2rem;
+			width:100%;
+			font-size:1.3rem;
+			overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+		}
+		.address.current .name{
+			color:red;
+			background-size:2rem;
+			text-indent:2rem;
+			background-repeat:no-repeat;
+			background-position:0 50%;
+			background-image:url("../../image/icons/location-red.png");
+		}
+		.address.current .detail{
+		    color:#222222;
+		    font-weight:bold;
+		}
+
+        .address .name{
+            font-weight:bold;
+        }
+		.address .detail {
+			color:#808080;
+			font-size:1.2rem;
+		}
+	</style>
+</head>
+<body>
+	<section class="container">
+	</section>
+</body>
+
+</html>
+<script type="text/html" id="template">
+	<%for(var i = 0; i < pois.length; i++){%>
+		<p data-lon="<%=pois[i].lon%>" data-lat="<%=pois[i].lat%>" tapmode="touch-down" class="address <%if(0 == i){%>current<%}%>">
+			<span class="name">
+				<%=pois[i].name%>
+			</span>
+			<span class="detail">
+				<%=pois[i].address%>
+			</span>
+		</p>
+	<%}%>
+</script>
+<script type="text/javascript" src="../../script/vendor/template.js"></script>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript">
+    function locationChange(lon, lat){
+        var map = api.require('xMap');
+        map.getNameFromCoords({
+            lon: lon,
+            lat: lat
+        },function(ret,err){
+            console.log(JSON.stringify(ret));
+            render(ret);
+        }); 
+    }
+
+	function initFront(){
+		$(document).on('touchstart', '.address', function(){
+			$(this).addClass('not-moved');
+		});
+
+		$(document).on('touchmove', '.address', function(){
+			$(this).removeClass('not-moved');
+		});
+
+		$(document).on('touchend', '.address', function(){
+			if($(this).hasClass('not-moved')){
+				var lon = $(this).attr("data-lon");
+				var lat = $(this).attr("data-lat");
+				var name = $(this).find('.name').text();
+				name = "'" + name + "'";
+				var address = $(this).find('.detail').text();
+				address = "'" + address + "'";
+				var params = [];
+				params.push(lon);
+				params.push(lat);
+				params.push(name);
+				params.push(address);
+				api.execScript({
+					name:'address_form',
+	                script: 'setAddress(' + params.join(',') + ')'
+                });
+                api.closeWin({
+                });
+			}
+		});
+
+		api.parseTapmode();
+	}
+	function render(poiResult){
+		var pois = poiResult.poi;
+		if(0 == pois.length){
+			pois.push({
+				lon:poiResult.lon,
+				lat:poiResult.lat,
+				name:poiResult.address,
+				address:poiResult.address
+			});
+		}
+		var data = {
+			pois:pois
+		};
+		var html=baidu.template('template',data);
+		$('.container').html(html);
+		initFront();
+	}
+</script>

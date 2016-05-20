@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/merchant/layout.css"/>
+    <style>
+
+        .user-info{
+            padding:1.5rem 0;
+            background:#FFD705;
+        }
+
+        .user-info p{
+            height:8rem;
+            background-image: url('../../image/icons/user-coffee.png');
+            background-position:50% 1rem;
+            background-repeat:no-repeat;
+            background-size:3rem;
+            width:8rem;
+            margin:0 auto;
+            text-align:center;
+            border:1px solid #6b450a;
+            border-radius:8rem;
+            color:#6b450a;
+
+        }
+        .user-info p.login{
+            display:none;
+            font-family:Helvetica;
+            line-height:10rem;
+        }
+        .no-login:after{
+            content:'登录/注册';
+            line-height:10rem;
+           /* font-weight:bold;*/
+        }
+        .menu{
+            padding:1rem;
+            height:3rem;
+            line-height:3rem;
+            position:relative;
+        }
+        .menu .icon{
+            position:absolute;
+            left:1rem;
+            width:2rem;
+            height:3rem;
+            background-size:2rem;
+            background-repeat:no-repeat;
+            background-position:50%;
+        }
+        .menu .title{
+            position:absolute;
+            left:3rem;
+            width:15rem;
+            font-size:1.3rem;
+           /* font-weight:bold;*/
+        }
+        .menu .detail{
+            position:absolute;
+            right:1rem;
+            padding-right:2rem;
+            width:9rem;
+            font-size:1.2rem;
+            color:#808080;
+            text-align:right;
+            background-repeat:no-repeat;
+            background-size:2rem;
+            background-position:right 50%;
+            background-image:url('../../image/icons/arrow-right.png');
+        }
+        .menu.open .detail{
+            background: none;
+            padding:0;
+            height:3rem;
+        }
+        .switcher{
+            height:100%;
+            background-color:#EFEFEF;
+            position:relative;
+            border-radius:1.5rem;
+        }
+        .switcher p{
+            width:50%;
+            height:100%;
+            position:absolute;
+            left:0;
+            border-radius:1.5rem 0 0 1.5rem;
+            background-color:#FFD705;
+            text-align:center;
+            color:#6B450A;
+            font-size:1.2rem;
+           /* font-weight:bold;*/
+        }
+        .switcher.closed p{
+            left: 50%;
+            border-radius:0 1.5rem 1.5rem 0;
+            background-color: #6B450A;
+            color:#FFD705;
+        }
+        .switcher p:after{
+            content:'开';
+        }
+
+        .switcher.closed p:after{
+            content:'关';
+        }
+        .switcher.loading{
+            background-repeat:no-repeat;
+            background-position: 50%;
+            background-size:2rem;
+            background-image:url('../../image/loading.gif');
+        }
+        .switcher.loading p{
+            display:none;
+        }
+
+        .balance{
+            border-top:0.1rem dashed #EFEFEF;
+            height:3rem;
+            line-height:3rem;
+            padding-left:1rem;
+        }
+        .money-symbol{
+            color:red;
+        }
+        .menu.open .icon{
+            background-image:url('../../image/icons/work-status.png');
+        }
+        .menu.mall .icon{
+            background-image: url('../../image/icons/work.png');
+        }
+        .menu.open-time .icon{
+            background-image:url('../../image/icons/time.png');
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <section class="header">
+            <button tapmode="touch-down" class="market"><span>定位...</span></button>
+        </section>
+    </header>
+
+    <section class="container" >
+        <section class="user-info">
+            <p class="no-login"></p>
+            <p class="login"></p>
+        </section>
+        <section tapmode="touch-down" class="menu open">
+             <section class="icon"></section>
+             <section class="title">店铺状态</section>
+             <section class="detail"><section class="switcher closed"><p></p></section></section>
+        </section>
+        <section class="divider"></section>
+        <section tapmode="touch-down" class="menu open-time">
+             <section class="icon"></section>
+             <section class="title">营业时间</section>
+             <section class="detail">设置</section>
+        </section>
+        <section class="divider"></section>
+        <section tapmode="touch-down" class="menu mall">
+             <section class="icon"></section>
+             <section class="title">商城入口</section>
+             <section class="detail">我要购物</section>
+        </section>
+        <section class="divider"></section>
+    </section>
+    <footer class="navigator text-center">
+        <section class="home">
+            <div class="icon">
+            </div>
+            <span>商品</span>
+        </section>
+        <section class="user active">
+            <div class="icon "></div>
+            <span>我的</span>
+        </section>
+    </footer>
+</body>
+</html>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/vendor/template.js"></script>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/merchant/window.js"></script>
+<script type="text/javascript" src="../../script/model/market.js"></script>
+<script type="text/javascript" src="../../script/model/user.js"></script>
+<script type="text/javascript" src="../../script/api/server.js"></script>
+<script type="text/javascript">
+function updateUserInfo(){
+    var userModel = new User();
+    var user = userModel.get();
+    if(null != user){
+        var server = new Server();
+        if(server.cookieIsExpired()){
+            $('.user-info .no-login').show();
+            $('.user-info .login').hide();
+            $('.switcher').addClass('closed');
+        }
+        else{
+            $('.user-info .no-login').hide();
+            $('.user-info .login').text(user.account).show();
+        }
+    }
+    else{
+        $('.user-info .no-login').show();
+        $('.user-info .login').hide();
+        $('.switcher').addClass('closed');
+    }
+}
+function delegateEvent(){
+    touchEvent('.no-login', function(){
+        api.openWin({
+            name: 'login',
+            url: 'widget://html/login.html'
+        });
+    });
+
+    touchEvent('.login', function(){
+        api.openWin({
+            name: 'account',
+            url: 'widget://html/account.html'
+        });
+    });
+
+    touchEvent('.open', function(){
+        var dom = $('.open .switcher');
+        dom.addClass('loading');
+        var status = 0;
+        if(dom.hasClass('closed')){
+        	status = 1;
+        }
+        setStatus(status);
+    });
+
+    touchEvent('.mall', function(){
+        goHome();
+    });
+
+    touchEvent('.open-time',function(){
+        api.openWin({
+            name: 'merchant_setting',
+            url: 'widget://html/merchant/setting.html'
+        });
+    });
+
+
+    api.addEventListener({
+        name:'resume'
+    },function(ret,err){
+        updateUserInfo();
+    });
+
+    api.addEventListener({
+        name:'viewappear'
+    },function(ret,err){
+        updateUserInfo();
+        request();
+    });
+    
+    
+}
+
+function setStatus(status){
+    var marketModel = new Market();
+    var current = marketModel.getCurrent();
+    var server = new Server();
+    var url = server.getOne() + '/merchant/shop/setStatus';
+    api.ajax({
+        url:url,
+        method:'post',
+        cache:false,
+        data:{
+            values:{
+                id:current.id,
+                SID:server.getCookie(),
+                status:status
+            }
+        },
+        timeout:10,
+        dataType:'text',
+        returnAll:true,
+    },function(ret,err){
+        $('.open .switcher').toggleClass('loading');
+        if(!err && 200 == ret.statusCode){
+            try{
+                var result = JSON.parse(ret.body);
+                if(result.code == 0){
+                	$('.open .switcher').toggleClass('closed');
+                }else if(result.code == 2){
+                    api.toast({
+                        location:'middle',
+                        msg:'操作失败， 您不是' + current.district + '的商户'
+                    });
+                }
+            }catch(e){
+            }   
+        }
+    });
+}
+function request(){
+    var marketModel = new Market();
+    var current = marketModel.getCurrent();
+    var server = new Server();
+    var url = server.getOne() + '/merchant/shop/mine';
+    api.ajax({
+        url:url,
+        method:'post',
+        cache:false,
+        data:{
+            values:{
+                id:current.id,
+                SID:server.getCookie()
+            }
+        },
+        timeout:10,
+        dataType:'text',
+        returnAll:true,
+    },function(ret,err){
+        if(!err && 200 == ret.statusCode){
+            try{
+                var result = JSON.parse(ret.body);
+                if(result.code == 0){
+                    if(0 == result.data.status){
+                        $('.switcher').addClass('closed');
+                    }
+                    else{
+                        $('.switcher').removeClass('closed');
+                    }
+                }
+            }catch(e){
+            }   
+        }
+    });
+}
+function initFront(){
+    fixStatusBar($('header'));
+    initNavigator();
+}
+
+function goHome(){
+    var postFix = 'ios' == api.systemType ? 'ios' : 'android';
+    api.openWin({
+        name: 'home',
+        url: 'widget://html/home_' + postFix + '.html',
+        slidBackEnabled:false,
+        animation:{
+            type:'none',
+            duration:300
+        },
+        bounces:false,
+        reload:false
+    });
+}
+
+apiready = function(){
+    initFront();
+    delegateEvent();
+    onMarketChange(function(){
+        var market = new Market();
+        var current = market.getCurrent();
+        $('header .market span').html(current.district);
+        $('.switcher').addClass('closed');
+    });
+}
+
+</script>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<widget id="A6916117301064" version="0.0.1"> 
+  <name>小小家</name>  
+  <description>小小家生活助手</description>  
+  <author email="anustro@icloud.com" href="http://www.apicloud.com">Anustro</author>  
+  <content src="html/root.html"/>  
+  <preference name="appBackground" value="rgba(0,0,0,0)"/>  
+  <preference name="frameBackgroundColor" value="rgba(0,0,0,0)"/>  
+  <preference name="autoLaunch" value="false"/>  
+  <preference name="autoUpdate" value="true"/>  
+  <preference name="smartUpdate" value="true"/>  
+  <preference name="debug" value="true"/>  
+  <preference name="iOS7StatusBarAppearance" value="true"/>  
+  <permission name="location"/>  
+  <permission name="internet"/>  
+  <access origin="*"/>  
+  <feature name="xMap"> 
+    <param name="android_api_key" value="GWKXllLiqvv1cKlEkxVk8WA8"/>  
+    <param name="ios_api_key" value="kV55tihy0FGjBigSKgeuGp3bX8Zcvl7B"/> 
+  </feature>  
+  <feature name="ajpush"> 
+    <param name="app_key" value="15c99a4c4e80f59e0efd97db"/>  
+    <param name="channel" value="market"/> 
+  </feature>  
+  <feature name="aliPay"> 
+    <param name="urlScheme" value="AliPayA6916117301064"/> 
+  </feature> 
+</widget>

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="stylesheet" type="text/css" href="../css/base.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/layout.css"/>
+    <style>
+        .container{
+            overflow:auto;
+            padding-bottom:5.1rem;
+        }
+        .navigator{
+            background-color:#FFFFFF;
+        }
+    	.user-info{
+    		padding:1.5rem 0;
+    		background:#FFD705;
+    		position:relative;
+    	}
+        .user-info .work{
+            height:4rem;
+            line-height: 6rem;
+            position:absolute;
+            right:1rem;
+            top:1rem;
+            font-size:1rem;
+            color:#6B450A;
+            background-size:2rem;
+            background-position:50% 0rem;
+            background-repeat:no-repeat;
+            background-image:url('../image//icons/work-coffee.png');
+            width:5rem;
+            border:0.1rem solid #6B450A;
+            border-radius:2.5rem;
+        }
+        .user-info .roles{
+            z-index:1;
+            position:absolute;
+            right:1rem;
+            top:1rem;
+            background:#FFD705;
+            width:0;
+            height:0;
+            overflow:hidden;
+            -webkit-transition-property:height, width;
+            transition-property:height,width;
+            -webkit-transition-duration: 0.2s, 0.2s;
+            transition-duration:0.2s, 0.2s;
+            webkit-transform: translate3d(0,0,0); 
+            transform: translate3d(0,0,0);
+        }
+
+        .roles.expanded{
+            width:10.2rem;
+            height:8.3rem;
+        }
+
+        .roles span{
+            display:block;
+            height:4rem;
+            color:#6B450A;
+            line-height:4rem;
+            text-align:center;
+            overflow: hidden;
+            float:left;
+            width:5rem;
+        }
+        .roles .selection{
+            position:absolute;
+            right:5rem;
+            border:1px dashed #6B450A;
+        }
+        .roles .selection span{
+            border-top:1px dashed #6B450A;
+        }
+        .roles .selection span:first-child{
+            border-top:0;
+        }
+        .roles .close{
+            position: absolute;
+            right: 0rem;
+            top: 0rem;
+            border:1px solid #6B450A;
+            border-left:0;
+            border-radius:3rem;
+        }
+
+    	.user-info p{
+    		height:8rem;
+    		background-image: url('../image/icons/user-coffee.png');
+    		background-position:50% 1rem;
+    		background-repeat:no-repeat;
+    		background-size:3rem;
+    		width:8rem;
+    		margin:0 auto;
+	   		text-align:center;
+	   		border:1px solid #6b450a;
+	   		border-radius:8rem;
+            color:#6b450a;
+
+    	}
+        .user-info p.login{
+            display:none;
+            font-family:Helvetica;
+            line-height:10rem;
+        }
+    	.user-info .no-login:after{
+    		content:'登录/注册';
+    		line-height:10rem;
+    		font-weight:bold;
+    	}
+        .menu{
+            padding:1rem;
+            height:3rem;
+            line-height:3rem;
+            position:relative;
+        }
+        .menu .icon{
+            position:absolute;
+            left:1rem;
+            width:2rem;
+            height:3rem;
+            background-size:2rem;
+            background-repeat:no-repeat;
+            background-position:50%;
+        }
+        .menu .title{
+            position:absolute;
+            left:3rem;
+            width:9rem;
+            font-size:1.3rem;
+        }
+        .menu .detail{
+            position:absolute;
+            right:1rem;
+            padding-right:2rem;
+            width:15rem;
+            font-size:1.2rem;
+            color:#808080;
+            text-align:right;
+            background-repeat:no-repeat;
+            background-size:2rem;
+            background-position:right 50%;
+            background-image:url('../image/icons/arrow-right.png');
+        }
+        .menu.order .icon{
+            background-image:url('../image/icons/order.png');
+        }
+        .menu.wallet .icon{
+            background-image:url('../image/icons/wallet.png');
+        }
+        .menu.address .icon{
+            background-image: url('../image/icons/location.png');
+        }
+        .menu.card .icon{
+            background-image: url('../image/icons/card.png');
+        }
+        .menu.fans .icon{
+            background-image: url('../image/icons/fans.png');
+        }
+        .menu.fans .detail:after{
+            content:'位';
+        }
+        .menu.apply .icon{
+            background-image: url('../image/icons/apply.png');
+        }
+        .menu.apply{
+            border-bottom:0.5rem solid #EFEFEF;
+        }
+
+        .menu.fans .detail{
+            background: none;
+        }
+        .order-tab{
+            border-top:2px dashed #EFEFEF;
+            height:4rem;
+            padding:1rem;
+        }
+        .order-tab p{
+            width:33.33%;
+            float:left;
+            text-align:center;
+            height:5rem;
+            line-height:6rem;
+            background-size:2rem;
+            background-repeat:no-repeat;
+            background-position:50% 0;
+            position:relative;
+        }
+        .order-tab .number{
+            position:absolute;
+            top:0;
+            height:2rem;
+            width:2rem;
+            line-height:2rem;
+            background:red;
+            color:#FFFFFF;
+            border-radius:1rem;
+            overflow:hidden;
+            text-overflow: ellipsis;
+            opacity:0;
+            font-weight:bold;
+        }
+        .order-tab .number.show{
+            opacity:1;
+        }
+        .need-pay{
+            background-image:url('../image/icons/need-pay.png');
+        }
+        .delivery{
+            background-image:url('../image/icons/delivery.png');
+        }
+        .praise{
+            background-image:url('../image/icons/praise.png');
+        }
+    </style>
+</head>
+<body>
+	<header>
+	</header>
+    <section class="container" >
+ 		<section class="user-info">
+ 			<p tapmode="touch-down" class="no-login"></p>
+ 			<p tapmode="touch-down" class="login"></p>
+ 			<button tapmode="touch-down" class="work hidden">管理</button>
+ 			<section class="roles">
+ 			    <section class="selection">
+                    <span class="role" tapmode="touch-down" data-role="101">快递员</span>
+                    </br>
+                    <span class="role" tapmode="touch-down" data-role="100">商户</span>
+ 			    </section>
+                <span class="close" tapmode="touch-down">关闭</span>
+ 			</section>
+ 		</section>
+ 		<section tapmode="touch-down" class="menu order go-order" data-status="1">
+ 		     <section class="icon"></section>
+ 		     <section class="title">我的订单</section>
+ 		     <section class="detail">全部订单</section>
+ 		</section>
+        <div class="order-tab">
+             <p tapmode="touch-down" class="need-pay go-order" data-status="1"><span>待付款</span><span class="number">0</span></p>
+             <p tapmode="touch-down" class="delivery go-order" data-status="2"><span>待收货</span><span class="number">0</span></p>
+             <p tapmode="touch-down" class="praise go-order" data-status="4"><span>待评价</span><span class="number">0</span></p>
+        </div>
+        <section class="divider"></section>
+        <section tapmode="touch-down" class="menu wallet">
+             <section class="icon"></section>
+             <section class="title">我的钱包</section>
+             <section class="detail">余额、积分、提现</section>
+        </section>
+        <section class="divider"></section>
+        <section class="menu fans">
+             <section class="icon"></section>
+             <section class="title">我的粉丝</section>
+             <section class="detail">0</section>
+        </section>
+        <section class="divider"></section>
+        <section  tapmode="touch-down" class="menu card">
+             <section class="icon"></section>
+             <section class="title">提现渠道</section>
+             <section class="detail">支付宝、银行卡</section>
+        </section>
+        <section class="divider"></section>
+        <section  tapmode="touch-down" class="menu address">
+             <section class="icon"></section>
+             <section class="title">收货地址</section>
+             <section class="detail">&nbsp;</section>
+        </section>
+        <section class="divider"></section>
+        <section tapmode="touch-down" class="menu apply">
+            <section class="icon"></section>
+            <section class="title">我要赚钱</section>
+            <section class="detail">申请商户、配送员</section>
+        </section>
+    </section>
+	<footer class="navigator text-center">
+		<section class="home">
+			<div class="icon">
+			</div>
+			<span>首页</span>
+		</section>
+		<section class="mall">
+			<div class="icon">
+			</div>
+			<span>商城</span>
+		</section>
+        <section class="activity">
+            <div class="icon">
+            </div>
+            <span>特惠</span>
+        </section>
+		<section class="cart">
+			<div class="icon"><span class="number empty">0</span></div>
+			<span>购物车</span>
+		</section>
+		<section class="user active">
+			<div class="icon "></div>
+			<span>我的</span>
+		</section>
+	</footer>
+</body>
+</html>
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/vendor/template.js"></script>
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/window.js"></script>
+<script type="text/javascript" src="../script/model/market.js"></script>
+<script type="text/javascript" src="../script/model/cart.js"></script>
+<script type="text/javascript" src="../script/model/user.js"></script>
+<script type="text/javascript" src="../script/api/server.js"></script>
+<script type="text/javascript">
+function updateUserInfo(){
+    var userModel = new User();
+    var user = userModel.get();
+    $('.work').addClass('hidden');
+    if(null != user){
+        var server = new Server();
+        if(server.cookieIsExpired()){
+            $('.user-info .no-login').show();
+            $('.user-info .login').hide();
+        }
+        else{
+            $('.user-info .no-login').hide();
+            $('.user-info .login').text(user.account).show();
+            if(user.roles){
+                $('.work').removeClass('hidden');
+            }
+        }
+    }
+    else{
+        $('.user-info .no-login').show();
+        $('.user-info .login').hide();
+    }
+}
+
+function openLogin(){
+    api.openWin({
+        name: 'login',
+        url: 'widget://html/login.html'
+    });
+}
+function openWallet(){
+    var server = new Server();
+    if(server.cookieIsExpired()){
+        openLogin();
+    }
+    else{
+        api.openWin({
+            name:'wallet',
+            url:'widget://html/wallet.html'
+        });
+    }
+}
+
+function openAccount(){
+    api.openWin({
+        name: 'account',
+        url: 'widget://html/account.html'
+    });
+}
+function openAddress(){
+    api.openWin({
+        name:'address',
+        url:'widget://html/address.html'
+    });
+}
+
+function openRoleWin(role){
+    api.openWin({
+        name:role + '_home',
+        url:'widget://html/' + role + '/home.html',
+        slidBackEnabled:false,
+        animation:{
+            type:'none',
+            duration:300
+        },
+        bounces:false,
+        reload:false
+    });
+}
+
+function openRoleSelection(){
+    $('.roles').addClass('expanded');
+}
+function closeRoleSelection(){
+    $('.roles').removeClass('expanded');
+}
+
+function openWork(){
+    var server = new Server();
+    if(server.cookieIsExpired()){
+        openLogin();
+    }
+    else{
+        var userModel = new User();
+        var user = userModel.get();
+        if(user.roles.length == 1){
+            var role = 'merchant';
+            if(101 == user.roles[0]){
+                role = 'delivery';
+            }
+            openRoleWin(role);
+        }
+        else{
+            openRoleSelection();
+        }
+    }
+}
+//订单
+function openOrder(obj){
+    var server = new Server();
+    if(server.cookieIsExpired()){
+        openLogin();
+    }
+    else{
+        var status = $(obj).attr('data-status');
+        status = status ? status : 1;
+        api.openWin({
+            name:'order',
+            url:'widget://html/order.html',
+            pageParam:{
+                status:status
+            }
+        });
+    }
+}
+//申请
+function openApply(){
+    var server = new Server();
+    if(server.cookieIsExpired()){
+        openLogin();
+    }
+    else{
+        api.openWin({
+            name:'apply',
+            url:'widget://html/apply.html'
+        });        
+    }
+}
+
+
+function openCard(){
+    var server = new Server();
+    if(server.cookieIsExpired()){
+        openLogin();
+    }
+    else{
+        api.openWin({
+            name:'card',
+            url:'widget://html/card.html',
+           
+        });
+    }
+}
+
+function render(data){
+    $('.fans .detail').text(data.fans);
+    $('.need-pay .number').text(data.order[0]);
+    if(data.order[0] > 0){
+        $('.need-pay .number').addClass('show');
+    }
+    else{
+        $('.need-pay .number').removeClass('show');
+    }
+    $('.delivery .number').text(data.order[1]);
+    if(data.order[1] > 0){
+        $('.delivery .number').addClass('show');
+    }
+    else{
+        $('.delivery .number').removeClass('show');
+    }
+    $('.praise .number').text(data.order[2]);
+    if(data.order[2] > 0){
+        $('.praise .number').addClass('show');
+    }
+    else{
+        $('.praise .number').removeClass('show');
+    }
+}
+
+function request(){
+    var server = new Server();
+    var url = server.getOne() + '/user/mine/index';
+    api.ajax({
+        url:url,
+        method:'post',
+        cache:false,
+        data:{
+            values:{
+                SID:server.getCookie()
+            }
+        },
+        timeout:10,
+        dataType:'text',
+        returnAll:true,
+    },function(ret,err){
+        if(!err && 200 == ret.statusCode){
+            try{
+                var result = JSON.parse(ret.body);
+                if(result.code == 0){
+                    render(result.data);
+                }
+            }catch(e){
+                    $('.fans .detail').text(0);
+            }
+        }
+        else{
+            $('.fans .detail').text(0);
+        }
+    });
+}
+
+
+function delegateEvent(){
+    touchEvent('.no-login', openLogin);
+    touchEvent('.login', openAccount);
+    touchEvent('.address',openAddress);
+    touchEvent('.work',openWork);
+    touchEvent('.go-order', openOrder);
+    touchEvent('.apply', openApply);
+    touchEvent('.wallet', openWallet);
+    touchEvent('.card', openCard);
+    touchEvent('.roles .close', closeRoleSelection);
+    touchEvent('.roles .role', function(obj){
+        var role = $(obj).attr('data-role');
+        var roleName = 'merchant';
+        if(role == 101){
+            roleName = 'delivery';
+        }
+        closeRoleSelection();
+        setTimeout(function(){
+            openRoleWin(roleName);
+        }, 200);
+    });
+}
+
+function initFront(){
+    fixStatusBar($('header'));
+    initNavigator();
+}
+
+apiready = function(){
+    delegateEvent();
+	initFront();
+	api.addEventListener({
+	    name:'viewappear'
+    },function(ret,err){
+        request();
+        api.setStatusBarStyle({
+            style: 'dark' 
+        });
+    updateCartNumber();
+    	updateUserInfo();
+    });
+}
+
+</script>

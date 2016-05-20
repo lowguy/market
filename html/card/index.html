@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+        <meta name="format-detection" content="telephone=no" />
+        <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+        <style>
+
+            .card {
+                font-size: 1.3rem;
+                background: #FFD705;
+                border-radius:1rem;
+                margin: 1rem;
+                position:relative;
+                height:12rem;
+            }
+            .card .content{
+                position:absolute;
+                left:0;
+                width:80%;
+                border-right:1px dashed #6B450A;
+                height:6rem;
+            }
+            .card.default .content{
+                width:100%;
+                border-right:0;
+            }
+
+            .card p {
+                padding-left: 0.5rem;
+                height: 2rem;
+                line-height: 2rem;
+            }
+            label {
+                color: #6B450A;
+            }
+            .bank {
+                font-size: 1.4rem;
+                padding: 2rem 0;
+                border-bottom: 0.1rem dashed #6B450A;
+                font-weight: bold;
+                color:#6B450A;
+            }
+            .delete {
+                position: absolute;
+                right: 0;
+                top: 6rem;
+                height: 6rem;
+                width:20%;
+                background-size: 2rem;
+                background-position: 50%;
+                background-repeat: no-repeat;
+                background-image: url('../../image/icons/delete.png');
+            }
+            .card.default .bank {
+                color: #FFD705;
+                background-color: #6B450A;
+                border-radius:1rem 1rem 0 0;
+                border-bottom: 0;
+            }
+            .card.default .bank:after {
+                content: '（默认提现账号）';
+            }
+            .card.default .delete {
+                display: none;
+            }
+            .no-data{
+	            margin:1rem;
+	            background:#FFD705;
+	            border-radius: 1rem;
+	            color:#6B450A;
+	            height:9rem;
+	            line-height:9rem;
+	            font-size:1.4rem;
+	            text-align:center;
+        }
+        </style>
+    </head>
+    <body>
+        <p class="network-error"></p>
+        <section class="container"></section>
+    </body>
+    <script type="text/html" id="template">
+    	<%if(card.length > 0){%>
+	        <section class="cards">
+	        <%for(var i = 0; i < card.length; i++){%>
+	        <section data-id="<%=card[i].card_id%>" class="card <%if(1 == card[i].status){%>default<%}%>">
+	            <p tapmode="touch-down" class="bank"><span><%=card[i].bank%></span></p>
+	            <section class="content">
+	                <p class="account"><label>账号:</label><span class="value"><%=card[i].account%></span></p>
+	                <p class="name"><label>姓名:</label><span class="value"><%=card[i].name%></span></p>
+	                <p class="phone"><label>手机:</label><span class="value"><%=card[i].phone%></span></p>
+	            </section>
+	            <section tapmode="touch-down"  class="delete"></section>
+	        </section>
+	        <%}%>
+	        </section>
+        <%}else{%>
+        	<p class="no-data">暂无数据</p>
+        <%}%>
+    </script>
+</html>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/frame.js"></script>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/vendor/template.js"></script>
+<script type="text/javascript" src="../../script/api/server.js"></script>
+<script type="text/javascript">
+    var lastUpdated = 0;
+    var first = true;
+    var setDefault = false;
+    function initFront() {
+        api.parseTapmode();
+    }
+    function ajaxComplete() {
+        api.refreshHeaderLoadDone();
+        if (first) {
+            first = false;
+            api.setFrameAttr({
+                name : api.frameName,
+                hidden : false
+            });
+            api.execScript({
+                script : 'loaded();'
+            });
+        }
+    }
+
+    function render(cards) {
+       var data = {
+            card : cards,
+        }
+       var html = baidu.template("template", data);
+       $('.container').html(html);
+        initFront();
+    }
+    function request() {
+        if (first) {
+            api.setFrameAttr({
+                name : api.frameName,
+                hidden : true
+            });
+            api.execScript({
+                script : 'loading();'
+            });
+        }
+        var server = new Server();
+        var url = server.getOne() + "/user/card/lists";
+        api.ajax({
+            url : url,
+            method : 'post',
+            cache : false,
+            data : {
+                values : {
+                    SID : server.getCookie()
+                }
+            },
+            timeout : 10,
+            dataType : 'text',
+            returnAll : true,
+        }, function(ret, err) {
+        console.log(JSON.stringify(ret));
+            if (!err && 200 == ret.statusCode) {
+                try {
+                    var result = JSON.parse(ret.body);
+                    if (result.code == 0 || result.code == 2) {
+                        lastUpdated = timestamp();
+                        render(result.data);
+                    }
+                } catch(e) {
+                }
+            }
+            ajaxComplete();
+        });
+    }
+
+    function delegateEvent() {
+        touchEvent('.delete', function(obj) {
+            var parent = $(obj).parents('.card');
+           
+            var id = parent.attr('data-id');
+            api.confirm({
+			    title: '温馨提示',
+			    msg: '确定要删除么？',
+			    buttons: ['确定','取消']
+			}, function(ret, err){
+			    if(1== ret.buttonIndex ){
+			         parent.hide();
+			         deleteCard(id);
+			    }else{
+			         return;
+			    }
+			});
+	   });
+       touchEvent('.bank', function(obj) {
+            var parent = $(obj).parents('.card');
+            if(!parent.hasClass('default')){
+                var id = parent.attr('data-id');
+                defaultCard(id);
+            }
+            if(api.pageParam.autoClose){
+               setTimeout(api.closeWin, 300);
+            }
+       });
+    }
+   
+		 
+    function defaultCard(id) {
+        if(setDefault){
+            return;
+        }
+        setDefault = true;
+        var id = id;
+        var server = new Server();
+        var url = server.getOne() + "/user/card/status";
+        api.ajax({
+            url : url,
+            method : 'post',
+            cache : false,
+            data : {
+                values : {
+                    SID : server.getCookie(),
+                    id : id
+                }
+            },
+            timeout : 10,
+            dataType : 'text',
+            returnAll : true,
+        }, function(ret, err) {
+            setDefault = false;
+            var message = '设置失败，请稍后重试';
+            if (!err && 200 == ret.statusCode) {
+                try {
+                    var result = JSON.parse(ret.body);
+                    if (result.code == 0) {
+                        message = '设置成功';
+                        $('.card.default').removeClass('default');
+                        //设置默认账户
+                        $('.card[data-id="' + id + '"]').addClass('default');
+                        $('.card[data-id="' + id + '"]').insertBefore($('section.cards  .card').first());
+                    }
+                } catch(e) {
+                }
+            }
+
+            api.toast({
+                msg:message,
+                location:'middle'
+            });
+        });
+    }
+
+    function deleteCard(id) {
+        var id = id;
+        var server = new Server();
+        var url = server.getOne() + "/user/card/delete";
+        api.ajax({
+            url : url,
+            method : 'post',
+            cache : false,
+            data : {
+                values : {
+                    SID : server.getCookie(),
+                    id : id
+                }
+            },
+            timeout : 10,
+            dataType : 'text',
+            returnAll : true,
+        }, function(ret, err) {
+            var message = '删除失败，请稍后重试';
+            if (!err && 200 == ret.statusCode) {
+                try {
+                    var result = JSON.parse(ret.body);
+                    if (result.code == 0) {
+                        message = '删除成功';
+                    }
+                } catch(e) {
+                }
+            }
+            if('删除成功' != message){
+                //通过属性动态获取标签元素
+                $('.card[data-id="' + id + '"]').show();
+            }
+            api.toast({
+	            msg:message,
+	            location:'middle'
+            });
+        });
+    }
+
+    apiready = function() {
+        if ('ios' != api.systemType) {
+            request();
+        }
+        onNetworkChanged(request, function() {
+            var now = timestamp();
+            if (now - lastUpdated > 10) {
+                request();
+            }
+        });
+        delegateEvent();
+        api.addEventListener({
+            name : 'viewappear'
+        }, function(ret, err) {
+            first = true;
+            request();
+        });
+    }
+</script>

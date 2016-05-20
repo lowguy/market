@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+        <meta name="format-detection" content="telephone=no" />
+        <link rel="stylesheet" type="text/css" href="../../../css/base.css"/>
+        <style>
+            .container {
+            }
+            
+             .button-loading {
+                background-image: url("../../../image/loading.gif");
+                background-size: 3rem;
+                background-repeat: no-repeat;
+                background-position: 50%;
+                text-indent: -150%;
+            }
+            .field-group {
+                height: 3rem;
+                line-height: 3rem;
+                margin: 0.5rem 1rem;
+                position: relative;
+            }
+            .field-group label {
+                width: 20%;
+                display: inline-block;
+                position: absolute;
+                font-weight: bold;
+                left: 0;
+            }
+            .field-group input {
+                height: 3rem;
+                width: 80%;
+                display: inline-block;
+                position: absolute;
+                right: 0;
+            }
+            .field-group.time section {
+                position: absolute;
+                width: 80%;
+                height: 3rem;
+                right: 0;
+            }
+            .time p {
+                width: 40%;
+                height: 3rem;
+                position: absolute;
+                text-align:center;
+                border-bottom: 0.1rem solid #EFEFEF;
+            }
+
+            .place{
+                position:absolute;
+                width:80%;
+                right:0;
+                text-align:center;
+
+            }
+            .time .to{
+                width:20%;
+                left:40%;
+                height:1.3rem;
+                border-bottom:0.2rem solid #222222;
+            }
+            .time .start {
+                left: 0;
+            }
+            .time .end{
+                right:0;
+            }
+            .button-wrapper {
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+            }
+            .submit {
+                padding: 0 1rem 1rem 1rem;
+            }
+            .submit button {
+                height: 4rem;
+                width: 100%;
+                background-color: #FFD705;
+                color: #6B450A;
+                font-size: 1.4 rem;
+                font-weight: bold;
+                border-radius: 1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <p class="network-error"></p>
+        <section class="container" >
+            <section class="settings">
+                <section class="divider"></section>
+                 <section class="field-group">
+                    <label>当前区域:</label>
+                    <p  class="place">阎良区</p>
+
+                </section>
+                <section class="divider"></section>
+                <section class="field-group time">
+                    <label>营业时间:</label>
+                    <section>
+                        <p tapmode="touch-down" class="start">8:00</p>
+                        <p class="to"></p>
+                        <p tapmode="touch-down" class="end">18:00</p>
+                    </section>
+                </section>
+            </section>
+        </section>
+        <section class="button-wrapper">
+            <section tapmode="touch-down" class="submit">
+                <button>
+                    保存
+                </button>
+            </section>
+        </section>
+    </body>
+</html>
+<script type="text/javascript" src="../../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../../script/frame.js"></script>
+<script type="text/javascript" src="../../../script/app.js"></script>
+<script type="text/javascript" src="../../../script/api/server.js"></script>
+<script type="text/javascript" src="../../../script/model/market.js"></script>
+<script type="text/javascript" src="../../../script/window.js"></script>
+<script type="text/javascript">
+function delegateEvent() {
+	touchEvent('.start', function() {
+		api.openPicker({
+		         type : 'time',
+		         title : '请选择开始时间'
+		}, function(ret, err) {
+		    hour = parseInt(ret.hour);
+	        hour = (hour > 9) ? hour : '0'+hour;
+	        minute = parseInt(ret. minute);
+	        minute = (minute > 9)? minute: '0'+minute;
+	         $('.start').text(hour+':'+minute);
+		 });
+     });
+   touchEvent('.end', function() {
+		api.openPicker({
+		        type : 'time',
+		        title : '请选择结束时间'
+		}, function(ret, err) {
+		   hour = parseInt(ret.hour);
+	        hour = (hour > 9) ? hour : '0'+hour;
+	        minute = parseInt(ret. minute);
+	        minute = (minute > 9)? minute: '0'+minute;
+	         $('.end').text(hour+':'+minute);
+	});
+  });
+} 
+	function initFront() {
+		request('/merchant/shop/time');
+	}
+	function ajaxComplete() {
+		api.refreshHeaderLoadDone();
+	}
+	$('.submit').on('touchend', function() {
+		request('/merchant/shop/setTime');
+	});
+	function request(str) {
+	  var dom = $('.submit');
+	    if('/merchant/shop/setTime' == str){
+	      if(!dom.hasClass('button-loading')){
+	        dom.addClass('button-loading');
+	      }
+	    }
+		var marketModel = new Market();
+		var current = marketModel.getCurrent();
+		$('.place').text(current.district);
+		var server = new Server();
+		var url = server.getOne() + str;
+		var start = unix($('.start').text()).toString();
+		var close = unix($('.end').text()).toString();
+		api.ajax({
+			url : url,
+			method : 'post',
+			cache : false,
+			data : {
+				values : {
+					id : current.id,
+					SID : server.getCookie(),
+					start : start,
+					close : close
+				}
+			},
+			timeout : 10,
+			dataType : 'text',
+			returnAll : true,
+		}, function(ret, err) {
+		   
+			if (!err && 200 == ret.statusCode) {
+			     if('/merchant/shop/setTime' == str){
+				      api.toast({
+							   msg: '设置成功',
+							   location: 'middle'
+						 });
+				    }
+				try {
+					var result = JSON.parse(ret.body);
+					if (result.code == 0) {
+						if (result.data) {
+						  if('/merchant/shop/time' == str){
+							$('.start').text(timer(parseInt(result.data.start)));
+							$('.end').text(timer(parseInt(result.data.close)));
+							}
+							
+						}
+					} 
+				} catch(e) {
+				   api.toast({
+                    msg:'服务器忙，请稍后再试'
+                });
+             }
+				
+			}
+			ajaxComplete();
+			dom.removeClass('button-loading');
+		});
+	}
+	function timer(timer){
+	   var hour,minute;
+	   hour = parseInt(timer/3600);
+	   hour = (hour > 9) ? hour : '0'+hour;
+	   minute = parseInt((timer%3600)/60);
+	   minute = (minute > 9) ? minute : '0'+minute;
+	   return hour + ":" + minute;
+	}
+
+	function unix(unix){
+	var time;
+	var times = unix.split(':');
+	var hour = parseInt(times[0]);
+	var minute = parseInt(times[1]);
+	if(0 !=hour){
+	   if(0 != minute){
+	      time = (hour*3600)+(minute*60);
+	   }else if(0 == minute){
+	      time = hour*3600;
+	   }
+	}else if(0 == hour){
+	     if(0 != minute){
+	        time = minute*60;
+	     }else{
+	       time = 0;
+	     }
+	 }
+	 return time;
+	}
+	apiready = function() {
+		initFront();
+		delegateEvent();
+		onNetworkChanged(request, request);
+	}
+</script>

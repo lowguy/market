@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+    <style>
+    	html, body{
+			height:100%;
+		}
+		body{
+			background: #EFEFEF;
+		}
+		.field{
+			border-top:1px solid #EFEFEF;
+			position:relative;
+			height:4rem;
+			padding:0 1rem;
+
+		}
+
+		input {
+			position:absolute;
+			padding:0.5rem 0;
+			padding-left:1rem;
+			outline:none;
+			height:3rem;
+			line-height: normal;
+			width:50%;
+			font-size:1.4rem;
+			background-color:#FFFFFF;
+			text-align:center;
+		}
+
+        .field.submit{
+            margin-top:0.5rem;
+        }
+		.submit button{
+			height:4rem;
+			line-height:4rem;
+			width:100%;
+			background-color:#FFD705;
+			font-size:1.4rem;
+			font-weight:bold;
+			color:#6b450a;
+			border-radius: 1rem;
+		}
+
+		.code button{
+			width:35%;
+			position:absolute;
+			height:4rem;
+			right:1rem;
+			background-color: #FFD705;
+			color:#6b450a;
+			border-radius: 1rem;
+		}
+        .button-loading{
+            background-image:url("../../image/loading.gif");
+            background-size:3rem;
+            background-repeat:no-repeat;
+            background-position:50%;
+            text-indent: -150%;
+        }
+        .code button.button-loading span{
+            display:none;
+        }
+		.code button.disabled{
+			background-color:#999999;
+			color:#222222;
+		}
+
+		p{
+			padding:0.5rem 0;
+			height:3rem;
+			line-height:3rem;
+			text-align:center;
+			font-size:1.1rem;
+			color:#666666;
+			background: #EFEFEF;
+		}
+		.seconds:after{
+		    content:"秒后";
+		}
+    </style>
+</head>
+<body>
+	<section class="container">
+	
+    	<p>
+    		短信验证码已经发送到<span class="phone"></span>
+    	</p>
+
+ 		<section class="field code">
+			<input  type="number"  id="code" placeholder="请输入短信验证码"/>
+			<button tapmode="touch-down" class="disabled recode"><span class="seconds">60</span><span>重新获取</span></button>
+ 		</section>
+
+ 		<section class="field submit">
+ 			<button tapmode="touch-down">提交验证码</button>
+ 		</section>
+	</section>
+</body>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/api/server.js"></script>
+<script type="text/javascript">
+	var interval = 0;
+    var lastUpdated = 0;
+	function initFront(){
+	    var storage = getStorage();
+	    var phone = storage.getItem('REGISTER_PHONE');
+	    $('.phone').text(phone);
+	    
+		$('.back').on('touchend', function(){
+	   	    var storage = getStorage();
+	   	    storage.removeItem('REGISTER_CODE');
+	   		api.closeWin();
+	   	});
+	   	
+	   	api.addEventListener({name: 'keyback'}, function(ret, err){
+            var storage = getStorage();
+	   	    storage.removeItem('REGISTER_CODE');
+        });
+        
+		timer();
+
+		$('.submit button').on('touchend', verifySMS);
+
+		touchEvent('.recode',recode);
+		
+	}
+	
+	function verifySMS(){
+
+		var storage = getStorage();
+		var phone = storage.getItem('REGISTER_PHONE');
+		var code = $("#code").val();
+		if(!code){
+		    api.toast({
+	            msg:'请输入短信验证码'
+            });
+            return;
+		}
+        var dom = $('.submit button');
+        if(dom.hasClass('button-loading')){
+            return;
+        }
+        dom.addClass('button-loading');
+		var server = new Server();
+        var url = server.getOne() + '/sms/index/verifySMS';
+        api.ajax({
+            url:url,
+            cache:false,
+            timeout:10,
+            dataType:'text',
+            returnAll:true,
+            method:"post",
+            data:{
+                values:{
+                    phone:phone,
+                    code:code
+                }
+            }
+        },function(ret,err){
+            dom.removeClass('button-loading');
+            if(!err && 200 == ret.statusCode){
+                try{
+                   var body = JSON.parse(ret.body);
+                   if(body.code == 0){
+                   	   	storage.setItem("REGISTER_CODE", code);
+                       	api.execScript({
+                           script: 'changeFrame(2);'
+                       	});
+                   }else if(body.code == 1){
+						api.toast({
+							msg:'验证码已失效，请重新获取'
+						});
+                   }else{
+                       	api.toast({
+                           	msg:'验证码错误'
+                       	});
+                   }
+                }catch(e){}
+            }
+        });
+	}
+
+	function recode(){
+	    var dom = $('.recode');
+	    if(dom.hasClass('button-loading') || dom.hasClass('disabled')){
+	        return;
+	    }
+	    dom.addClass('button-loading');
+		var storage = getStorage();
+		var phone = storage.getItem('REGISTER_PHONE');
+		var server = new Server();
+        var url = server.getOne() + '/sms/index/sendRegister';
+        api.ajax({
+            url:url,
+            cache:false,
+            timeout:10,
+            dataType:'text',
+            returnAll:true,
+            method:"post",
+            data:{
+                values:{
+                    phone:phone
+                }
+            }
+        },function(ret,err){
+            dom.removeClass('button-loading');
+            if(!err && 200 == ret.statusCode){
+                try{
+                   var body = JSON.parse(ret.body);
+                   if(body.code == 0){
+                       	timer();
+                   }else if(body.code == 1){
+                       api.toast({
+                           msg:'该账号已被注册'
+                       });
+                   }else if(body.code == 2){
+                       api.toast({
+                           msg:'短信发送次数已达每日上限，请明天再试'
+                       });
+                   }else{
+               		   api.toast({
+                           msg:'服务器忙， 请稍后再试'
+                       });
+                   }
+                }catch(e){}
+            }
+        });
+	}
+	function timer(){
+        $('.recode').addClass('disabled');
+        if(interval){
+            clearInterval(interval);
+        }
+		$('.seconds').text(60).show();
+		interval = setInterval(function(){
+			var seconds = $('.seconds').text();
+			if(seconds == 1){
+				$('.recode').removeClass('disabled');
+				$('.seconds').hide();
+				clearInterval(interval);
+			}
+			else{
+				$('.seconds').text(--seconds);
+			}
+		}, 1000);
+	}
+	
+	apiready = function(){
+	    lastUpdated = timestamp();
+		initFront();
+	};
+</script>
+</html>

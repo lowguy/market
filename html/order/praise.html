@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+    <style>
+    	html, body{
+    		height:100%;
+    		background-color:rgba(0,0,0,0.5);
+    	}
+
+    	.content{
+            padding-top:5rem;
+    	    background:#FFFFFF;
+            padding-bottom:5rem;
+    	}
+    	.info {
+    	    padding:1rem;
+    	    color:red;
+    	    font-weight:bold;
+    	    border-top: 1px solid #EFEFEF;
+    	}
+    	.close{
+    	    height:20%;
+    	}
+    	.field {
+    	    padding:0 1rem;
+    	}
+    	.title{
+    	    font-size:1.3rem;
+    	    font-weight:bold;
+    	    color:#808080;
+    	    padding:1rem 0;
+    	    height:2rem;
+    	    line-height:2rem;
+    	    border-bottom:1px dashed #EFEFEF;
+    	    text-align:center;
+    	}
+    	.stars{
+    	    height:4rem;
+    	    padding:1rem 0;
+    	}
+    	.star{
+    	    display:inline-block;
+    	    width:20%;
+    	    height:4rem;
+    	    vertical-align: middle;
+    	    background-size:3rem;
+    	    background-repeat:no-repeat;
+    	    background-position:50%;
+    	    background-image:url('../../image/icons/star.png');
+    	    float:left;
+    	}
+        .star.highlight{
+            background-image:url('../../image/icons/star_full.png');
+        }
+        .button-wrapper{
+            margin-top:5rem;
+            text-align:center;
+        }
+        .save{
+            height:4rem;
+            width:80%;
+            background:#FFD705;
+            color:#6B450A;
+            border-radius: 1rem;
+        }
+         .button-loading{
+            background-image:url("../../image/loading.gif");
+            background-size:3rem;
+            background-repeat:no-repeat;
+            background-position:50%;
+            text-indent: -150%;
+        }
+    </style>
+</head>
+<body>
+	<section class="container">
+        <section class="content">
+            <p class="info">小小家的进步， 离不开您的督促，请对我们的服务进行评价～</p>
+            <section class="divider"></section>
+            <section class="field">
+                <p class="title">配送服务</p>
+                <p class="stars">
+                    <span tapmode="touch-down" class="star highlight"></span>
+                    <span tapmode="touch-down" class="star highlight"></span>
+                    <span tapmode="touch-down" class="star highlight"></span>
+                    <span tapmode="touch-down" class="star highlight"></span>
+                    <span tapmode="touch-down" class="star highlight"></span>
+                </p>
+            </section>
+            <section class="button-wrapper">
+                <button tapmode="touch-down" class="save">提交</button>
+            </section>
+        </section>
+	</section>
+</body>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/api/server.js"></script>
+<script type="text/javascript">
+    function delegateEvent(){
+
+        $('.content').on('touchstart', function(event){
+            event.stopPropagation();
+        });
+
+        $('.star').on('touchstart', function(event){
+            $(this).addClass('not-moved');
+        });
+
+        $('.star').on('touchmove', function(event){
+            $(this).removeClass('not-moved');
+        });
+
+        $('.star').on('touchend', function(event){
+            if($(this).hasClass('not-moved')){
+                $(this).removeClass('not-moved');
+                var index = $('.star').index($(this));
+                $('.star').each(function(i, item){
+                    if(i <= index){
+                        $(item).addClass('highlight');
+                    }
+                    else{
+                        $(item).removeClass('highlight');
+                    }
+                });
+            }
+        });
+
+        $('.save').on('touchstart', function(event){
+            $(this).addClass('not-moved');
+        });
+
+        $('.save').on('touchmove', function(event){
+            $(this).removeClass('not-moved');
+        });
+
+        $('.save').on('touchend', function(event){
+            if($(this).hasClass('not-moved')){
+                $(this).removeClass('not-moved');
+                var score = $('.star.highlight').length;
+                add(score);
+            }
+        });
+
+
+        touchEvent('body', function(){
+            api.closeFrame({
+                name: api.frameName
+            });
+        });
+    }
+
+    function add(score){
+      var dom =  $('.save');
+      var server = new Server();
+	  var url = server.getOne() + "/order/index/evaluate";
+        if (!dom.hasClass('button-loading')) {
+           dom.addClass('button-loading');
+           api.ajax({
+	        url:url,
+	        method:'post',
+	        cache:false,
+	        data:{
+	            values:{
+	            	order_no:api.pageParam.order,
+	                score:score,
+	                SID:server.getCookie()
+	            }
+	        },
+	        timeout:10,
+	        dataType:'text',
+	        returnAll:true,
+	    },function(ret,err){
+	    var tip = '服务器忙，请稍候再试...';
+	    console.log(JSON.stringify(ret));
+	        if(!err && 200 == ret.statusCode){
+	            try{
+	                var result = JSON.parse(ret.body);              
+	                if(result.code == 0){
+	                    api.execScript({
+	                        frameName:'order_index',
+	                        script: 'removeOrder(' + api.pageParam.order + ')'
+                        });
+	                    api.closeFrame();
+	                }
+	            }catch(e){
+	            }   
+	        }else{
+	        api.toast({
+	            msg:tip,
+	            location:'top'
+            });
+	      } 
+	      dom.removeClass('button-loading');         
+      	});
+     }
+ }
+
+	apiready = function(){
+	    delegateEvent();	
+	};
+</script>
+</html>

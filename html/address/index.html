@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no" />
+		<link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+		<style>
+
+		    .container{
+		        margin:0 1rem;
+		    }
+			.delivery{
+			    background:#FFD705;
+				position:relative;
+				height:9rem;
+				border-left:0.5rem solid transparent;
+                font-size:1.2rem;
+                margin:1rem 0;
+                border-radius:1rem;
+			}
+
+			.delivery.default{
+				border-left-color:#6B450A;
+			}
+
+			.delivery p{
+				height:3rem;
+				line-height: 3rem;
+				width:75%;
+				display: inline-block;
+			}
+			.delivery .address{
+				height:6rem;
+				overflow:hidden;
+			}
+    
+			.delivery .address label{
+
+				height:6rem;
+
+			}
+			.delivery .address span{
+				height:6rem;
+				word-break:break-all;
+			}
+			.delivery label{
+				float:left;
+				height:3rem;
+				display:inline-block;
+				width:35%;
+			    text-overflow: ellipsis;
+			    white-space: nowrap;
+			    overflow: hidden;
+                font-weight:bold;
+                text-indent:0.5rem;
+                color:#6B450A;
+			}
+
+			.delivery span{
+				display:inline-block;
+				width:60%;
+			}
+
+			.delivery .delete{
+				right:0;
+				top:0;
+				width:20%;
+				position:absolute;
+				height:4.5rem;
+				text-align:left;
+				background-image: url('../../image/icons/delete.png');
+				background-repeat:no-repeat;
+				background-size:2rem;
+				background-position:50%;
+				border-left:1px dashed #6B450A;
+			}
+			.delivery .edit{
+				width:20%;
+				position:absolute;
+				height:4.5rem;
+				right:0;
+				top:4.5rem;
+				text-align:left;
+				background-image: url('../../image/icons/edit.png');
+				background-repeat:no-repeat;
+				background-size:2rem;
+				background-position:50%;
+				border-left:1px dashed #6B450A;
+				}
+		.no-address{
+            margin:1rem;
+            background:#FFD705;
+            border-radius: 1rem;
+            color:#6B450A;
+            height:9rem;
+            line-height:9rem;
+            font-size:1.4rem;
+            text-align:center;
+        }
+			
+		</style>
+	</head>
+	<body>
+	  <p class="no-address">暂无地址请添加</p>
+		<section class="container">
+
+		</section>
+	</body>
+	<script type="text/html" id="template">
+		<%for(var i = 0; i < addresses.length; i++){%>
+			<section class="delivery <%if(addresses[i].status){%>default<%}%>" >
+
+				<section class="left-area" tapmode="touch-down" data-id="<%=addresses[i].id%>">
+					<p class="phone">
+						<label>联系方式:</label>
+						<span class="number"><%=addresses[i].phone%></span>
+					</p>
+					<p class="address">
+						<label>收货地址:</label>
+						<span><%=addresses[i].address%></span>
+					</p>
+				</section>
+				<p tapmode="touch-down" class="delete" data-id="<%=addresses[i].id%>">
+				</p>
+				<p tapmode="touch-down" class="edit" data-id="<%=addresses[i].id%>">
+				</p>
+			</section>
+		<%}%>
+		
+	</script>
+</html>
+
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/frame.js"></script>
+<script type="text/javascript" src="../../script/model/address.js"></script>
+<script type="text/javascript" src="../../script/model/market.js"></script>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/vendor/template.js"></script>
+<script type="text/javascript">
+    var first = true;
+	function initFront(){
+		var market = new Market();
+		var current = market.getCurrent();
+		var marketID = current.id;
+		$('.edit').on('touchend', function(event){
+			var id = $(this).attr('data-id');
+	   		api.openWin({
+	           name: 'address_form',
+	           url: 'widget://html/address/form.html',
+	           pageParam:{
+	               id:id,
+	               marketID:marketID
+	           }
+	        });
+		});
+
+		$('.delete').on('touchend', function(event){
+			var id = $(this).attr('data-id');
+			var dom =$(this).parent(); 
+	   		var address = new Address();
+	   		address.remove(marketID,id);
+	   		api.confirm({
+					    title: '温馨提示',
+					    msg: '确定要删除么',
+					    buttons: ['确定', '取消']
+					}, function(ret, err){
+					   if(1 ==ret.buttonIndex){
+					       dom.remove();
+					       request();
+					   }else {
+					      return;
+					   }
+				  });
+				 initFront();  
+	   	    });
+
+		$('.left-area').on('touchend', function(event){
+			var id  = $(this).attr('data-id');
+			$('.delivery.default').removeClass('default');
+			$(this).parent('.delivery').addClass('default');
+			var address = new Address();
+			address.setDefault(marketID,id);
+            if(api.pageParam.autoClose){
+                setTimeout(api.closeWin, 300);
+            }
+		});
+
+		api.parseTapmode();
+	}
+	function render(addresses){
+	console.log(JSON.stringify(addresses));
+	 if(addresses.length){
+	 $('.no-address').hide();
+	 var data = {
+			addresses:addresses,
+		}
+		 var html = baidu.template("template", data);
+		 $('.container').html(html);
+	 }else {
+	    $('.no-address').show();
+	 }
+		initFront();
+	}
+	
+	function request(){
+		var market = new Market();
+		var current = market.getCurrent();
+		var marketID = current.id;
+		var address = new Address();
+		var stored = address.list(marketID);
+		render(stored);
+	}
+
+	apiready = function() {
+		request();
+		api.addEventListener({
+	        name:'viewappear'
+        },function(ret,err){
+        	request();
+        });
+	}
+</script>

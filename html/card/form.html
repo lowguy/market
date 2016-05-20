@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+        <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+        <style>
+            .header {
+                height: 4rem;
+                background-color: #FFFFFF;
+                position: relative;
+                font-size: 1.2rem;
+                font-weight: bold;
+                border-bottom: 1px solid #EFEFEF;
+                padding: 0.5rem 0;
+            }
+            .divider {
+                border-top: 0;
+            }
+            .header p {
+                height: 4rem;
+                line-height: 4rem;
+            }
+            .back {
+                position: absolute;
+                top: 0.5rem;
+                padding-left: 2rem;
+                background-size: 2rem;
+                background-position: 1rem 50%;
+                background-repeat: no-repeat;
+                background-image: url('../../image/icons/arrow-left-black.png');
+            }
+            .button-loading {
+                background-image: url("../../image/loading.gif");
+                background-size: 3rem;
+                background-repeat: no-repeat;
+                background-position: 50%;
+                text-indent: -150%;
+            }
+            .title {
+                font-size: 1.4rem;
+            }
+            .title:before {
+                content: '添加';
+            }
+            .field-group {
+                height: 4rem;
+                padding: 1rem 0;
+                margin: 0 1rem;
+                line-height: 4rem;
+                border-bottom: 1px solid #EFEFEF;
+            }
+            .field-group input {
+                height: 4rem;
+                line-height: normal;
+                outline: none;
+                width: 70%;
+                font-size: 1.3rem;
+            }
+            label {
+                display: inline-block;
+                width: 25%;
+                font-size: 1.3rem;
+            }
+            .type-item {
+                display: inline-block;
+                width: 30%;
+            }
+            .type-item span {
+                display: inline-block;
+                height: 1.6rem;
+                line-height: 1.6rem;
+                font-size: 1.3rem;
+                vertical-align: middle;
+            }
+            .checkbox {
+                width: 1.6rem;
+                border-radius: 1rem;
+                border: 1px solid #EFEFEF;
+                position: relative;
+            }
+            .checkbox a {
+                position: absolute;
+                left: 0.3rem;
+                top: 0.3rem;
+                display: inline-block;
+                width: 1rem;
+                height: 1rem;
+                border-radius: 0.5rem;
+                background-color: #EFEFEF
+            }
+            .checkbox.checked {
+                border-color: #FFD705;
+            }
+            .checkbox.checked a {
+                background-color: #FFD705;
+            }
+            .save {
+                margin: 0 1rem;
+                margin-top: 5rem;
+                height: 4rem;
+                line-height: 4rem;
+                text-align: center;
+                font-size: 1.4rem;
+                font-weight: bold;
+                color: #6B450A;
+                background-color: #FFD705;
+                border-radius: 1rem;
+            }
+        </style>
+    </head>
+    <body>
+        <header>
+            <section class="header text-center">
+                <p tapmode="touch-down" class="back">
+                    返回
+                </p>
+                <p class="title">
+                    提现渠道
+                </p>
+            </section>
+        </header>
+        <section class="container" >
+            <section class="divider"></section>
+            <section class="field-group">
+                <label>类型</label>
+                <span tapmode="touch-down" class="type-item"> <span class="checkbox checked" data-type="2"><a></a></span><span>支付宝</span> </span>
+                <span tapmode="touch-down" class="type-item"> <span class="checkbox" data-type="1"><a></a></span><span>银行卡</span> </span>
+            </section>
+            <section class="alipay">
+                <section class="field-group">
+                    <label for="account">支付宝账号</label>
+                    <input tapmode="touch-down" placeholder="必填，请输入您的支付宝账号" id="account" name="account"/>
+                </section>
+            </section>
+            <section class="bank hidden">
+                <section class="field-group">
+                    <label for="ali-account">开户行</label>
+                    <input tapmode="touch-down" placeholder="必填，例如工商银行" id="bank" name="bank"/>
+                </section>
+                <section class="field-group">
+                    <label for="ali-account" type="tel">银行卡号</label>
+                    <input type="tel" tapmode="touch-down" placeholder="必填，请输入您的银行卡号" id="card" name="card"/>
+                </section>
+            </section>
+            <section class="field-group">
+                <label for="name">姓名</label>
+                <input tapmode="touch-down" placeholder="必填，请输入您的真实姓名" id="name" name="name"/>
+            </section>
+            <section class="field-group">
+                <label for="phone">手机号码</label>
+                <input type="tel" id="phone" name="phone" placeholder="必填，请输入您的手机号码" />
+            </section>
+            <p class="save" tapmode="touch-down">
+                保存
+            </p>
+        </section>
+    </body>
+</html>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/model/address.js"></script>
+<script type="text/javascript" src="../../script/model/market.js"></script>
+<script type="text/javascript" src="../../script/model/user.js"></script>
+<script type="text/javascript" src="../../script/api/server.js"></script>
+<script type="text/javascript">
+    function initFront() {
+        fixStatusBar($('header'));
+    }
+
+    function delegateEvent() {
+        $('#card').on('keyup mouseout input', function() {
+            this.value = this.value.replace(/\s/g, '').replace(/(\d{4})(?=\d)/g, "$1 ");
+        });
+        touchEvent('.back', function() {
+            api.closeWin();
+        });
+        touchEvent('.save', save);
+        touchEvent('.type-item', function(obj) {
+            var checkbox = $(obj).children('.checkbox');
+            if (!checkbox.hasClass('checked')) {
+                $('.type-item .checkbox').toggleClass('checked');
+                checkbox = $('.checkbox.checked');
+                var type = checkbox.attr('data-type');
+                type = parseInt(type);
+                if (type == 1) {
+                    $('.alipay').hide();
+                    $('.bank').show();
+                } else if (type == 2) {
+                    $('.bank').hide();
+                    $('.alipay').show();
+                }
+            }
+        });
+    }
+
+    function save() {
+        var dom = $('.save');
+        var type = $('.checkbox.checked').attr('data-type');
+        if (!dom.hasClass('button-loading')) {
+            var account = $('#account').val();
+            var card = $('#card').val();
+            var bank = $('#bank').val();
+            var name = $('#name').val();
+            var phone = $('#phone').val();
+            if (type == 1) {
+                account = card;
+                if (!card || !bank || !name || !phone) {
+                    api.toast({
+                        msg : '请完善您的信息，谢谢！'
+                    });
+                    return;
+                }
+            } else if (!account || !name || !phone) {
+                    api.toast({
+                        msg : '请完善您的信息，谢谢！'
+                    });
+                    return;
+                }
+            dom.addClass('button-loading');
+            var server = new Server();
+            var url = server.getOne() + "/user/card/index";
+            api.ajax({
+                url : url,
+                method : 'post',
+                cache : false,
+                data : {
+                    values : {
+                        type : type,
+                        account : account,
+                        bank : bank,
+                        name : name,
+                        phone : phone,
+                        SID : server.getCookie()
+                    }
+                },
+                timeout : 10,
+                dataType : 'text',
+                returnAll : true,
+            }, function(ret, err) {
+                var tip = '服务器忙，请稍候再试...';
+                if (!err && 200 == ret.statusCode) {
+                    try {
+                        var result = JSON.parse(ret.body);
+                        if (result.code == 0) {
+                            tip = '保存成功';
+                            setTimeout(function() {
+                                api.closeWin();
+                            }, 500);
+                        } 
+                    } catch(e) {
+                    }
+                }
+                    api.toast({
+                    location : 'middle',
+                    msg : tip
+                });
+                dom.removeClass('button-loading');
+            })
+        }
+    }
+
+    apiready = function() {
+        initFront();
+        delegateEvent();
+    }
+</script>

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+        <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+        <link rel="stylesheet" type="text/css" href="../../css/layout.css"/>
+        <style>
+             header{
+                 position:fixed;
+                 width:100%;
+                 z-index:2;
+                 top:0;
+                 background-color:transparent;
+             }
+             
+             header.white button{
+                 color:#FFFFFF;
+             }
+             header.white .market{
+                 background-color:rgba(0,0,0,0.4);
+                 border-radius: 2rem
+             }
+             header.white .market span{
+                 background-image:url('../../image/icons/location-white.png');
+             }
+             header.white .search{
+                 background-image: url('../../image/icons/search-white.png');
+             }
+
+             header.white .scanner{
+                 background-image: url('../../image/icons/scanner-white.png');
+             }
+
+             .header{
+                 padding:0.5rem 1rem;
+             }
+
+            .container {
+                height:100%;
+                display:none;
+            }
+            .category-icon {
+                max-width: 100%;
+                border-radius: 1.5rem;
+                width: 4rem;
+                height: 4rem;
+            }
+            .recommend {
+                overflow: auto;
+                font-size:1.2rem;
+            }
+            .activity-wrapper{
+                padding:1rem 0;
+                font-size:1.3rem;
+                overflow:auto;
+                position: relative;
+            }
+            .activity-wrapper .vertical-divider{
+                width:1px;
+                background:#EFEFEF;
+                height:100%;
+                position:absolute;
+                left:50%;
+                top:0;
+            }
+            .activity-item{
+                width:50%;
+                float: left;
+            }
+
+            .recommend-title{
+                font-size:1.2rem;
+                height:3rem;
+                line-height:3rem;
+                text-indent:1rem;
+                color:#808080;
+                border-left:0.5rem solid #FFD705;
+            }
+            .categories {
+                overflow: auto;
+                font-size: 1.3rem;
+                padding:0.5rem 0;
+            }
+            .categories .four-column {
+                padding: 0.5rem 0;
+            }
+            .banner{
+                width:100%;
+            }   
+            .four-column{
+                width:25%;
+                float:left;
+                overflow: auto;
+            }           
+            .two-column{
+                padding:0 0.5rem;
+            }
+
+            .goods {
+                text-align:center;
+                overflow: auto;
+                border-bottom:0.3rem solid #EFEFEF;
+            }
+            .goods-wrapper{
+                width:50%;
+                float:left;
+                overflow:auto;
+                background-color:#EFEFEF;
+            }
+            .goods .item {
+                position: relative;
+                margin-bottom:0.2rem;
+                background-color:#FFFFFF;
+            }
+            .goods .goods-wrapper:nth-child(odd) .item{
+                margin-right:0.1rem;
+            }
+            .goods .goods-wrapper:nth-child(even) .item{
+                margin-left:0.1rem;
+            }
+            .item .goods-thumb {
+                max-width: 80%;
+            }
+            .item .title {
+                height: 1.5rem;
+                font-size: 1.3rem;
+                line-height: 1.5rem;
+                font-weight:normal;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                padding:0 1rem;
+            }
+            .item .advertisement{
+                height: 1.4rem;
+                font-size: 1.2rem;
+                line-height: 1.4rem;
+                color:#808080;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                padding:0 1rem;
+
+            }
+            .item .bottom {
+                width: 100%;
+                height:3rem;
+                position: relative;
+                font-weight: bold;
+                padding-bottom:0.5rem;
+            }
+            .bottom .operation {
+                text-align: right;
+                position:absolute;
+                right:0;
+                display: inline-block;
+                width: 75%;
+                height:3rem;
+            }
+            .bottom .add {
+                height:3rem;
+                padding-right: 1rem;
+                display: inline-block;
+            }
+            .bottom .icon {
+                height: 2.5rem;
+                width: 2.5rem;
+                background-size: 1.5rem;
+                background-position: 50%;
+                border: 1px solid #EFEFEF;
+                display: inline-block;
+                border-radius: 100%;
+                background-repeat: no-repeat;
+                margin-top:0.15rem;
+            }
+            .bottom .add .icon {
+                background-image: url("../../image/icons/add.png");
+            }
+            .money-symbol {
+                text-align: left;
+                font-size:1.5rem;
+                position:absolute;
+                left: 1rem;
+                display: inline-block;
+                width: 20%;
+                height: 3rem;
+                line-height:3rem;
+                color:red;
+            }
+            .bottom .sub {
+                height:3rem;
+                padding-left: 1rem;
+                display: inline-block;
+                visibility: hidden;
+            }
+            .bottom .sub.show {
+                visibility: visible;
+            }
+            .bottom .sub .icon {
+                background-image: url("../../image/icons/sub.png");
+            }
+            .bottom .number {
+                visibility: hidden;
+                display:inline-block;
+                width:1.8rem;
+                height:3rem;
+                line-height:3rem;
+                color:#808080;
+                font-size:1.2rem;
+                text-align: center;
+                text-overflow: ellipsis;
+                word-wrap: normal;
+                overflow: hidden;
+                vertical-align:top;
+            }       
+            .bottom .number.show {
+                visibility: visible;
+            }
+        </style>
+    </head>
+    <body>
+        <header class="white">
+            <section class="header">
+                <button tapmode="touch-down" class="scanner">扫一扫</button>
+                <button tapmode="touch-down" class="market"><span>定位...</span></button>
+                <button tapmode="touch-down" class="search">搜一搜</button>
+            </section>
+        </header>
+        <p class="network-error"></p>
+
+        <section class="container">
+            <section>
+                <img class="banner" src="../../image/banners/mall.png"/>
+            </section>
+            <section class="categories text-center">
+            </section>
+            <section class="divider"></section>
+            <section class="recommend-title">
+                特惠活动
+            </section>
+            <section class="divider"></section>
+            <section class="activity-wrapper">
+                <img tapmode="touch-down" class="activity-item hot" src="../../image/icons/activity-hot.png" data-id="1" />
+                <img tapmode="touch-down" class="activity-item daily" src="../../image/icons/activity-daily.png" data-id="2" />
+                <p class="vertical-divider"></p>
+            </section>
+            <section class="divider"></section>
+            <section class="recommend-title">
+                实时推荐
+            </section>
+            <section class="divider"></section>
+            <section class="recommend clear-all text-center">
+            </section>
+        </section>
+        <script id="categories" type="text/html">
+            <%for(var i = 0; i < categories.length; i++){%>
+                <section tapmode="touch-down" class="four-column" data-id="<%=categories[i].id%>">
+                    <img class="category-icon" src="../../image/categories/<%=categories[i].id%>.png"/>
+                    <p>
+                        <%=categories[i].name%>
+                    </p>
+                </section>
+            <%}%>
+        </script>
+        <script id="goods" type="text/html">
+            <section class="goods">
+            <%for(var i = 0; i < goods.length; i++){%>
+                <section class="goods-wrapper">
+                    <section class="item" data-id="<%=goods[i].id%>" data-price="<%=goods[i].price%>" data-title="<%=goods[i].title%>" data-slogan="<%=goods[i].slogan%>">
+                        <p class="text-center">
+                            <img tapmode="touch-down" class="goods-thumb" src="../../image/products/<%=goods[i].id%>.JPG"/>
+                        </p>
+                        <p class="title">
+                            <span><%=goods[i].title%></span>
+                        </p>
+                        <p class="advertisement"><%=goods[i].slogan%></p>
+                        <section class="bottom text-ellipsis">
+                            <p>
+                                <span class="money-symbol"><%=goods[i].price%></span>
+                                <span class="operation"> 
+                                    <span tapmode="touch-down" class="sub"> 
+                                        <span class="icon"></span> 
+                                    </span> 
+                                    <span class="number">1</span> 
+                                    <span tapmode="touch-down" class="add"> 
+                                        <span class="icon"></span> 
+                                    </span> 
+                                </span>
+                            </p>
+                        </section>
+                    </section>
+                </section>
+            <%}%>
+            </section>
+        </script>
+    </body>
+</html>
+
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/window.js"></script>
+<script type="text/javascript" src="../../script/frame.js"></script>
+<script type="text/javascript" src="../../script/model/market.js"></script>
+<script type="text/javascript" src="../../script/model/category.js"></script>
+<script type="text/javascript" src="../../script/model/goods.js"></script>
+<script type="text/javascript" src="../../script/model/cart.js"></script>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/vendor/template.js"></script>
+<script type="text/javascript" src="../../script/api/server.js"></script>
+<script type="text/javascript">
+    var first = true;//标志变量
+    var lastUpdated = 0;//数据最后更新时间
+    function openGoodsDetail(obj){
+        var _this = $(obj).parents('.item');
+        var params = [];
+        params.push($(_this).attr('data-id'));
+        params.push('"' + $(_this).attr('data-price') + '"');
+        params.push('"' + $(_this).attr('data-title') + '"');
+        params.push('"' + $(_this).attr('data-slogan') + '"');
+        api.execScript({
+	        script: 'openGoodsFrame(' + params.join(',') + ')'
+        });
+    }
+
+    function openMall(obj){
+        var animation = {
+            type:'none',
+            duration:300
+        };
+
+        var delay = 0;
+        var id = $(obj).attr('data-id');
+ 
+        api.execScript({
+            name:'mall',
+            script: 'categoryChange(' + id + ');'
+        });
+        setTimeout(function(){
+            pageParam={categoryID:id}
+            openWin('mall','mall',animation,delay,pageParam,false);
+        }, 100);
+    }
+
+    function opacityHeader(percent){
+        percent = percent > 1 ? 1 : percent;
+        var dom = $('header');
+        dom.css('background-color', 'rgba(255,215,5,' + percent +')');
+        if(percent < 0.5){
+            $('header').addClass('white');
+        }
+        else{
+            $('header').removeClass('white');
+        }
+    }
+
+    function delegateEvent(){
+        $(window).on('scroll', function(){
+            var header = $('header');
+            var offset = $(window).scrollTop();
+            opacityHeader(offset / header.height() * 0.3);
+        });
+        touchEvent('.goods-thumb', openGoodsDetail);
+
+        touchEvent('.four-column', openMall);
+
+        touchEvent('.add', addCart);
+
+        touchEvent('.sub', subCart);
+        
+        touchEvent('.activity-item', openActivity);
+    }
+    
+    function openActivity(obj){
+        var animation = {
+            type:'none',
+            duration:300
+        };
+
+        var delay = 0;
+        var id = $(obj).attr('data-id');
+ 
+        api.execScript({
+            name:'activity',
+            script: 'activityChange(' + id + ');'
+        });
+        setTimeout(function(){
+            pageParam={activityID:id}
+            openWin('activity','activity',animation,delay,pageParam,false);
+        }, 100);
+    }
+
+    function initFront(){
+
+        showNumber();
+
+    }
+
+
+    function showNumber(){
+        $.each($('.goods-wrapper'), function(i, dom){
+            var market = new Market();
+            var current = market.getCurrent();
+            var cart = new Cart();
+            var cartGoods = cart.list(current.id);
+            var inCart = false;
+            var number = 0;
+            var _this = $(dom).find('.item');
+            $.each(cartGoods, function(j, goods){
+                if($(_this).attr('data-id') == goods.id)
+                {
+                    inCart = true;
+                    number = goods.number;
+                    return false;
+                }               
+            });
+            
+            if(inCart)
+            {
+                $(_this).find('.sub').addClass('show');
+                $(_this).find('.number').html(number).addClass('show');
+            }
+            else
+            {
+                $(_this).find('.sub').removeClass('show');
+                $(_this).find('.number').html(number).removeClass('show');
+            }
+        });
+        
+    }
+    
+    function addCart(obj){
+        var marketModel = new Market();
+        var current = marketModel.getCurrent();
+        var cart = new Cart();
+        
+        var goodsID = $(obj).parents('.item').attr('data-id');
+        cart.add(current.id, goodsID);
+        showNumber();
+        api.execScript({
+	        script: 'updateCartNumber();'
+        });
+    }
+
+    function subCart(obj){
+        var marketModel = new Market();
+        var current = marketModel.getCurrent();
+        var cart = new Cart();
+        
+        var goodsID = $(obj).parents('.item').attr('data-id');
+        cart.sub(current.id, goodsID);
+        showNumber();
+        api.execScript({
+            script: 'updateCartNumber();'
+        });
+    }
+
+    function render(ret){
+    
+        var categoryModel = new Category();
+        categoryModel.load(function(){
+            var categories = categoryModel.listTop(ret.categories);
+            var html=baidu.template('categories',{categories:categories});
+            $('.categories').html(html);
+            var goodsModel = new Goods();
+            goodsModel.load(function(){
+                var goods = goodsModel.merge(ret.recommend);
+                var html=baidu.template('goods',{goods:goods});
+                $('.recommend').html(html);
+                initFront();
+                if('none' == $('.container').css('display'))
+                {
+                    $('.container').fadeIn(300);
+                }
+
+                api.parseTapmode();
+            });
+        });
+    }
+
+    function ajaxComplete(){
+        api.refreshHeaderLoadDone();
+        if(first){
+            first = false;
+            setTimeout(function(){
+                api.removeLaunchView({
+                    animation: {
+                        type: 'none',
+                        duration: 100
+                    }
+                });
+            }, 200);
+
+        }
+    }
+    
+    function request(){
+        var market = new Market();      
+        var current = market.getCurrent();
+        var server = new Server();
+        var url = server.getOne() + "/customer/home/index?id=" + current.id;
+
+        api.ajax({
+            url:url,
+            cache:true,
+            timeout:5,
+            dataType:'text',
+            returnAll:true,
+        },function(ret,err){
+            if(!err && 200 == ret.statusCode){
+                try{
+                    var body = JSON.parse(ret.body);
+                    render(body.data);
+                    lastUpdated = timestamp();
+                }catch(e){}
+            }
+
+            ajaxComplete();
+        });
+    }
+
+    apiready = function() {
+        initNavigator();
+
+        onMarketChange(function(){
+            var market = new Market();
+            var current = market.getCurrent();
+            $('header .market span').html(current.district);
+            api.refreshHeaderLoading();
+
+        });
+
+        delegateEvent();
+
+        request();
+
+        onNetworkChanged(request, function(){
+            var now = timestamp();
+            if(now - lastUpdated > 10){
+                api.refreshHeaderLoading();
+            }
+        });
+
+        api.addEventListener({
+            name:'viewappear'
+        },function(ret,err){
+            showNumber();
+            updateCartNumber();
+        });
+
+        api.addEventListener({
+            name:'resume'
+        },function(ret,err){
+            var now = timestamp();
+            if(now - lastUpdated > 3600){
+                api.refreshHeaderLoading();
+            }
+        });
+    }
+</script>

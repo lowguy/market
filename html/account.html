@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="stylesheet" type="text/css" href="../css/base.css"/>
+    <style>
+        header{
+            background-color: #FFFFFF;
+        }
+        .header{
+            height: 4rem;
+            position: relative;
+            font-size:1.2rem;
+            font-weight:bold;
+            border-bottom:1px solid #EFEFEF;
+            padding:0.5rem 0;
+        }
+
+        .header p{
+            height:4rem;
+            line-height:4rem;
+        }
+        .back{
+            position:absolute;
+            top:0.5rem;
+            padding-left:2rem;
+            background-size:2rem;
+            background-position: 1rem 50%;
+            background-repeat:no-repeat;
+            background-image:url('../image/icons/arrow-left-black.png');
+        }
+        .title{
+            font-size:1.4rem;
+        }
+        .qrcode {
+            padding:0 2rem;
+        }
+        .qrcode img{
+            width:100%;
+        }
+
+        button{
+            height:6rem;
+            width:100%;
+            font-size:1.4rem;
+            font-weight:bold;
+        }
+        .password {
+            border:1px solid #EFEFEF;
+            border-left:0;
+            border-right:0;
+        }
+        .quit{
+            color:red;
+            border-bottom:1px solid #EFEFEF;
+        }
+    </style>
+</head>
+<body>
+	<header>
+		<section class="header text-center">
+            <p tapmode="touch-down" class="back">返回</p>
+            <p class="title">用户中心</p>
+        </section>
+	</header>
+    <section class="container">
+        <section class="qrcode">
+                <img />
+        </section>
+        <section class="button-wrapper">
+            <button tapmode="touch-down" class="password">修改密码</button>
+            <button tapmode="touch-down" class="quit">退出</button>
+        </section>
+    </section>
+</body>
+</html>
+<script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/model/user.js"></script>
+<script type="text/javascript" src="../script/api/server.js"></script>
+<script type="text/javascript">
+
+function initFront(){
+    fixStatusBar($('header'));
+    genQRCode();
+    $('.back').on('touchend', function(){
+        api.closeWin({});
+    });
+    $('button.password').on('touchend',function(){
+    	api.openWin({
+            name: 'password',
+            url: 'widget://html/password.html'
+        });
+    });
+    
+    $('button.quit').on('touchend',function(){
+		logout();
+    });
+}
+
+function logout(){
+	var server = new Server();
+    var url = server.getOne() + '/user/sign/out';
+    api.ajax({
+        url:url,
+        cache:false,
+        timeout:10,
+        dataType:'text',
+        returnAll:true,
+        method:"post",
+        data:{
+            values:{
+                SID:server.getCookie()
+            }
+        }
+    },function(ret,err){
+        if(!err && 200 == ret.statusCode){
+            try{
+               var body = JSON.parse(ret.body);
+               if(body.code == 0){
+               		var user = new User();
+               		user.setLogin(0);
+					server.clear();
+					api.closeWin();
+               }else{
+                   api.toast({
+                       msg:'服务器忙， 请稍后再试！'
+                   });
+               }
+            }catch(e){}
+        }
+    });
+}
+function genQRCode(callback){
+    var scanner = api.require('FNScanner');
+    var userModel = new User();
+    var user = userModel.get();
+    var content = 'xiaoxiaojia://' + user.id;
+    var path = 'fs://xiaoxiaojia/qrcode.png';
+    scanner.encodeImg({
+        content: content,
+        saveImg: {
+            path: path,
+            w: 400,
+            h: 400
+        }
+    },function( ret, err ){
+        if( ret.status ){
+            var trans = api.require('trans');
+            trans.decodeImgToBase64({
+                imgPath:path
+            },function(ret,err){
+                if(ret.status) {
+                    var src = 'data:image/png;base64,' + ret.base64Str;
+                    $('.qrcode img').attr('src', src);
+                }else{
+                    api.toast({
+                        msg:'二维码生成失败， 请检查您的磁盘空间'
+                    });
+                }
+            });
+        }else{
+            api.toast({
+	            msg:'二维码生成失败， 请检查您的磁盘空间'
+            });
+        }
+    });
+}
+
+apiready = function(){
+	initFront();
+}
+
+</script>

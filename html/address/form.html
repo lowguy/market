@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+	<style>
+
+		.header{
+			height: 4rem;
+			background-color: #FFFFFF;
+			position: relative;
+			font-size:1.2rem;
+			font-weight:bold;
+			border-bottom:1px solid #EFEFEF;
+			padding:0.5rem 0;
+		}
+		.divider{
+			border-top:0;
+		}
+
+		.header p{
+			height:4rem;
+			line-height:4rem;
+		}
+		.back{
+			position:absolute;
+			top:0.5rem;
+			padding-left:2rem;
+			background-size:2rem;
+			background-position: 1rem 50%;
+			background-repeat:no-repeat;
+			background-image:url('../../image/icons/arrow-left-black.png'); 
+		}
+		
+		.title {
+			font-size:1.4rem;
+		}
+		.title:before{
+			content:'添加';
+		}
+		.title.edit:before{
+			content:'编辑';
+		}
+
+		.field-group{
+			height:4rem;
+			padding:1rem 0;
+			margin:0 1rem;
+			line-height:4rem;
+		    border-bottom: 1px solid #EFEFEF;
+		}
+		.field-group input{
+			 height:4rem;
+            line-height:normal;
+            outline:none;
+            width:70%;
+            font-size:1.3rem;
+		}
+
+		label{
+			display:inline-block;
+			width:25%;
+			font-size:1.3rem;
+		} 
+            .save{
+            margin:0 1rem;
+            margin-top:5rem;
+            height:4rem;
+            line-height:4rem;
+            text-align:center;
+            font-size:1.4rem;
+            font-weight:bold;
+            color:#6B450A;
+            border-radius: 1rem;
+            background-color:#FFD705;
+        }
+		
+
+	</style>
+</head>
+<body>
+	<header>
+		<section class="header text-center">
+			<p tapmode="touch-down" class="back">返回</p>
+			<p class="title">地址</p>
+		</section>
+	</header>
+
+    <section class="container" >
+ 		<section class="divider">
+ 		</section>
+ 		<section class="field-group">
+ 			<label for="address">收货地址</label>
+ 			<input tapmode="touch-down" placeholder="必填，请选择建筑物、小区或道路" onfocus="this.blur();" id="address" name="address"/>
+ 		</section>
+        <section class="field-group">
+            <label for="phone">手机号码</label>
+            <input type="tel" id="phone" name="phone" placeholder="必填，请输入收货人的手机号码" />
+        </section>
+        <section class="field-group">
+            <label for="detail">详细地址</label>
+            <input placeholder="选填，请输入门牌号或村庄名" id="detail" name="detail"/>
+        </section>
+        <p class="save" tapmode="touch-down">保存</p>
+    </section>
+</body>
+</html>
+
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/model/address.js"></script>
+<script type="text/javascript" src="../../script/model/market.js"></script>
+<script type="text/javascript" src="../../script/model/user.js"></script>
+<script type="text/javascript">
+var id = 0,marketID=0;
+var detail = '';
+var lon = 0;
+var lat = 0;
+function setAddress(pLon, pLat, name, address){
+	lon = pLon;
+	lat = pLat;
+	detail = address;
+	$('#address').val(name);
+}
+function initFront(){
+   	fixStatusBar($('header'));
+   	$('.back').on('touchend', function(){
+   		api.closeWin();
+   	});
+   	var userModel = new User();
+   	var user = userModel.get();
+   	if(user){
+   	    $('#phone').val(user.account);
+   	}
+	var market = new Market();
+	var current = market.getCurrent();
+	marketID = current.id;
+   	$('.save').on('touchend', function(){
+   		var addressModel = new Address();
+   		var phone = $('#phone').val().trim();
+   		var address = $('#address').val().trim();
+   		var detail = $('#detail').val().trim();
+        if(!address){
+            api.toast({
+                msg:'请选择建筑物、小区或道路'
+            });
+            return;
+        }
+		if(!isCellPhone(phone)){
+			api.toast({
+	            msg:'请输入收货人的手机号码'
+            });
+            return;
+		}
+
+   		if(!id){
+   			addressModel.add(marketID, phone, lon, lat, address, detail);
+   		}
+   		else{
+   			addressModel.edit(marketID,id, phone, lon, lat, address, detail);
+   		}
+   		api.closeWin();
+   	});
+
+   	$('#address').on('touchend', function(){
+   		api.openWin({
+	    	name: 'map',
+	        url: 'widget://html/address/map.html',
+	        reload:false
+        });
+   	});
+
+   	if(id){
+   		var address = new Address();
+   		var current = address.get(marketID,id);
+   		$('#phone').val(current.phone);
+   		$('#address').val(current.address);
+   		$('#detail').val(current.detail);
+   		$('.title').addClass('edit');
+   		lon = current.lon;
+   		lat = current.lat;
+   	}
+}
+
+apiready = function(){
+    var params = api.pageParam;
+    if(params.id){
+    	id = params.id
+    }
+
+	initFront();
+}
+
+</script>
