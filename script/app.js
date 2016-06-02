@@ -48,6 +48,16 @@ function isCellPhone(number){
 	return result;
 }
 
+function isMail(mail){
+    var result = false;
+    if(mail){
+        var pattern = /^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+/;
+        result = pattern.test(mail);
+    }
+
+    return result;
+}
+
 function showMarket(){
 
 	api.openWin({
@@ -56,7 +66,7 @@ function showMarket(){
         slidBackEnabled:false,
 	    animation:{
 	    	type:'none',
-	    	duration:300
+	    	duration:500
 	    }
     });
 }
@@ -66,7 +76,7 @@ function hideMarket(){
 		name: 'market',
 	    animation:{
 	    	type:'none',
-	    	duration:300
+	    	duration:500
 	    }
     });
 }
@@ -119,12 +129,37 @@ function openURL(url){
     });
 }
 
+function loadImage(dom, id, blank, version){
+    dom.onload = null;
 
+    var url = 'http://static.xxj365.com/upload/product/' + id +'.JPG';
+    version = version || 0;
+    url += '?version=' + version;
+    var cache = function(){
+        api.imageCache({
+            url: url,
+            policy:'cache_only',
+            thumbnail:false
+        }, function(ret, err){
+  
+            if(ret.status){
+                dom.src = ret.url;
+            }
+            else{
+                dom.src = blank;
+            }
+        });
+    }
+    dom.onerror = function(){
+        dom.onerror = null;
+        cache();
+    }
+    cache();
+}
 
 function pushAddAlias(uid){
     var push = api.require('ajpush');
-    var param = {alias:uid};
-    push.bindAliasAndTags(param,function(ret) {
-        console.log(ret.statusCode);
+    var param = {tags:[uid]};
+    push.bindAliasAndTags(param,function(ret, err) {
     });
 }

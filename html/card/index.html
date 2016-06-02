@@ -13,14 +13,14 @@
                 border-radius:1rem;
                 margin: 1rem;
                 position:relative;
-                height:12rem;
+                height:10rem;
+                padding-bottom:1rem;
             }
             .card .content{
                 position:absolute;
                 left:0;
                 width:80%;
-                border-right:1px dashed #6B450A;
-                height:6rem;
+                height:4rem;
             }
             .card.default .content{
                 width:100%;
@@ -46,7 +46,7 @@
                 position: absolute;
                 right: 0;
                 top: 6rem;
-                height: 6rem;
+                height: 5rem;
                 width:20%;
                 background-size: 2rem;
                 background-position: 50%;
@@ -65,7 +65,7 @@
             .card.default .delete {
                 display: none;
             }
-            .no-data{
+            .no-cards{
 	            margin:1rem;
 	            background:#FFD705;
 	            border-radius: 1rem;
@@ -79,7 +79,8 @@
     </head>
     <body>
         <p class="network-error"></p>
-        <section class="container"></section>
+        <section class="container">
+        </section>
     </body>
     <script type="text/html" id="template">
     	<%if(card.length > 0){%>
@@ -90,14 +91,13 @@
 	            <section class="content">
 	                <p class="account"><label>账号:</label><span class="value"><%=card[i].account%></span></p>
 	                <p class="name"><label>姓名:</label><span class="value"><%=card[i].name%></span></p>
-	                <p class="phone"><label>手机:</label><span class="value"><%=card[i].phone%></span></p>
 	            </section>
 	            <section tapmode="touch-down"  class="delete"></section>
 	        </section>
 	        <%}%>
 	        </section>
         <%}else{%>
-        	<p class="no-data">暂无数据</p>
+        	<p class="no-cards">暂无数据</p>
         <%}%>
     </script>
 </html>
@@ -151,16 +151,10 @@
             url : url,
             method : 'post',
             cache : false,
-            data : {
-                values : {
-                    SID : server.getCookie()
-                }
-            },
             timeout : 10,
             dataType : 'text',
-            returnAll : true,
+            returnAll : true
         }, function(ret, err) {
-        console.log(JSON.stringify(ret));
             if (!err && 200 == ret.statusCode) {
                 try {
                     var result = JSON.parse(ret.body);
@@ -220,7 +214,6 @@
             cache : false,
             data : {
                 values : {
-                    SID : server.getCookie(),
                     id : id
                 }
             },
@@ -261,7 +254,6 @@
             cache : false,
             data : {
                 values : {
-                    SID : server.getCookie(),
                     id : id
                 }
             },

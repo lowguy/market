@@ -59,9 +59,8 @@
 
 			.delivery span{
 				display:inline-block;
-				width:60%;
+				width:65%;
 			}
-
 			.delivery .delete{
 				right:0;
 				top:0;
@@ -102,12 +101,12 @@
 		</style>
 	</head>
 	<body>
-	  <p class="no-address">暂无地址请添加</p>
 		<section class="container">
 
 		</section>
 	</body>
 	<script type="text/html" id="template">
+	<%if(addresses.length > 0){%>
 		<%for(var i = 0; i < addresses.length; i++){%>
 			<section class="delivery <%if(addresses[i].status){%>default<%}%>" >
 
@@ -118,7 +117,7 @@
 					</p>
 					<p class="address">
 						<label>收货地址:</label>
-						<span><%=addresses[i].address%></span>
+						<span><%=addresses[i].address%><%if(addresses[i].detail){%>(<%=addresses[i].detail%>)<%}%></span>
 					</p>
 				</section>
 				<p tapmode="touch-down" class="delete" data-id="<%=addresses[i].id%>">
@@ -127,6 +126,9 @@
 				</p>
 			</section>
 		<%}%>
+		 <%}else{%>
+        	<p class="no-address">暂无地址</p>
+        <%}%>
 		
 	</script>
 </html>
@@ -154,7 +156,7 @@
 	           }
 	        });
 		});
-
+		
 		$('.delete').on('touchend', function(event){
 			var id = $(this).attr('data-id');
 			var dom =$(this).parent(); 
@@ -168,11 +170,8 @@
 					   if(1 ==ret.buttonIndex){
 					       dom.remove();
 					       request();
-					   }else {
-					      return;
 					   }
 				  });
-				 initFront();  
 	   	    });
 
 		$('.left-area').on('touchend', function(event){
@@ -189,17 +188,12 @@
 		api.parseTapmode();
 	}
 	function render(addresses){
-	console.log(JSON.stringify(addresses));
-	 if(addresses.length){
 	 $('.no-address').hide();
 	 var data = {
 			addresses:addresses,
 		}
 		 var html = baidu.template("template", data);
 		 $('.container').html(html);
-	 }else {
-	    $('.no-address').show();
-	 }
 		initFront();
 	}
 	
@@ -211,7 +205,6 @@
 		var stored = address.list(marketID);
 		render(stored);
 	}
-
 	apiready = function() {
 		request();
 		api.addEventListener({

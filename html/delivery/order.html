@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/merchant/layout.css"/>
+    <style>
+        html,body{
+            background:#6B450A;
+        }
+    	header{
+            background-color:#FFFFFF;
+	    }
+		.header{
+			height: 4rem;
+			position: relative;
+			font-size:1.2rem;
+			font-weight:bold;
+			padding:0.5rem 0;
+		}
+		header button{
+		    color:#222222;
+		}
+		header .market span{
+		    background-image:url('../../image/icons/location.png');
+		}
+
+		.header p{
+			height:4rem;
+			line-height:4rem;
+		}
+		.back{
+			position:absolute;
+			top:0.5rem;
+			padding-left:2rem;
+			background-size:2rem;
+			background-position: 1rem 50%;
+			background-repeat:no-repeat;
+			background-image:url('../../image/icons/arrow-left-black.png');
+		}
+		.title{
+			font-size:1.4rem;
+		}
+		.statistics{
+		    height:6rem;
+		    position:relative;
+		    line-height:6rem;
+		    background-color:#FFD705;
+		    color:#6B450A;
+		    font-size:1.4rem;
+            text-align:center;
+		}
+		.statistics .picker{
+            position:absolute;
+            top:1rem;
+		    width:40%;
+		    height: 4rem;
+            line-height: 4rem;
+            border-right:1px dashed #6B450A;
+		}
+        .statistics .total{
+            position:absolute;
+            width:60%;
+            right:0;
+            top:0;
+            line-height:3rem;
+            text-indent: 1rem;
+            text-align: left;
+        }
+		.picker span{
+		    padding-right:1rem;
+		    background-size:1rem;
+		    background-position:right 50%;
+		    background-repeat:no-repeat;
+		    background-image:url('../../image/icons/arrow-down-coffee.png');
+		}
+		.money-symbol{
+		    color:red;
+		    font-weight:bold;
+		}
+
+    </style>
+</head>
+<body>
+	<header>
+		<section class="header text-center">
+			<p tapmode="touch-down" class="back">返回</p>
+            <button tapmode="touch-down" class="market"><span>定位...</span></button>
+		</section>
+        <section class="statistics">
+              <section class="picker" tapmode="touch-down"><span>----年-月-日</span></section>
+              <section class="total">
+                  <p class="monthly"><label>月配送费：</label><span class="money-symbol">0.00</span></p>
+                  <p class="daily"><label>日配送费：</label><span class="money-symbol">0.00</span></p>
+              </section>
+        </section>
+		<section class="container">
+
+		</section>
+	</header>
+</body>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/model/market.js"></script>
+<script type="text/javascript" src="../../script/model/user.js"></script>
+<script type="text/javascript" src="../../script/api/server.js"></script>
+<script type="text/javascript" src="../../script/delivery/window.js"></script>
+
+<script type="text/javascript">
+    Date.prototype.format = function (fmt) { //author: meizz 
+        var o = {
+            "M+": this.getMonth() + 1,
+            "d+": this.getDate(),
+            "h+": this.getHours(),
+            "m+": this.getMinutes(),
+            "s+": this.getSeconds(),
+            "q+": Math.floor((this.getMonth() + 3) / 3), 
+            "S": this.getMilliseconds()
+        };
+        if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
+    var globalDate = new Date();
+
+	function initFrames(){
+		var header = $('header').height();
+		var winHeight = parseInt(api.winHeight);
+		var height = winHeight - header;
+		api.openFrame({
+		    name: 'delivery_order_index',
+		    url: 'widget://html/delivery/order/index.html',
+		    rect: {
+		        x: 0,
+		        y: header,
+		        w:'auto',
+		        h:height
+		    },
+		    bounces: true,
+		    vScrollBarEnabled:false,
+		    pageParam:{
+		        year:globalDate.getFullYear(),
+		        month:globalDate.getMonth() + 1,
+		        day:globalDate.getDate()
+		    }
+		});
+	}
+
+    function setMonthly(amount){
+        amount = parseFloat(amount);
+        amount = 4 * amount;
+        amount = amount.toFixed(2);
+        $('.monthly span').text(amount);
+    }
+
+    function setDaily(amount){
+        amount = parseFloat(amount);
+        amount = 4 * amount;
+        amount = amount.toFixed(2);
+        $('.daily span').text(amount);
+    }
+
+	function initFront(){
+	   fixStatusBar($('header'));
+       initNavigator();
+       $('.picker span').text(globalDate.getFullYear() + '年' + (globalDate.getMonth() + 1) + '月' + globalDate.getDate() +  '日');
+	}
+
+	function delegateEvent(){
+	   touchEvent('.back', function(){
+	       api.closeWin({});
+	   });
+
+	   touchEvent('.picker', function(){
+	       api.openPicker({
+	           type:'date',
+	           date:globalDate.format('yyyy-MM-dd')
+           },function(ret,err){
+               if(ret){
+                    globalDate.setFullYear(ret.year);
+                    globalDate.setMonth(ret.month - 1);
+                    globalDate.setDate(ret.day);
+                    $('.picker span').text(ret.year + '年' + ret.month + '月' + ret.day + '日');
+                    $('.daily .money-symbol').text('0.00');
+                    var params = [];
+                    params.push(ret.year);
+                    params.push(ret.month);
+                    params.push(ret.day);
+                    api.execScript({
+                        frameName:'delivery_order_index',
+	                    script: 'setDate(' + params.join(',') + ')'
+                    });
+               }
+           });
+	   });
+	}
+
+	apiready = function(){
+		initFront();
+		delegateEvent();
+	    onMarketChange(function(){
+            var market = new Market();
+            var current = market.getCurrent();
+            $('header .market span').html(current.district);
+            var params = [];
+            params.push(globalDate.getFullYear());
+            params.push(globalDate.getMonth() + 1);
+            params.push(globalDate.getDate());
+            api.execScript({
+                frameName:'delivery_order_index',
+                script: 'setDate(' + params.join(',') + ')'
+            });
+        });
+		initFrames();
+	};
+</script>
+</html>

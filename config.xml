@@ -6,15 +6,18 @@
   <author email="anustro@icloud.com" href="http://www.apicloud.com">Anustro</author>  
   <content src="html/root.html"/>  
   <preference name="appBackground" value="rgba(0,0,0,0)"/>  
+  <preference name="windowBackground" value="rgba(255,255,255,1)"/>  
   <preference name="frameBackgroundColor" value="rgba(0,0,0,0)"/>  
   <preference name="autoLaunch" value="false"/>  
   <preference name="autoUpdate" value="true"/>  
   <preference name="smartUpdate" value="true"/>  
   <preference name="debug" value="true"/>  
   <preference name="iOS7StatusBarAppearance" value="true"/>  
+  <preference name="customRefreshHeader" value="UIPullRefreshFlash"/>  
+  <preference name="urlScheme" value="xiaoxiaojia"/>  
   <permission name="location"/>  
   <permission name="internet"/>  
-  <access origin="*"/>  
+  <access origin="local"/>  
   <feature name="xMap"> 
     <param name="android_api_key" value="GWKXllLiqvv1cKlEkxVk8WA8"/>  
     <param name="ios_api_key" value="kV55tihy0FGjBigSKgeuGp3bX8Zcvl7B"/> 
@@ -25,5 +28,10 @@
   </feature>  
   <feature name="aliPay"> 
     <param name="urlScheme" value="AliPayA6916117301064"/> 
+  </feature>  
+  <feature name="wxPay"> 
+    <param name="urlScheme" value="wx368da7efb7f69d88"/>  
+    <param name="apiKey" value="wx368da7efb7f69d88"/>  
+    <param name="apiSecret" value="cd6599ddbe82bb8c45f88dce11813f90"/> 
   </feature> 
 </widget>

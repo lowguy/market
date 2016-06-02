@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+		<meta name="format-detection" content="telephone=no" />
+		<link rel="stylesheet" type="text/css" href="../../../css/base.css"/>
+		<style>
+			.container{
+				display:none;
+			}
+			.goods {
+				width: 100%;
+				background: white;
+			}
+			.goods .item {
+				position: relative;
+				padding-top:0.25rem;
+                border-bottom:1px solid #EFEFEF;
+                height:8rem;
+			}
+			.item .goods-thumb {
+			    position:absolute;
+				height:8rem;
+				width:8rem;
+				top:0;
+				left:0;
+			}
+			.item .title {
+				height: 2rem;
+				font-size: 1.3rem;
+				line-height: 2rem;
+				padding-left: 8rem;
+				overflow:hidden;
+				white-space: nowrap;
+    			text-overflow: ellipsis;
+			}
+            .item .advertisement {
+                height: 2rem;
+                font-size: 1.2rem;
+                line-height: 2rem;
+                padding-left: 8rem;
+                overflow:hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                color:red;
+            }
+			.item .title span{
+				padding:0.5rem 0; 
+			}
+			.item{
+			    border-bottom:1px solid #FFFFFF;
+			}
+			.item .bottom {
+				height:3rem;
+				position: relative;
+				top:0.5rem;
+				padding-left: 8rem;
+				padding-bottom:0.5rem;
+			}
+
+			.bottom p{
+				position:absolute;
+				top:0;
+				color: red;
+				font-size:1.2rem;
+				font-weight:bold;
+				height:3rem;
+				line-height:3rem;
+			}
+            .bottom .price-sales{
+                line-height:3rem;
+                left:8rem;
+                color:red;
+                font-weight:bold;
+            }
+			.bottom .operation {
+				right:0;
+			}
+			.operation span{
+				height:3rem;
+			}
+			.bottom .icon{
+				height: 2.5rem;
+				width: 2.5rem;
+                margin-top:0.15rem;
+				background-size: 1.5rem;
+				background-position: 50%;
+				border: 1px solid #EFEFEF;
+				display:inline-block;
+				border-radius: 100%;
+				background-repeat:no-repeat;
+			}
+			.bottom .add {
+			    margin-left:1rem;
+				padding:0 1rem;
+				display:inline-block;
+			}
+			.bottom .add .icon {
+				background-image: url("../../../image/icons/sync.png");
+			}
+	        .bottom span.number {
+                font-size:1.2rem;
+                line-height:3rem;
+                vertical-align:top;
+                display:inline-block;
+                text-align:center;
+                text-overflow: ellipsis;
+                word-wrap: normal;
+                overflow: hidden;
+            }
+			.bottom input.number {
+				font-size:1.2rem;
+                line-height:3rem;
+				color: #808080;
+				vertical-align:top;
+				width:8rem;
+				display:inline-block;
+				text-align:center;
+				text-overflow: ellipsis;
+    			word-wrap: normal;
+    			overflow: hidden;
+    			border:1px solid #EFEFEF;
+			}
+			.cart-empty{
+				background-image:url("../../../image/icons/cart-empty.png");
+				background-repeat:no-repeat;
+				background-size:10rem;
+				background-position: 50%;
+				height:20rem;
+				text-align:center;
+			    line-height: 5rem;
+    			font-size:1.4rem;
+    			font-weight:bold;
+    			color:#808080;
+			}
+		</style>
+	</head>
+	<body>
+		  <p class="network-error"></p>
+          <section class="container" >
+          </section>
+	</body>
+	<script type="text/html" id="template">
+			<%if(goods.length == 0){%>
+				<section class="cart-empty">
+					您还没有经营任何商品
+				</section>
+			<%}else{%>
+			<section class="goods">
+					<%for(var i = 0; i < goods.length; i++){%>
+					<section class = "item" data-id="<%=goods[i].id%>"  data-stock="<%=goods[i].stock%>">
+						<p class="title">
+							<span><%=goods[i].title%></span>
+						</p>
+                        <p class="advertisement">
+                            <span><%=goods[i].slogan%></span>
+                        </p>
+						<img
+						    class="goods-thumb"
+						    onload="onImageLoad(this, <%=goods[i].id%>, <%=goods[i].version%>);" 
+                            <% 
+                               var selector = '.item[data-id="' + goods[i].id + '"]';
+                               var dom = $(selector).find('.goods-thumb');
+                           %>
+                           <%if(dom.length){%>
+                               src="<%=dom.attr('src');%>"
+                           <%}else{%>
+                               src="../../../image/products/placeholder.JPG"
+                           <%}%> 
+						/>
+						<section class="bottom text-ellipsis">
+								<p class="price-sales">
+									<span class="money-symbol"><%=goods[i].price%></span>
+								</p>
+								<p class="status"></p>
+								<p class="operation">
+                                    <span class="number">库存:</span>
+									<input type="tel" class="number" value="<%=goods[i].stock%>" />
+									<span tapmode="touch-down" class="add"> <span class="icon"></span> </span>
+								</p>
+						</section>
+					</section>
+					<%}%>
+			</section>
+			<%}%>
+	</script>
+</html>
+<script type="text/javascript" src="../../../script/vendor/template.js"></script>
+<script type="text/javascript" src="../../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../../script/app.js"></script>
+<script type="text/javascript" src="../../../script/frame.js"></script>
+<script type="text/javascript" src="../../../script/model/market.js"></script>
+<script type="text/javascript" src="../../../script/model/goods.js"></script>
+<script type="text/javascript" src="../../../script/api/server.js"></script>
+<script type="text/javascript">
+	var categoryID = 0;
+	var first = true;
+	 function onImageLoad(dom, id, version){
+        loadImage(dom, id, '../../../image/products/no.JPG', version);
+    }
+	apiready = function() {
+	    api.setFrameAttr({
+	        name: api.frameName,
+	        hidden:true
+        });
+
+        api.execScript({
+	        script: 'loading()'
+        });
+
+		var params = api.pageParam;
+		onNetworkChanged(request,request);
+        request();
+        delegateEvent();
+        api.addEventListener({
+		    name:'resume'
+	    },function(ret,err){
+    		api.execScript({
+	        	script: 'loading();'
+        	});
+	    	request();
+	    });
+	    onMarketChange(function(){
+	    	categoryID = 0;
+	    	first=true;
+    	    api.setFrameAttr({
+                name: api.frameName,
+                hidden:true
+            });
+
+            api.execScript({
+                script: 'loading()'
+            });
+            $('.container').css('display', 'none');
+            request();
+	    });
+	}
+	function request(){
+	   
+		var market = new Market();
+        var marketModel = market.getCurrent();
+        var marketID = marketModel.id;
+    	var server = new Server();
+		var url = server.getOne() + "/merchant/product/index";
+		api.ajax({
+	        url:url,
+	        method:'post',
+	        cache:false,
+	        data:{
+	        	values:{
+	        		id:marketID,
+	        		current:categoryID
+	        	}
+	        },
+	        timeout:10,
+	        dataType:'text',
+	        returnAll:true,
+        },function(ret,err){
+	        if(!err && 200 == ret.statusCode){
+				try{
+					var result = JSON.parse(ret.body);
+					if(result.code == 0){
+					    var goodsModel = new Goods();
+                        var data = {
+                            goods:goodsModel.merge(result.data.goods)
+                        }
+                        var params = [];
+                        params.push(JSON.stringify(result.data.all));
+                        params.push(JSON.stringify(result.data.current));
+                        api.execScript({
+                            script: 'render(' + params.join(',') + ');'
+                        });
+                        var html=baidu.template('template',data);
+                        $('.container').html(html);
+                        if('none' == $('.container').css('display')){
+                            $('.container').fadeIn(300);
+                        }
+					}else{
+					    api.toast({
+	                        msg:'您还没有登陆, 请登陆后进行操作'
+                        });
+					}
+				}catch(e){
+				}	
+			}
+		  	ajaxComplete();
+		});
+    }
+    function ajaxComplete(){
+		api.refreshHeaderLoadDone();
+		if(first){
+		    first = false;
+		    api.setFrameAttr({
+	            name: api.frameName,
+	            hidden:false
+            });
+            api.execScript({
+	            script: 'loaded()'
+            });
+		}
+	}
+    function categoryChange(id){
+        categoryID = id;
+        first = true;
+        api.setFrameAttr({
+	        name: api.frameName,
+	        hidden:true,
+        });
+        $('.container').css('display', 'none');
+        api.execScript({
+	        script: 'loading()'
+        });
+        request();
+    }
+	function delegateEvent(){
+	    touchEvent('.item .operation .add', stockChange);
+	}
+
+	function stockChange(obj){
+		var _this 			= $(obj).parents('.item');
+		var stock 		= _this.find('input.number').val();
+		var product 	= _this.attr('data-id');
+		var market 		= new Market();
+        var marketModel = market.getCurrent();
+        var marketID = marketModel.id;
+		var server = new Server();
+		var url = server.getOne() + "/merchant/product/stockChange";
+		api.ajax({
+	        url:url,
+	        method:'post',
+	        cache:false,
+	        data:{
+	        	values:{
+	        		id:marketID,
+	        		pid:product,
+	        		stock:stock
+	        	}
+	        },
+	        timeout:10,
+	        dataType:'text',
+	        returnAll:true,
+        },function(ret,err){
+	        if(!err && 200 == ret.statusCode){
+				try{
+					var result = JSON.parse(ret.body);				
+					if(result.code == 0){
+						api.toast({
+	                        msg:'更新成功',
+	                        location: 'top'
+                        });
+					}
+					else{
+				       api.toast({
+	                        msg:'更新成功',
+	                        location: 'top'
+                        });
+					}
+				}catch(e){
+				    api.toast({
+	                        msg:'更新成功',
+	                        location: 'top'
+                        });
+				}	
+			}		
+		});
+	}
+</script>

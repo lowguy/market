@@ -140,7 +140,11 @@
 <script id="template" type="text/html">
     <%if(0 == amount){%>
         <section class="no-score">
-            <p>您的积分不足1元，暂时无法兑现~</p>
+           <%if(0 == type){%>
+             <p>您的积分不足1元，暂时无法兑现~</p>
+           <%}else{%>
+             <p>您的余额不足1元，暂时无法提现~</p>
+           <%}%>
         </section>
     <%}else{%>
         <%if(0 == card.length){%>
@@ -152,20 +156,32 @@
                 <p class="bank"><span><%=card.bank%></span><span tapmode="touch-down" class="change">更换</span></p>
                 <p class="account"><label>账号：</label><span class="value"><%=card.account%></span></p>
                 <p class="name"><label>姓名：</label><span class="value"><%=card.name%></span></p>
-                <p class="phone"><label>手机：</label><span class="value"><%=card.phone%></span></p>
             </section>
         <%}%>
             <section class="divider"></section>
-            <section class="columns">
-                <section class="column-left">
-                    <p class="label">兑换现金</p>
-                    <p class="money-symbol"><%=amount%></p>
+            <%if(0 == type){%>
+                <section class="columns">
+                    <section class="column-left">
+                        <p class="label">兑换现金</p>
+                        <p class="money-symbol"><%=amount%></p>
+                    </section>
+                    <section class="column-right">
+                        <p class="label">扣除积分</p>
+                        <p class="score"><%=score%></p>
+                    </section>
                 </section>
-                <section class="column-right">
-                    <p class="label">扣除积分</p>
-                    <p class="score"><%=score%></p>
+            <%}else{%>
+                <section class="columns">
+                    <section class="column-left">
+                        <p class="label">提现金额</p>
+                        <p class="money-symbol"><%=amount%></p>
+                    </section>
+                    <section class="column-right">
+                        <p class="label">扣除余额</p>
+                        <p class="score money-symbol"><%=score%></p>
+                    </section>
                 </section>
-            </section>
+            <%}%>
             <section class="button-wrapper">
                 <button tapmode="touch-down" class="apply">申请</button>
             </section>
@@ -184,9 +200,9 @@
         var data = {
             card:data.card,
             amount:data.amount,
-            score:data.score
+            score:data.score,
+            type:api.pageParam.type
         }
-
         var html=baidu.template('template',data);
         $('.container').html(html);
         api.parseTapmode();
@@ -207,8 +223,8 @@
                 method:"post",
                 data:{
                     values:{
-                        SID:server.getCookie(),
-                        score:$('.score').text()
+                        score:$('.score').text(),
+                        type:type
                     }
                 }
             },function(ret,err){
@@ -217,7 +233,8 @@
                     try{
                        var body = JSON.parse(ret.body);
                        if(0 == body.code){
-                           message = '申请成功， 恭喜发财';
+                           message = '申请成功, 您可以在历史提现中查看相关状态';
+                           dom.hide();
                        }
                     }catch(e){
                     }
@@ -288,7 +305,7 @@
             method:"post",
             data:{
                 values:{
-                    SID:server.getCookie()
+                    type:type
                 }
             }
         },function(ret,err){

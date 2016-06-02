@@ -2,7 +2,7 @@ function openNavigator(dom){
 
 	var animation = {
        		type:'none',
-       		duration:100
+       		duration:500
        };
 
     var delay = 0;

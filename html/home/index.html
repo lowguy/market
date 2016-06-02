@@ -5,11 +5,12 @@
         <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
         <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
         <link rel="stylesheet" type="text/css" href="../../css/layout.css"/>
+        <link rel="stylesheet" type="text/css" href="../../css/flexslider.css"/>
         <style>
              header{
                  position:fixed;
                  width:100%;
-                 z-index:2;
+                 z-index:100;
                  top:0;
                  background-color:transparent;
              }
@@ -120,7 +121,38 @@
                 margin-left:0.1rem;
             }
             .item .goods-thumb {
-                max-width: 80%;
+                width:12rem;
+                height:12rem;
+            }
+            .item.not-enough .goods-thumb{
+                -webkit-filter:grayscale(100%);
+                filter:grayscale(100%);
+            }
+            .item.not-enough .stock-less{
+                font-size:1.2rem;
+                font-weight:bold;
+                padding-right:1rem;
+                color:red;
+                line-height:3rem;
+            }
+            .item .hot{
+                position:absolute;
+                height:3rem;
+                width:3rem;
+                background-image: url('../../image/icons/product-hot.png');
+                background-size:contain;
+                background-repeat:no-repeat;
+                z-index:1;
+            }
+
+            .item .discount{
+                position:absolute;
+                height:3rem;
+                width:3rem;
+                background-image: url('../../image/icons/product-discount.png');
+                background-size:contain;
+                background-repeat:no-repeat;
+                z-index:1;
             }
             .item .title {
                 height: 1.5rem;
@@ -136,7 +168,7 @@
                 height: 1.4rem;
                 font-size: 1.2rem;
                 line-height: 1.4rem;
-                color:#808080;
+                color:red;
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
@@ -150,12 +182,38 @@
                 font-weight: bold;
                 padding-bottom:0.5rem;
             }
+            .bottom .price-sales{
+                position:absolute;
+                height:3rem;
+                line-height:1.5rem;
+                left:1rem;
+                font-family: Helvetica;
+                color:red;
+                font-weight:bold;
+                text-align:left;
+            }
+            .price-sales .money-symbol{
+                font-size:1.5rem;
+            }
+            .money-symbol.origin{
+                font-size:1rem;
+                text-decoration: line-through;
+                color:#808080;
+                font-weight:normal;
+            }
+            .bottom .sales{
+                color:#808080;
+                font-weight:normal;
+                font-size:1rem;
+            }
+            .bottom .sales:before{
+                content:'已售'
+            }
             .bottom .operation {
                 text-align: right;
                 position:absolute;
                 right:0;
                 display: inline-block;
-                width: 75%;
                 height:3rem;
             }
             .bottom .add {
@@ -177,17 +235,7 @@
             .bottom .add .icon {
                 background-image: url("../../image/icons/add.png");
             }
-            .money-symbol {
-                text-align: left;
-                font-size:1.5rem;
-                position:absolute;
-                left: 1rem;
-                display: inline-block;
-                width: 20%;
-                height: 3rem;
-                line-height:3rem;
-                color:red;
-            }
+
             .bottom .sub {
                 height:3rem;
                 padding-left: 1rem;
@@ -217,6 +265,12 @@
             .bottom .number.show {
                 visibility: visible;
             }
+            
+            #banners{
+                position:relative;
+                overflow:hidden;
+                z-index:1;
+            }
         </style>
     </head>
     <body>
@@ -227,12 +281,26 @@
                 <button tapmode="touch-down" class="search">搜一搜</button>
             </section>
         </header>
+        <section id="banners">
+            <div class="flexslider">
+              <ul class="slides">
+                <li>
+                  <img src="../../image/banners/home/1.png" />
+                </li>
+                <li>
+                  <img src="../../image/banners/home/2.png" />
+                </li>
+                <li>
+                  <img src="../../image/banners/home/3.png" />
+                </li>
+                <li>
+                  <img src="../../image/banners/home/4.png" />
+                </li>
+              </ul>
+            </div>
+        </section>
         <p class="network-error"></p>
-
         <section class="container">
-            <section>
-                <img class="banner" src="../../image/banners/mall.png"/>
-            </section>
             <section class="categories text-center">
             </section>
             <section class="divider"></section>
@@ -255,10 +323,22 @@
         </section>
         <script id="categories" type="text/html">
             <%for(var i = 0; i < categories.length; i++){%>
-                <section tapmode="touch-down" class="four-column" data-id="<%=categories[i].id%>">
-                    <img class="category-icon" src="../../image/categories/<%=categories[i].id%>.png"/>
+                <section tapmode="touch-down" class="four-column" data-id="<%=categories[i][0]%>">
+                    <img 
+                        class="category-icon"
+                        onload="onCategoryImageLoad(this, <%=categories[i][0]%>, <%=categories[i][2]%>)"
+                        <%
+                            var selector = '.four-column[data-id="' +  categories[i][0] + '"]';
+                            var dom = $(selector).find('img');
+                        %>
+                        <%if(dom.length){%>
+                            src="<%=dom.attr('src')%>"
+                        <%}else{%>
+                            src="../../image/categories/placeholder.JPG"
+                        <%}%>
+                    />
                     <p>
-                        <%=categories[i].name%>
+                        <%=categories[i][1]%>
                     </p>
                 </section>
             <%}%>
@@ -267,26 +347,52 @@
             <section class="goods">
             <%for(var i = 0; i < goods.length; i++){%>
                 <section class="goods-wrapper">
-                    <section class="item" data-id="<%=goods[i].id%>" data-price="<%=goods[i].price%>" data-title="<%=goods[i].title%>" data-slogan="<%=goods[i].slogan%>">
+                    <section class="item <%if(!goods[i].status || goods[i].stock < 1){%>not-enough<%}%>" data-id="<%=goods[i].id%>" data-goods="<%=JSON.stringify(goods[i])%>">
+                        <%if(1 == goods[i].activity){%>
+                            <p class="hot"></p>
+                        <%}else if(2 == goods[i].activity){%>
+                            <p class="discount"></p>
+                        <%}%>
                         <p class="text-center">
-                            <img tapmode="touch-down" class="goods-thumb" src="../../image/products/<%=goods[i].id%>.JPG"/>
+                            <img
+                                tapmode="touch-down" class="goods-thumb" 
+                                onload="onImageLoad(this,<%=goods[i].id%>,<%=goods[i].version%>);"
+                                <%
+                                    var selector = '.item[data-id="' + goods[i].id + '"]';
+                                    var dom = $(selector).find('.goods-thumb');
+                                %>
+                                <%if(dom.length){%>
+                                    src="<%=dom.attr('src');%>"
+                                <%}else{%>
+                                    src="../../image/products/placeholder.JPG"
+                                <%}%>
+                             />
                         </p>
                         <p class="title">
                             <span><%=goods[i].title%></span>
                         </p>
                         <p class="advertisement"><%=goods[i].slogan%></p>
                         <section class="bottom text-ellipsis">
-                            <p>
-                                <span class="money-symbol"><%=goods[i].price%></span>
-                                <span class="operation"> 
-                                    <span tapmode="touch-down" class="sub"> 
-                                        <span class="icon"></span> 
-                                    </span> 
-                                    <span class="number">1</span> 
-                                    <span tapmode="touch-down" class="add"> 
-                                        <span class="icon"></span> 
-                                    </span> 
+                            <p class="price-sales">
+                                <span class="money-symbol current"><%=goods[i].price%></span>
+                                <br />
+                                <%if(0 != goods[i].activity){%>
+                                    <span class="money-symbol origin"><%=goods[i].price%></span>
+                                <%}%>
+                                <span class="sales"><%=goods[i].sales%></span>
+                            </p>
+                            <p class="operation">
+                                <%if(goods[i].status && goods[i].stock > 0){%>
+                                <span tapmode="touch-down" class="sub"> 
+                                    <span class="icon"></span> 
                                 </span>
+                                <span class="number">1</span> 
+                                <span tapmode="touch-down" class="add"> 
+                                    <span class="icon"></span> 
+                                </span> 
+                                <%}else{%>
+                                    <span class="stock-less">补货中...</span>
+                                <%}%>
                             </p>
                         </section>
                     </section>
@@ -301,44 +407,63 @@
 <script type="text/javascript" src="../../script/window.js"></script>
 <script type="text/javascript" src="../../script/frame.js"></script>
 <script type="text/javascript" src="../../script/model/market.js"></script>
-<script type="text/javascript" src="../../script/model/category.js"></script>
 <script type="text/javascript" src="../../script/model/goods.js"></script>
 <script type="text/javascript" src="../../script/model/cart.js"></script>
-<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/vendor/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="../../script/vendor/jquery.flexslider.js"></script>
 <script type="text/javascript" src="../../script/vendor/template.js"></script>
 <script type="text/javascript" src="../../script/api/server.js"></script>
 <script type="text/javascript">
     var first = true;//标志变量
     var lastUpdated = 0;//数据最后更新时间
-    function openGoodsDetail(obj){
-        var _this = $(obj).parents('.item');
-        var params = [];
-        params.push($(_this).attr('data-id'));
-        params.push('"' + $(_this).attr('data-price') + '"');
-        params.push('"' + $(_this).attr('data-title') + '"');
-        params.push('"' + $(_this).attr('data-slogan') + '"');
-        api.execScript({
-	        script: 'openGoodsFrame(' + params.join(',') + ')'
+    function onImageLoad(dom, id,version){
+        loadImage(dom, id, '../../image/products/no.JPG',version);
+    }
+    function onCategoryImageLoad(dom, id, version){
+        dom.onload = null;
+        var url = 'http://static.xxj365.com/upload/category/' + id +'.png';
+        version = version || 0;
+        url += '?version=' + version;
+
+        api.imageCache({
+            url: url,
+            policy:'cache_only',
+            thumbnail:false
+        }, function(ret, err){
+            if(ret.status){
+                dom.src = ret.url;
+            }
         });
     }
 
-    function openMall(obj){
-        var animation = {
-            type:'none',
-            duration:300
-        };
-
-        var delay = 0;
-        var id = $(obj).attr('data-id');
- 
+    function openGoodsDetail(obj){
+        var _this = $(obj).parents('.item');
+        var goods = $(_this).attr('data-goods');
+        goods = JSON.parse(goods);
         api.execScript({
-            name:'mall',
-            script: 'categoryChange(' + id + ');'
+            script: 'openGoodsFrame(' + JSON.stringify(goods) + ')'
         });
-        setTimeout(function(){
-            pageParam={categoryID:id}
-            openWin('mall','mall',animation,delay,pageParam,false);
-        }, 100);
+	}
+
+    function openMall(obj){
+        var id = $(obj).attr('data-id');
+
+        if(id > 0){
+            var delay = 0;
+            var animation = {
+                type:'none',
+                duration:300
+            };
+        
+            api.execScript({
+                name:'mall',
+                script: 'categoryChange(' + id + ');'
+            });
+            setTimeout(function(){
+                pageParam={categoryID:id}
+                openWin('mall','mall',animation,delay,pageParam,false);
+            }, 100);
+        }
     }
 
     function opacityHeader(percent){
@@ -357,7 +482,7 @@
         $(window).on('scroll', function(){
             var header = $('header');
             var offset = $(window).scrollTop();
-            opacityHeader(offset / header.height() * 0.3);
+            opacityHeader(offset / $('#banners').height());
         });
         touchEvent('.goods-thumb', openGoodsDetail);
 
@@ -366,8 +491,9 @@
         touchEvent('.add', addCart);
 
         touchEvent('.sub', subCart);
-        
+
         touchEvent('.activity-item', openActivity);
+
     }
     
     function openActivity(obj){
@@ -405,15 +531,16 @@
             var inCart = false;
             var number = 0;
             var _this = $(dom).find('.item');
-            $.each(cartGoods, function(j, goods){
-                if($(_this).attr('data-id') == goods.id)
+            var goods = JSON.parse(_this.attr('data-goods'));
+            $.each(cartGoods, function(j, item){
+                if(goods.id == item.id)
                 {
                     inCart = true;
-                    number = goods.number;
+                    number = item.number;
                     return false;
                 }               
             });
-            
+
             if(inCart)
             {
                 $(_this).find('.sub').addClass('show');
@@ -424,17 +551,18 @@
                 $(_this).find('.sub').removeClass('show');
                 $(_this).find('.number').html(number).removeClass('show');
             }
+            showPrice(_this, number);
+
         });
         
     }
-    
+
     function addCart(obj){
         var marketModel = new Market();
         var current = marketModel.getCurrent();
         var cart = new Cart();
-        
-        var goodsID = $(obj).parents('.item').attr('data-id');
-        cart.add(current.id, goodsID);
+        var goods = JSON.parse($(obj).parents('.item').attr('data-goods'));
+        cart.add(current.id, goods.id);
         showNumber();
         api.execScript({
 	        script: 'updateCartNumber();'
@@ -445,55 +573,131 @@
         var marketModel = new Market();
         var current = marketModel.getCurrent();
         var cart = new Cart();
-        
-        var goodsID = $(obj).parents('.item').attr('data-id');
-        cart.sub(current.id, goodsID);
+
+        var goods = JSON.parse($(obj).parents('.item').attr('data-goods'));
+        cart.sub(current.id, goods.id);
         showNumber();
         api.execScript({
             script: 'updateCartNumber();'
         });
     }
 
-    function render(ret){
-    
-        var categoryModel = new Category();
-        categoryModel.load(function(){
-            var categories = categoryModel.listTop(ret.categories);
-            var html=baidu.template('categories',{categories:categories});
-            $('.categories').html(html);
-            var goodsModel = new Goods();
-            goodsModel.load(function(){
-                var goods = goodsModel.merge(ret.recommend);
-                var html=baidu.template('goods',{goods:goods});
-                $('.recommend').html(html);
-                initFront();
-                if('none' == $('.container').css('display'))
-                {
-                    $('.container').fadeIn(300);
+    function showPrice(dom, number){
+        var goods = JSON.parse(dom.attr('data-goods'));
+        var activity = goods.activity || 0;
+        if(0 != activity){
+            if(1 == activity){
+                if(!dom.hasClass('not-enough')){
+                    if(number > 2){
+                        dom.find('.money-symbol.current').text(goods.price);
+                    }
+                    else{
+                        dom.find('.money-symbol.current').text(goods.discount);
+                    }
                 }
+                else{
+                    dom.find('.money-symbol.current').text(goods.discount);
+                }
+            }
+            else if(2== activity){
+                dom.find('.money-symbol.current').text(goods.discount);
+            }
+        }
+    }
 
-                api.parseTapmode();
-            });
-        });
+    function renderCategory(categories){
+        if(categories.length < 4){
+            for(var i = categories.length; i < 4; i++){
+                categories[i] = [0, '敬请期待', 0]
+            }
+        }
+        else if(categories.length > 4 && categories.length < 8){
+            for(var i = categories.length; i < 8; i++){
+                categories[i] = [0, '敬请期待', 0]
+            }
+        }
+        var html=baidu.template('categories',{categories:categories});
+        $('.categories').html(html);
+    }
+
+    function render(ret){
+        renderCategory(ret.categories);
+        var goodsModel = new Goods();
+        var goods = goodsModel.merge(ret.recommend);
+        var html=baidu.template('goods',{goods:goods});
+        $('.recommend').html(html);
+        initFront();
+        if('none' == $('.container').css('display'))
+        {
+            loaded();
+            $('.container').fadeIn(300);
+        }
+        api.parseTapmode();
     }
 
     function ajaxComplete(){
         api.refreshHeaderLoadDone();
         if(first){
             first = false;
-            setTimeout(function(){
-                api.removeLaunchView({
-                    animation: {
-                        type: 'none',
-                        duration: 100
-                    }
-                });
-            }, 200);
-
+            setTimeout(loaded, 5000);
         }
     }
-    
+
+    function autoLocation(){
+        var market = new Market();
+        var current = market.getCurrent();
+        if(0 == current.auto){
+            return;
+        }
+        var map = api.require('xMap');
+        map.getLocation({
+            accuracy : '10m',
+            autoStop : false
+        }, function(ret, err) {
+            map.stopLocation();
+            if (ret.status) {
+                map.getNameFromCoords({
+                lon : ret.lon,
+                lat : ret.lat
+                }, function(ret, err) {
+                    if (ret.status) {
+                        var district = ret.district;
+                        var city = ret.city;
+                        market.load(function() {
+                            var marketObject = market.getMarket(city, district);
+                            if (marketObject) {
+                                market.setCurrent(marketObject);
+                                if(marketObject.id != current.id){
+                                    marketChange();
+                                    api.toast({
+                                        msg:'小小家服务站点自动切换...',
+                                        location:'middle',
+                                        global:true
+                                    });
+                                }
+                            } else {
+                                var districts = market.getMarketsOfCity(city);
+                                if (districts.length > 0) {
+                                    market.setCurrent(districts[0]);
+                                    marketChange();
+                                    api.toast({
+                                        msg:'小小家服务站点自动切换...',
+                                        location:'middle',
+                                        global:true
+                                    });
+                                } else {
+                                    market.setCurrent(current);
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
     function request(){
+        api.cancelAjax({tag: 'home_ajax'});
         var market = new Market();      
         var current = market.getCurrent();
         var server = new Server();
@@ -505,7 +709,9 @@
             timeout:5,
             dataType:'text',
             returnAll:true,
+            tag:'home_ajax'
         },function(ret,err){
+            ajaxComplete();
             if(!err && 200 == ret.statusCode){
                 try{
                     var body = JSON.parse(ret.body);
@@ -513,22 +719,49 @@
                     lastUpdated = timestamp();
                 }catch(e){}
             }
-
-            ajaxComplete();
         });
     }
 
+    function scrollBanner(){
+        $('#banners').height(api.winWidth * 5 / 12);
+        var slider = null;
+        $('.flexslider').flexslider({
+            animation: "fade",
+            animationLoop: true,
+            itemWidth: api.winWidth,
+            itemMargin: 0,
+            directionNav: false,
+            slideshowSpeed:5000,
+            animationSpeed: 1000,
+            slideshow:true,
+            after:function(slider){
+                if(slider && !slider.playing){
+                    slider.play();
+                }
+            },
+            init:function(obj){
+                slider = obj;
+            }
+        });
+        $('.flexslider').on('touchend', function(){
+            if(slider && !slider.playing){
+                slider.play();
+            }
+        });
+    }
     apiready = function() {
+        scrollBanner();
+        loading();
         initNavigator();
 
         onMarketChange(function(){
             var market = new Market();
             var current = market.getCurrent();
             $('header .market span').html(current.district);
-            api.refreshHeaderLoading();
-
+            request();
         });
 
+        autoLocation();
         delegateEvent();
 
         request();
@@ -536,7 +769,7 @@
         onNetworkChanged(request, function(){
             var now = timestamp();
             if(now - lastUpdated > 10){
-                api.refreshHeaderLoading();
+                request();
             }
         });
 
@@ -544,15 +777,16 @@
             name:'viewappear'
         },function(ret,err){
             showNumber();
-            updateCartNumber();
         });
 
         api.addEventListener({
             name:'resume'
         },function(ret,err){
             var now = timestamp();
-            if(now - lastUpdated > 3600){
-                api.refreshHeaderLoading();
+            if(now - lastUpdated > 600){
+                setTimeout(function(){
+                    request();
+                }, 200);
             }
         });
     }

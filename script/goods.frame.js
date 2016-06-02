@@ -1,14 +1,22 @@
-function openGoodsFrame(id,price,title,slogan){
+function openGoodsFrame(goods){
 	var header = parseInt($('header').height());
 	if('mall' == api.winName){
 	    header -= parseInt($('.top-category-area').height());
 	}
+
+	if('activity' == api.winName){
+       header -= parseInt($('.activity-area').height());
+	}
+
 	if('home' == api.winName && 'ios' != api.systemType){
 	    header = 50;
 	}
 	var footer = parseInt($('footer').height());
 	var winHeight = parseInt(api.winHeight);
 	var height = winHeight - header - footer;
+	if('search' == api.winName){
+	    height = winHeight - header;
+	}
 	api.openFrame({
 	    name: 'goods_detail',
 	    url: 'widget://html/common/goods_detail.html',
@@ -26,10 +34,7 @@ function openGoodsFrame(id,price,title,slogan){
 	    	duration:300
 	    },
 	    pageParam:{
-	    	id:id,
-	    	price:price,
-	    	title:title,
-	    	slogan:slogan
+	    	goods:goods
 	    },
 	    bounces:false
     });

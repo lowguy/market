@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../../../css/base.css"/>
+	<style>
+	    html,body{
+	       background: transparent;
+	       height:100%;
+	    }
+	    body{
+	       background-color:rgba(0,0,0,0.8);
+	    }
+
+	    .container{
+	       padding-top:4rem;
+	       padding-bottom:6rem;
+	    }
+
+	    .goods {
+           background:#FFD705;
+           color:#6B450A;
+           margin:1rem;
+	       position:relative;
+	       height:4rem;
+	       border-radius:1rem;
+	    }
+	    .goods p{
+	       position:absolute;
+	       top:0;
+	       height:4rem;
+	       line-height:4rem;
+	    }
+	    .goods .checkbox{
+	       width:20%;
+	       z-index:1;
+	       text-align:center;
+	    }
+
+	    .checkbox span{
+	       display:inline-block;
+	       height:2rem;
+	       width:2rem;
+	       border-radius:1rem;
+	       background-color:#EFEFEF;
+	       margin-top:1rem;
+	       background-size:2rem;
+	       background-position:50%;
+	       background-repeat:no-repeat;
+	    }
+
+	    .goods.checked .checkbox span{
+	       background-image:url('../../../image/icons/agree.png');
+	    }
+
+	    .goods .content{
+	       width:80%;
+	       right:1rem;
+	       text-align:right;
+	    }
+	    .buttons{
+	       height:4rem;
+	       padding-bottom:2rem;
+	       position:fixed;
+	       bottom:0;
+	       width:100%;
+	       background-color:#EFEFEF;
+	       z-index:1;
+	       border-radius:1rem;
+	    }
+	    .buttons button{
+	       position:absolute;
+	       height:4rem;
+	       width:40%;
+	       top:1rem;
+	       background-color:#FFD705;
+	       color:#6B450A;
+	       border-radius:1rem;
+	    }
+	    .buttons .close{
+	       left:5%;
+	    }
+	    .buttons .commit{
+	       left: 55%;
+	       color:red;
+	    }
+
+        .button-loading{
+            background-image:url("../../../image/loading.gif");
+            background-size:3rem;
+            background-repeat:no-repeat;
+            background-position:50%;
+            text-indent: -150%;
+        }
+    </style>
+</head>
+<body>
+    <section class="container">
+        <section class="buttons">
+            <button tapmode="touch-down" class="close">取消</button>
+            <button tapmode="touch-down" class="commit">提交</button>
+        </section>
+    </section>
+</body>
+<script type="text/html" id="template">
+    <%for(var i = 0; i < goods.length; i++){%>
+    <section tapmode="touch-down" class="goods checked" data-id="<%=goods[i].product_id%>">
+        <p  class="checkbox"><span></span></p>
+        <p class="content"><%=goods[i].title%><span class="number">&nbsp;&nbsp;X&nbsp;&nbsp;<%=goods[i].number%></span></p>
+    </section>
+    <%}%>
+</script>
+</html>
+<script type="text/javascript" src="../../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../../script/frame.js"></script>
+<script type="text/javascript" src="../../../script/app.js"></script>
+<script type="text/javascript" src="../../../script/api/server.js"></script>
+<script type="text/javascript" src="../../../script/vendor/template.js"></script>
+
+<script type="text/javascript">
+
+apiready = function(){
+	delegateEvent();
+	render(api.pageParam.goods);
+}
+
+function delegateEvent(){
+
+    touchEvent('.goods', function(obj){
+        $(obj).toggleClass('checked');
+    });
+
+    touchEvent('.close', function(){
+        api.closeFrame({
+	        name: api.frameName
+        });
+    });
+
+    touchEvent('.commit', function(obj){
+        pick($(obj));
+    });
+}
+
+function pick(dom){
+    if(!dom.hasClass('button-loading')){
+        dom.addClass('button-loading');
+        var params = {};
+        params.id = parseInt(api.pageParam.id);
+        params.goods = [];
+        var goods = $('.goods');
+        for(var i = 0; i < goods.length; i++){
+            var temp = $(goods[i]);
+            var item = [];
+            var checked = 0;
+            item.push(parseInt(temp.attr('data-id')));
+            if(temp.hasClass('checked')){
+                checked = 1;
+            }
+            item.push(checked);
+            params.goods.push(item);
+        }
+        var server = new Server();
+        var url = server.getOne() + '/delivery/order/pick';
+        api.ajax({
+            url:url,
+            method:'post',
+            cache:false,
+            data:{
+                values:params
+            },
+            timeout:10,
+            dataType:'text',
+            returnAll:true,
+        },function(ret,err){
+            var message = '操作失败, 请稍候再试';
+            if(!err && 200 == ret.statusCode){
+                try{
+                    var result = JSON.parse(ret.body);
+                    if(result.code == 0){
+                       message = '操作成功';
+                       api.execScript({
+                           frameName:'delivery_dispatch_index',
+                           script: 'afterPick(' + JSON.stringify(params) + ')'
+                       });
+                       api.closeFrame({
+	                       name: api.frameName
+                       });
+                    }
+                }catch(e){
+                }
+            }
+
+            api.toast({
+                msg:message,
+                location:'middle'
+            });
+
+            dom.removeClass('button-loading');
+        });
+    }
+
+}
+
+function render(goods){
+    var data = {
+        goods:goods
+    };
+
+    var html=baidu.template('template',data);
+    $('.container').prepend(html);
+    api.parseTapmode();
+}
+</script>

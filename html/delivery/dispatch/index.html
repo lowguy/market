@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../../../css/base.css"/>
+	<style>
+	    html,body{
+	       background: #6B450A;
+	    }
+
+	    .container{
+	    }
+
+		.order{
+		    border-radius:1rem;
+		    background:#FFD705;
+		    margin:1rem;
+		}
+		.order p{
+		   height:2rem;
+		   line-height:2rem;
+		}
+		.order .user-info{
+		   padding:0 1rem;
+		   position:relative;
+		   height:auto;
+		}
+		.user-info .containt{
+		   line-height:3rem;
+		   font-size:1.3rem;
+		   color:red;
+		   height:auto;
+		}
+
+		label{
+		   color:#6B450A;
+		}
+		.order .user-info span.fee{
+		    color:red;
+		}
+
+		.user-phone{
+		    right:0;
+		    bottom:1rem;
+		}
+
+		.shop-info{
+          position:relative;
+		  font-size:1.3rem;
+		  height:auto;
+		  min-height:6rem;
+		}
+		.shop-info p{
+		  line-height:3rem;
+		  height:auto;
+		}
+		.shop-info .address{
+		  color:red;
+		}
+		.phone{
+            height:4rem;
+            width:6rem;
+            line-height:8rem;
+            font-size:1rem;
+            text-align:center;
+            text-decoration:none;
+            color:#6B450A;
+            position:absolute;
+            display:inline-block;
+            background-repeat:no-repeat;
+            background-size:3rem;
+            background-position:50% 0;
+            background-image:url('../../../image/icons/call.png');
+		}
+        .shop-phone{
+            top:1rem;
+            right:0;
+        }
+
+    	.order-number{
+    	  padding:0 1rem;
+          color:#6B450A;
+		}
+		.order-number .number{
+		  color:#222222;
+		}
+
+		.shop .contact{
+		    padding: 0 6rem 0 1rem;
+		    min-height: 6rem;
+		}
+		.shop .button-wrapper{
+		    height:auto;
+		}
+        .shop button {
+            display:block;
+            text-align:center;
+            border:1px solid #6B450A;
+            border-radius:2rem;
+            height:4rem;
+            width:100%;
+            color:#6B450A;
+        }
+        .shop button:after{
+            content:'已取货';
+        }
+        .shop button.pick:after{
+            content:'确认取货';
+        }
+		.shop:first-child{
+		    border-top:0.1rem dashed #6B450A;
+		}
+        .goods{
+            position:relative;
+            padding:0.5rem 0;
+            min-height:3rem;
+            line-height:3rem;
+            display:none;
+            background:#FFFFFF;
+            border-top:1px dashed #FFD705;
+        }
+
+        .goods .title{
+            padding-left:4rem;
+        }
+
+        .goods .comment{
+            height:auto;
+            padding:0 1rem;
+            border-top:1px dashed #EFEFEF;
+        }
+
+        .goods .comment label{
+            color:red;
+        }
+
+        .goods img{
+            position:absolute;
+            height:4rem;
+            width:4rem;
+            top:0;
+            left:0;
+        }
+
+        .goods-less{
+            z-index:1;
+            display:none;
+        }
+        .goods.less .goods-less{
+            display:inline;
+        }
+
+		.goods.first{
+		    display:block;
+            border:0;
+		}
+		.goods.first .button{
+		    position:absolute;
+		    height:3rem;
+		    width:3rem;
+		    padding-left:2rem;
+		    padding-right:1rem;
+		    top:0.5rem;
+		    right:0rem;
+		    line-height:3rem;
+		    text-align:right;
+		    color:#808080;
+		    background-size:2rem;
+		    background-position: 0, 50%;
+		    background-repeat:no-repeat;
+		    background-image:url('../../../image/icons/arrow-down.png');
+		}
+		.goods.first .button.expanded{
+            background-image:url('../../../image/icons/arrow-up.png');
+		}
+		.goods.first .button:after{
+		    content:'展开';
+		}
+        .goods.first .button.expanded:after{
+            content:'收缩';
+        }
+
+		.button-wrapper{
+		    height:4rem;
+		    font-size:1.3rem;
+		    font-weight:bold;
+		    padding:0.5rem 1rem;
+            background-color:#FFD705;
+		}
+		.button-wrapper.delivery .new{
+		    display:none;
+		}
+		.button-wrapper.new .delivery{
+		    display:none;
+		}
+		.button-wrapper section{
+		    height:100%;
+		}
+		.button-wrapper button{
+		    height:4rem;
+		    border-radius:2rem;
+		    border:0.1rem solid #6B450A;
+		    color: #6B450A;
+		}
+		.button-wrapper .accept{
+		    width:40%;
+		    float:right;
+		}
+		.button-wrapper .reject{
+		    width:40%;
+            float:left;
+		}
+		.button-wrapper .delivery button{
+		    width:100%;
+		}
+
+		.button-wrapper .finish{
+            color:red;
+		}
+
+        .button-loading{
+            background-image:url("../../../image/loading.gif");
+            background-size:3rem;
+            background-repeat:no-repeat;
+            background-position:50%;
+            text-indent: -150%;
+        }
+	</style>
+</head>
+<body>
+	<p class="network-error"></p>
+    <section class="container">
+    </section>
+</body>
+<script type="text/html" id="template">
+    <%for(var i=0; i < order.length; i++){%>
+    <section class="order" data-id="<%=order[i].order.order_id%>">
+        <section class="user-info">
+            <section class="containt">
+                <label>订单编号:</label><span class="number"><%=order[i].order.order_no%></span>
+                </br>
+                <label>送货地址:</label><span><%=order[i].order.address%></span>
+                <br/>
+                <label>支付状态:</label><span class="status"><%if(4 != order[i].order.payment){%>已支付<%}else{%>未支付<%}%></span>
+                <br />
+                <label>总&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;额:</label><span class="fee number">¥<%=order[i].order.amount%></span>
+            </section>
+            <a class="user-phone phone" href="tel:<%=order[i].order.phone%>">联系客户</a>
+        </section>
+        <section class="button-wrapper <%if(2 == order[i].order.status){%> new  <%}else{%> delivery <%}%>">
+            <section class="new">
+                <button tapmode="touch-down" class="reject">转发</button>
+                <button tapmode="touch-down" class="accept">抢单</button>
+            </section>
+            <section class="delivery">
+                <button tapmode="touch-down" class="finish">确认送达</button>
+            </section>
+        </section>
+        <section class="shop-wrapper">
+            <%for(var j in order[i].shop){%>
+            <section class="shop">
+                <section class="shop-info">
+                    <p class="contact">
+                        <label>取货地址:</label><span class="address"><%=order[i].shop[j].merchant.address%></span>
+                        <a tapmode="touch-down" class="shop-phone phone" href="tel:<%=order[i].shop[j].merchant.phone%>">联系商户</a>
+                        <section class="button-wrapper <%if(2 == order[i].order.status){%> new  <%}else{%> delivery <%}%>">
+                            <section class="delivery">
+                                <button tapmode="touch-down"
+                                    <%if(0 == order[i].shop[j].picked){%> 
+                                    class="pick"
+                                    <%}%>
+                                    data-goods="<%:v=JSON.stringify(order[i].shop[j].goods);%>"
+                                    data-order="<%=order[i].order.order_id%>">
+                                </button>
+                            </section>
+                        </section>
+                    </p>
+                </section>
+                <%for(var k = 0; k < order[i].shop[j].goods.length; k++){%>
+                    <%if(0 == k){%>
+                        <%if(order[i].shop[j].goods.length > 1){%>
+                            <section data-id="<%=order[i].shop[j].goods[k].product_id%>" tapmode="touch-down" class="goods first <%if(2 == order[i].shop[j].goods[k].status){%>less<%}%>">
+                                <img onload="onImageLoad(this, <%=order[i].shop[j].goods[k].product_id%>);" src="../../../image/products/placeholder.JPG" />
+                                <img class="goods-less" src="../../../image/icons/goods-less.png" />
+                                <span class="title"><%=order[i].shop[j].goods[k].title%></span><span class="number">&nbsp;&nbsp;X&nbsp;&nbsp;<%=order[i].shop[j].goods[k].number%></span>
+                                <span class="button"></span>
+                                <%if(order[i].shop[j].goods[k].comment){%>
+                                <p class="comment"><label>备注：</label><span><%=order[i].shop[j].goods[k].comment%></span></p>
+                                <%}%>
+                            </section>
+                        <%}else{%>
+                            <section data-id="<%=order[i].shop[j].goods[k].product_id%>" class="goods first <%if(2 == order[i].shop[j].goods[k].status){%>less<%}%>">
+                                <img onload="onImageLoad(this,<%=order[i].shop[j].goods[k].product_id%>);" src="../../../image/products/placeholder.JPG" />
+                                <img class="goods-less" src="../../../image/icons/goods-less.png" />
+                                <span class="title"><%=order[i].shop[j].goods[k].title%></span><span class="number">&nbsp;&nbsp;X&nbsp;&nbsp;<%=order[i].shop[j].goods[k].number%></span>
+                                <%if(order[i].shop[j].goods[k].comment){%>
+                                <p class="comment"><label>备注：</label><span><%=order[i].shop[j].goods[k].comment%></span></p>
+                                <%}%>
+                            </section>
+                        <%}%>
+                    <%}else{%>
+                        <section data-id="<%=order[i].shop[j].goods[k].product_id%>" class="goods <%if(2 == order[i].shop[j].goods[k].status){%>less<%}%>">
+                            <img onload="onImageLoad(this, <%=order[i].shop[j].goods[k].product_id%>);" src="../../../image/products/placeholder.JPG" />
+                            <img class="goods-less" src="../../../image/icons/goods-less.png" />
+                            <span class="title"><%=order[i].shop[j].goods[k].title%></span><span class="number">&nbsp;&nbsp;X&nbsp;&nbsp;<%=order[i].shop[j].goods[k].number%></span>
+                            <%if(order[i].shop[j].goods[k].comment){%>
+                                <p class="comment"><label>备注：</label><span><%=order[i].shop[j].goods[k].comment%></span></p>
+                            <%}%>
+                        </section>
+                    <%}%>
+                <%}%>
+            </section>
+            <%}%>
+        </section>
+    </section>
+    <%}%>
+</script>
+</html>
+<script type="text/javascript" src="../../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../../script/frame.js"></script>
+<script type="text/javascript" src="../../../script/app.js"></script>
+<script type="text/javascript" src="../../../script/api/server.js"></script>
+<script type="text/javascript" src="../../../script/vendor/template.js"></script>
+
+<script type="text/javascript">
+
+var first = true;
+ function onImageLoad(dom, id){
+        loadImage(dom, id, '../../../image/products/no.JPG');
+    }
+function init(){
+    first = true;
+    api.execScript({
+	    script: 'loading();'
+    });
+    api.setFrameAttr({
+	    name: api.frameName,
+	    hidden:true
+    });
+    request();
+}
+
+apiready = function(){
+    init();
+	delegateEvent();
+	onNetworkChanged(request,request);
+}
+
+function reject(id){
+    var dom = $('.order[data-id="' + id + '"] .reject');
+    if(dom.hasClass('button-loading')){
+        return;
+    }
+    dom.addClass('button-loading');
+    var server = new Server();
+    var url = server.getOne() + "/delivery/order/reject";
+    api.ajax({
+        url:url,
+        method:'post',
+        cache:false,
+        data:{
+            values:{
+                id:id
+            }
+        },
+        timeout:10,
+        dataType:'text',
+        returnAll:true,
+    },function(ret,err){
+        dom.removeClass('button-loading');
+        var message = '转发失败';
+
+        if(!err && 200 == ret.statusCode){
+            try{
+                var result = JSON.parse(ret.body);
+                if(result.code == 0){
+                    message = '转发成功';
+                    dom.parents('.order').remove();
+                }
+            }catch(e){
+            }
+        }
+
+        api.toast({
+            location:'middle',
+	        msg:message
+        });
+    });
+}
+
+function accept(id){
+    var dom = $('.order[data-id="' + id + '"] .accept');
+    if(dom.hasClass('button-loading')){
+        return;
+    }
+    dom.addClass('button-loading');
+    var server = new Server();
+    var url = server.getOne() + "/delivery/order/accept";
+    api.ajax({
+        url:url,
+        method:'post',
+        cache:false,
+        data:{
+            values:{
+                id:id
+            }
+        },
+        timeout:10,
+        dataType:'text',
+        returnAll:true,
+    },function(ret,err){
+        dom.removeClass('button-loading');
+        var message = '抢单失败';
+        if(!err && 200 == ret.statusCode){
+            try{
+                var result = JSON.parse(ret.body);              
+                if(result.code == 0){
+                    message = '抢单成功, 一路顺风';
+                    dom.parents('.order').find('.button-wrapper').toggleClass('new delivery');
+                }
+            }catch(e){
+            }
+        }
+        api.toast({
+            location:'middle',
+            msg:message
+        });
+    });
+}
+
+function finish(id){
+    api.confirm({
+        title: '确认送达',
+        msg: '您已经把货品交付给客户了吗？',
+        buttons: ['点错了', '已送达']
+    },function( ret, err ){
+        if(2 == ret.buttonIndex){
+            var dom = $('.order[data-id="' + id + '"] .finish');
+            if(dom.hasClass('button-loading')){
+                return;
+            }
+            dom.addClass('button-loading');
+            var server = new Server();
+            var url = server.getOne() + "/delivery/order/finish";
+            api.ajax({
+                url:url,
+                method:'post',
+                cache:false,
+                data:{
+                    values:{
+                        id:id
+                    }
+                },
+                timeout:10,
+                dataType:'text',
+                returnAll:true,
+            },function(ret,err){
+                dom.removeClass('button-loading');
+                var message = '操作失败， 请检查您的网络状况';
+                if(!err && 200 == ret.statusCode){
+                    try{
+                        var result = JSON.parse(ret.body);              
+                        if(result.code == 0){
+                            message = '操作成功';
+                            dom.parents('.order').remove();
+                        }
+                    }catch(e){
+                    }
+                }
+                api.toast({
+                    location:'middle',
+                    msg:message
+                });
+            });
+        }
+    });
+}
+
+function delegateEvent(){
+    touchEvent('.accept', function(obj){
+        var id = $(obj).parents('.order').attr('data-id');
+        accept(id);
+    });
+
+    touchEvent('.reject', function(obj){
+        var id = $(obj).parents('.order').attr('data-id');
+        reject(id);
+    });
+
+    touchEvent('.finish', function(obj){
+        var id = $(obj).parents('.order').attr('data-id');
+        finish(id);
+    });
+    
+    touchEvent('.goods.first', function(obj){
+        var dom  = $(obj).find('.button');
+        if(dom.hasClass('expanded')){
+            dom.parent().siblings('.goods').hide();
+        }
+        else{
+            dom.parent().siblings('.goods').show();
+        }
+        dom.toggleClass('expanded');
+    });
+
+    touchEvent('.shop-info .pick', function(obj){
+        $('.pick.pick-current').removeClass('pick-current');
+        $(obj).addClass('pick-current');
+        var goods = $(obj).attr('data-goods');
+        var id = $(obj).attr('data-order');
+        goods = JSON.parse(goods);
+        api.openFrame({
+	        name: 'delivery_dispatch_pick',
+	        url: 'widget://html/delivery/dispatch/pick.html',
+	        rect: {
+		        x:0,
+		        y:0,
+		        w:'auto',
+		        h:'auto'
+	        },
+	        pageParam:{
+	           goods:goods,
+	           id : id
+	        },
+	        vScrollBarEnabled:false,
+            bounces:false,
+            animation:{
+                type:'movein',
+                subType:'from_bottom',
+                duration:300
+            }
+        });
+    });
+
+}
+
+function afterPick(params){
+    var goods = params.goods;
+    var dom = $('.pick.pick-current'); 
+    dom.removeClass('pick pick-current');
+    var goodsDom = dom.parents('.shop').find('.goods');
+    for(var i = 0; i < goodsDom.length; i++){
+        var temp = $(goodsDom[i]);
+        var goodsID = temp.attr('data-id');
+        for(var j = 0; j < goods.length; j++){
+            if(goods[j][0] == goodsID){
+                if(0 == goods[j][1]){
+                    temp.addClass('less');
+                }
+                break;
+            }
+        }
+    }
+
+}
+
+function request(){
+
+	var server = new Server();
+	var url = server.getOne() + "/delivery/order/dispatch";
+	api.ajax({
+        url:url,
+        method:'post',
+        cache:false,
+        timeout:10,
+        dataType:'text',
+        returnAll:true,
+    },function(ret,err){
+        if(!err && 200 == ret.statusCode){
+			try{
+				var result = JSON.parse(ret.body);
+				if(result.code == 0){
+					render(result.data);
+				}
+			}catch(e){
+			}
+		}
+	  	ajaxComplete();
+	});
+}
+
+function render(orders){
+    for(var i = 0; i < orders.length; i++){
+       for(var j in orders[i].shop){
+           var picked = 1;
+           for(var k = 0; k < orders[i].shop[j].goods.length; k++){
+               if(0 == orders[i].shop[j].goods[k].status){
+                   picked = 0;
+               }
+           }
+           orders[i].shop[j].picked = picked;
+       }
+    }
+    var data = {
+        order:orders
+    };
+
+    var html=baidu.template('template',data);
+    $('.container').html(html);
+    api.parseTapmode();
+}
+
+function ajaxComplete(){
+	api.refreshHeaderLoadDone();
+	if(first){
+	    first = false;
+	    api.execScript({
+	        script: 'loaded();'
+        });
+        api.setFrameAttr({
+	        name: api.frameName,
+	        hidden:false
+        });
+	}
+}
+
+
+</script>

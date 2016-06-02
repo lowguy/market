@@ -1,41 +1,50 @@
-function setRefreshHeader(callback, visible) {
-	api.setRefreshHeaderInfo({
-		visible : visible,
-		textLoading : '加载...',
-		textDown : '用力...',
-		textUp : '放手...',
-		showTime : true,
-		bgColor:'rgba(255,255,255,1)',
-		textColor:'rgba(102,102,102,1)',
-		loadingImg:'widget://image/icons/push-down.png',
-	}, function(ret, err) {
-		if (callback && $.isFunction(callback)) {
-			callback();
-		}
-	});
+function setRefreshHeader(callback) {
+	api.setCustomRefreshHeaderInfo({
+        bgColor: '#FFFFFF',
+        isScale: true,
+        image: {
+            pull: [
+                'widget://image/pulldown/1.png',
+                'widget://image/pulldown/2.png',
+                'widget://image/pulldown/3.png',
+                'widget://image/pulldown/4.png',
+                'widget://image/pulldown/5.png',
+                'widget://image/pulldown/6.png',
+                'widget://image/pulldown/7.png',
+                'widget://image/pulldown/8.png',
+                'widget://image/pulldown/9.png',
+                'widget://image/pulldown/10.png',
+                'widget://image/pulldown/11.png',
+                'widget://image/pulldown/12.png'
+            ],
+            load: [
+                'widget://image/pulldown/r1.png',
+                'widget://image/pulldown/r2.png',
+                'widget://image/pulldown/r3.png',
+                'widget://image/pulldown/r4.png'
+            ]
+        }
+    }, function() {
+        callback();
+    });
 }
 
 function onNetworkChanged(request, lasyRequest){
 
 	if(api.connectionType == 'none' || api.connectionType == 'unknown'){
 		$('.network-error').addClass('show');
-		setRefreshHeader(request, false);
 	}
-	else{
-		setRefreshHeader(request, true);
-	}
+	setRefreshHeader(request);
 
 	api.addEventListener({
         name:'offline'
     },function(ret,err){
- 		setRefreshHeader(request, false);
     	$('.network-error').addClass('show');
 	});
 
 	api.addEventListener({
         name:'online'
     },function(ret,err){
-    	setRefreshHeader(request, true);
     	$('.network-error').removeClass('show');
     	if(lasyRequest && $.isFunction(lasyRequest)){
     		setTimeout(lasyRequest,  2000);

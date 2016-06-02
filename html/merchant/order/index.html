@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+        <meta name="format-detection" content="telephone=no" />
+        <link rel="stylesheet" type="text/css" href="../../../css/base.css"/>
+        <style>
+            .container {
+                display:none;
+            }
+            .no-order{
+                margin:1rem;
+                background:#FFD705;
+                border-radius: 1rem;
+                color:#6B450A;
+                height:9rem;
+                line-height:9rem;
+                font-size:1.4rem;
+                text-align:center;
+            }
+            .order{
+                background:#FFD705;
+                color:#6B450A;
+                font-size:1.3rem;
+                margin:1rem;
+                border-top:1rem solid #FFD705;
+                border-radius:1rem;
+            }
+            .order p{
+                line-height:2rem;
+                padding:0 0.5rem;
+            }
+            .order .value{
+                color:#222222;
+            }
+            .order .money-symbol{
+                color:red;
+                font-weight:bold;
+            }
+
+            .order .goods{
+                position:relative;
+                background-color:#FFFFFF;
+                min-height:4rem;
+                border-top:1px dashed #FFD705;
+                border-right:1px dashed #FFD705;
+                border-left:1px dashed #FFD705;
+                display:none;
+                font-size:1.2rem;
+            }
+            .order .goods.show{
+                display:block;
+            }
+            .order .goods:first-child{
+                border-top:0;
+                display:block;
+            }
+
+            .goods img{
+                position:absolute;
+                top:0;
+                left:0;
+                height:4rem;
+                width:4rem;
+            }
+            .goods .goods-less{
+                z-index:1;
+                display:none;
+            }
+            .goods.less .goods-less{
+                display:inline-block;
+            }
+
+            .goods p{
+                line-height:2rem;
+                padding-left:5rem;
+                color:#222222;
+            }
+
+            .goods .comment{
+                padding:0 1rem;
+                border-top:1px dashed #EFEFEF;
+            }
+
+            .goods .comment label{
+                color:red;
+            }
+
+            .arrow-down-wrapper{
+                background:#FFFFFF;
+            }
+            .more{
+                background:#FFFFFF;
+            }
+            .more p{
+                background:#FFD705;
+                border-radius:0 0 1rem 1rem;
+            }
+            .more .up {
+                display:none;
+            }
+            .more.expanded .up{
+                display:block;
+                border:1px dashed #FFD705;
+                border-top:0;
+                border-bottom:0;
+            }
+            .more.expanded .down{
+                display:none;
+            }
+            .more p{
+                text-align:center;
+                color:#6B450A;
+                font-size:1rem;
+                height:1rem;
+                line-height:2rem;
+            }
+            .more.expanded p{
+                line-height:0rem;
+            }
+            .more p:before{
+                content:'展开';
+            }
+            .more.expanded p:before{
+                content:'收缩'
+            }
+            .down .arrow{
+                width:0rem; 
+                height:0rem;
+                border-left:5rem solid transparent;
+                border-right:5rem solid transparent;
+                border-top:1rem solid #FFD705;
+                margin:0 auto;
+            }
+            .up .arrow{
+                width:0rem; 
+                height:0rem;
+                border-left:5rem solid transparent;
+                border-right:5rem solid transparent;
+                border-bottom:1rem solid #FFD705;
+                margin:0 auto;
+            }
+
+            .pushup {
+                height:6rem;
+                background-repeat:no-repeat;
+                background-size:contain;
+                background-position:50%;
+                background-image:url('../../../image/loading.gif');
+                display:none;
+            }
+            .pushup.show{
+                display:block;
+            }
+        </style>
+    </head>
+    <body>
+        <p class="network-error"></p>
+        <section class="container" >
+        </section>
+        <p class="pushup"></p>
+    </body>
+    <script type="text/html" id="template">
+        <%if(orders.length > 0){%>
+            <%for(var i = 0; i < orders.length; i++){%>
+                <section class="order">
+                    <p class="order-no"><label>编号：</label><span class="value"><%=orders[i].order_no%></span></p>
+                    <p class="order-amount"><label>合计：</label><span class="value money-symbol"><%=orders[i].amount.toFixed(2)%></span></p>
+                    <section class="order-goods">
+                        <%for(var j = 0; j < orders[i].goods.length; j++){%>
+                            <section class="goods <%if(2 == orders[i].goods[j].status){%>less<%}%>">
+                                <img onload="onImageLoad(this,<%=orders[i].goods[j].product_id%>);" src="../../../image/products/placeholder.JPG" />
+                                <img class="goods-less" src="../../../image/icons/goods-less.png" />
+                                <p class="title"><%=orders[i].goods[j].title%><span class="number">&nbsp;&nbsp;X&nbsp;&nbsp;<%=orders[i].goods[j].number%></span></p>
+                                <p class="goods-amount"><span class="money-symbol"><%=orders[i].goods[j].inamount%></span></p>
+                                <%if(orders[i].goods[j].comment){%>
+                                <p class="comment"><label>备注：</label><span><%=orders[i].goods[j].comment%></span></p>
+                                <%}%>
+                            </section>
+                        <%}%>
+                        <%if(orders[i].goods.length > 1){%>
+                            <section tapmode="touch-down" class="more">
+                                <section class="arrow-down-wrapper up">
+                                    <section class="arrow"></section>
+                                </section>
+                                <p></p>
+                                <section class="arrow-down-wrapper down">
+                                    <section class="arrow"></section>
+                                </section>
+                            </section>
+                        <%}else{%>
+                            <p style="height:1rem"></p>
+                        <%}%>
+                    </section>
+                </section>
+            <%}%>
+        <%}else if(1 == page){%>
+            <p class="no-order">暂无订单</p>
+        <%}%>
+    </script>
+</html>
+<script type="text/javascript" src="../../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../../script/frame.js"></script>
+<script type="text/javascript" src="../../../script/app.js"></script>
+<script type="text/javascript" src="../../../script/api/server.js"></script>
+<script type="text/javascript" src="../../../script/model/market.js"></script>
+<script type="text/javascript" src="../../../script/window.js"></script>
+<script type="text/javascript" src="../../../script/vendor/template.js"></script>
+<script type="text/javascript">
+    var first = true;
+    var page = 1;
+    var year = 0;
+    var month = 0;
+    var day = 0;
+    var monthlyStatistics = true;
+     function onImageLoad(dom, id){
+        loadImage(dom, id, '../../../image/products/no.JPG');
+    }
+    function addPushUp(){
+        api.addEventListener({
+            name:'scrolltobottom',
+            extra:{
+                threshold:0
+            }
+        }, function(ret, err){
+            if(!$('.pushup').hasClass('show')){
+                if($('.no-order').length == 0){
+                    $('.pushup').addClass('show');
+                    request();
+                }
+            }
+        });
+    }
+
+    function setDate(_year, _month, _day){
+        first = true;
+        page = 1;
+        monthlyStatistics = true;
+        year = _year;
+        month = _month,
+        day = _day;
+        api.execScript({
+            script: 'loading();'
+        });
+        $('.container').css('display', 'none');
+        api.setFrameAttr({
+            name: api.frameName,
+            hidden:true
+        });
+        request();
+    }
+
+    function delegateEvent(){
+        touchEvent('.more', function(obj){
+            var dom = $(obj);
+            dom.siblings().toggleClass('show');
+            dom.toggleClass('expanded');
+        });
+
+        addPushUp();
+
+    }
+
+    function ajaxComplete(){
+        api.refreshHeaderLoadDone();
+        $('.pushup').removeClass('show');
+
+        if(first){
+            first = false;
+            api.setFrameAttr({
+                name: api.frameName,
+                hidden:false
+            });
+            api.execScript({
+                script: 'loaded();'
+            });
+        }
+    }
+
+    function render(params){
+        var data = {
+            orders:params.order,
+            page:page
+        };
+
+        var html=baidu.template('template',data);
+        if(1 == page){
+            $('.container').html(html);
+        }
+        else{
+            $('.container').append(html);
+        }
+        if(params.amount.hasOwnProperty('monthly')){
+            api.execScript({
+                script: 'setMonthly(' + params.amount.monthly + ')'
+            });
+            monthlyStatistics = false;
+        }
+        if(params.amount.hasOwnProperty('daily')){
+            api.execScript({
+                script: 'setDaily(' + params.amount.daily + ')'
+            });
+        }
+        api.parseTapmode();
+        if('none' == $('.container').css('display')){
+            $('.container').fadeIn(200);
+        }
+    }
+
+    function request(){
+        var market = new Market();
+        var marketModel = market.getCurrent();
+        var marketID = marketModel.id;
+        var server = new Server();
+        var url = server.getOne() + "/merchant/order/statistics";
+        api.ajax({
+            url:url,
+            method:'post',
+            cache:false,
+            data:{
+                values:{
+                    id:marketID,
+                    page:page,
+                    year:year,
+                    month:month,
+                    day:day,
+                    monthly: monthlyStatistics? 1: 0
+                }
+            },
+            timeout:10,
+            dataType:'text',
+            returnAll:true,
+        },function(ret,err){
+            if(!err && 200 == ret.statusCode){
+                try{
+                    var result = JSON.parse(ret.body);
+                    if(result.code == 0){
+                        render(result.data);
+                        if(result.data.order.length > 0){
+                            page++;
+                        }
+                        else{
+                            if(page != 1){
+                                api.toast({
+                                    location:'middle',
+                                    msg:'没有数据啦～'
+                                });
+                            }
+                        }
+                    }else{
+                        api.toast({
+                            msg:'您还没有登陆, 请登陆后进行操作'
+                        });
+                    }
+                }catch(e){
+                }
+            }
+
+            ajaxComplete();
+        });
+    }
+
+	apiready = function() {
+        setDate(api.pageParam.year, api.pageParam.month, api.pageParam.day);
+		delegateEvent();
+		onNetworkChanged(function(){
+		    page = 1;
+		    monthlyStatistics =  true;
+		    request();
+		}, function(){
+		    page = 1;
+		    monthlyStatistics =  true;
+            request();
+		});
+	}
+</script>

@@ -54,6 +54,14 @@ Market.prototype.getCurrent = function(){
 	if(stored){
 		result = JSON.parse(stored);
 	}
+	else{
+	   result = {
+	       id:11,
+	       city:'渭南市',
+	       district:'蒲城县',
+	       auto:1
+	   }
+	}
 	return result;
 };
 
@@ -63,7 +71,7 @@ Market.prototype.getCurrent = function(){
  */
 Market.prototype.setCurrent = function(market){
 	var storage = getStorage();
-
+    market.auto = 0;
 	storage.setItem(this.STORAGE_KEY, JSON.stringify(market));
 
 	this.addHistory(market);
@@ -108,15 +116,31 @@ Market.prototype.getCities = function(){
 }
 
 Market.prototype.load = function(callback){
-	var thiz = this;
-	api.readFile({
-    	path: 'widget://data/market.json'
-	}, function( ret, err ){
-	    thiz.markets = JSON.parse(ret.data);
-	    if(callback && $.isFunction(callback)){
-	    	callback();
-	    }
-	});
+    var server = new Server();
+    var thiz = this;
+    var url = server.getOne() + '/customer/market/lists'
+    api.ajax({
+        url:url,
+        cache:true,
+        timeout:5,
+        dataType:'text',
+        returnAll:true,
+    },function(ret,err){
+        if(!err && 200 == ret.statusCode){
+            try{
+                var body = JSON.parse(ret.body);
+                thiz.markets = [];
+                for(var i = 0; i < body.data.length; i++){
+                    thiz.markets.push({
+                        id:body.data[i][0],
+                        city:body.data[i][1],
+                        district:body.data[i][2],
+                    });
+                }
+            }catch(e){}
+        }
+        callback();
+    });
 };
 
 Market.prototype.clear = function(){

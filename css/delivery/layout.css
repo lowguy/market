@@ -70,13 +70,13 @@ header .market span{
 	background-position: 50%;
 }
 
-.navigator .home .icon{
-	background-image: url(../../image/icons/order.png);
+.navigator .dispatch .icon{
+	background-image: url(../../image/icons/dispatch.png);
 }
 
 
-.navigator .active.home .icon{
-	background-image: url(../../image/icons/order-active.png);
+.navigator .active.dispatch .icon{
+	background-image: url(../../image/icons/dispatch-active.png);
 }
 
 .navigator .user .icon{

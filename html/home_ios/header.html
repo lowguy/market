@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/layout.css"/>
+    <style>
+         html, body{
+            background-color:rgba(0,0,0,0);
+         }
+         header{
+             position:fixed;
+             width:100%;
+             z-index:100;
+             top:0;
+             background-color:transparent;
+         }
+
+         header.white button{
+             color:#FFFFFF;
+         }
+         header.white .market{
+             background-color:rgba(0,0,0,0.4);
+             border-radius: 2rem
+         }
+         header.white .market span{
+             background-image:url('../../image/icons/location-white.png');
+         }
+         header.white .search{
+             background-image: url('../../image/icons/search-white.png');
+         }
+
+         header.white .scanner{
+             background-image: url('../../image/icons/scanner-white.png');
+         }
+
+         .header{
+             padding:0.5rem 1rem;
+         }
+    </style>
+</head>
+<body>
+    <header class="white">
+        <section class="header">
+            <button tapmode="touch-down" class="scanner">扫一扫</button>
+            <button tapmode="touch-down" class="market"><span>定位...</span></button>
+            <button tapmode="touch-down" class="search">搜一搜</button>
+        </section>
+    </header>
+</body>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/window.js"></script>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../script/model/market.js"></script>
+<script type="text/javascript">
+    function opacityHeader(percent){
+        showHeader();
+        percent = percent > 1 ? 1 : percent;
+        var dom = $('header');
+        dom.css('background-color', 'rgba(255,215,5,' + percent +')');
+        if(percent < 0.5){
+            $('header').addClass('white');
+        }
+        else{
+            $('header').removeClass('white');
+        }
+        statusBarStyle();
+    }
+    function hideHeader(){
+        api.setFrameAttr({
+	        name: 'home_header',
+	        hidden:true
+        });
+    }
+
+    function showHeader(){
+        api.setFrameAttr({
+            name: 'home_header',
+            hidden:false
+        });
+    }
+
+    function statusBarStyle(){
+        if($('header').hasClass('white')){
+            api.setStatusBarStyle({
+                style: 'light' 
+            });
+        }
+        else{
+            api.setStatusBarStyle({
+                style: 'dark' 
+            });
+        }
+    }
+
+	apiready = function(){
+		fixStatusBar($('header'));
+		initNavigator();
+        onMarketChange(function(){
+            var market = new Market();
+            var current = market.getCurrent();
+            $('header .market span').html(current.district);
+            api.execScript({
+                frameName:'home_index',
+	            script: 'request();'
+            });
+        });
+
+        api.addEventListener({
+            name:'viewappear'
+        },function(ret,err){
+            statusBarStyle();
+        });
+	};
+</script>
+</html>

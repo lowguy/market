@@ -132,6 +132,31 @@ Cart.prototype.sub = function(marketID, goodsID, number){
 	}
 }
 
+
+/**
+ * 商品添加备注
+ * @param {Integer} marketID
+ * @param {Integer} goodsID
+ * @param {String} comment
+ */
+Cart.prototype.comment = function(marketID, goodsID, comment){
+    var key = 'market' + marketID;
+    var storage = getStorage();
+    var str = storage.getItem(this.STORAGE_KEY);
+    if(str){
+        var data = JSON.parse(str);
+        if(data.hasOwnProperty(key)){
+            for(var i = 0; i < data[key].length; i++){
+                if(data[key][i].id == goodsID){
+                    data[key][i].comment = comment;
+                    storage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+                    break;
+                }
+            }
+        }
+    }
+}
+
 /**
  * 从购物车删除某商品 
  * @param {Integer} marketID

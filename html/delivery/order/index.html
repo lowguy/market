@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+        <meta name="format-detection" content="telephone=no" />
+        <link rel="stylesheet" type="text/css" href="../../../css/base.css"/>
+        <style>
+
+            html,body{
+               background: #6B450A;
+            }
+
+            .container{
+                display:none;
+            }
+            .no-order{
+                margin:1rem;
+                background:#FFD705;
+                border-radius: 1rem;
+                color:#6B450A;
+                height:9rem;
+                line-height:9rem;
+                font-size:1.4rem;
+                text-align:center;
+            }
+            .order{
+                border-radius:1rem;
+                background:#FFD705;
+                margin:1rem;
+            }
+            .order p{
+               height:2rem;
+               line-height:2rem;
+            }
+            .order .user-info{
+               padding:0 1rem;
+               position:relative;
+               height:auto;
+            }
+            .user-info .containt{
+               line-height:3rem;
+               font-size:1.3rem;
+               color:red;
+               height:auto;
+            }
+    
+            label{
+               color:#6B450A;
+            }
+            .order .user-info span.fee{
+                color:red;
+            }
+    
+            .user-phone{
+                right:0;
+                bottom:1rem;
+            }
+    
+            .shop-info{
+              position:relative;
+              font-size:1.3rem;
+              height:auto;
+              min-height:6rem;
+            }
+            .shop-info p{
+              line-height:3rem;
+              height:auto;
+            }
+            .shop-info .address{
+              color:red;
+            }
+            .phone{
+                height:4rem;
+                width:6rem;
+                line-height:8rem;
+                font-size:1rem;
+                text-align:center;
+                text-decoration:none;
+                color:#6B450A;
+                position:absolute;
+                display:inline-block;
+                background-repeat:no-repeat;
+                background-size:3rem;
+                background-position:50% 0;
+                background-image:url('../../../image/icons/call.png');
+            }
+            .shop-phone{
+                top:1rem;
+                right:0;
+            }
+    
+            .order-number{
+              padding:0 1rem;
+              color:#6B450A;
+            }
+            .order-number .number{
+              color:#222222;
+            }
+
+            .shop .contact{
+                padding: 0 6rem 0 1rem;
+                min-height: 6rem;
+            }
+
+            .shop:first-child{
+                border-top:0.1rem dashed #6B450A;
+            }
+            .goods{
+                position:relative;
+                padding:0.5rem 0;
+                min-height:3rem;
+                line-height:3rem;
+                display:none;
+                background:#FFFFFF;
+                border-top:1px dashed #FFD705;
+            }
+    
+            .goods .title{
+                padding-left:4rem;
+            }
+
+            .goods .comment{
+                height:auto;
+                padding:0 1rem;
+                border-top:1px dashed #EFEFEF;
+            }
+
+            .goods .comment label{
+                color:red;
+            }
+            .goods img{
+                position:absolute;
+                height:4rem;
+                width:4rem;
+                top:0;
+                left:0;
+            }
+            .goods-less{
+                z-index:1;
+                display:none;
+            }
+            .goods.less .goods-less{
+                display:inline;
+            }
+
+            .goods.first{
+                display:block;
+                border:0;
+            }
+            .goods.first .button{
+                position:absolute;
+                height:3rem;
+                width:3rem;
+                padding-left:2rem;
+                padding-right:1rem;
+                top:0.5rem;
+                right:0rem;
+                line-height:3rem;
+                text-align:right;
+                color:#808080;
+                background-size:2rem;
+                background-position: 0, 50%;
+                background-repeat:no-repeat;
+                background-image:url('../../../image/icons/arrow-down.png');
+            }
+            .goods.first .button.expanded{
+                background-image:url('../../../image/icons/arrow-up.png');
+            }
+            .goods.first .button:after{
+                content:'展开';
+            }
+            .goods.first .button.expanded:after{
+                content:'收缩';
+            }
+
+            .pushup {
+                height:6rem;
+                background-repeat:no-repeat;
+                background-size:contain;
+                background-position:50%;
+                background-image:url('../../../image/loading.gif');
+                display:none;
+            }
+            .pushup.show{
+                display:block;
+            }
+        </style>
+    </head>
+    <body>
+        <p class="network-error"></p>
+        <section class="container" >
+        </section>
+        <p class="pushup"></p>
+    </body>
+    <script type="text/html" id="template">
+        <%if(order.length > 0){%>
+            <%for(var i=0; i < order.length; i++){%>
+            <section class="order" data-id="<%=order[i].order.order_id%>">
+                <section class="user-info">
+                    <section class="containt">
+                        <label>订单编号:</label><span class="number"><%=order[i].order.order_no%></span>
+                        </br>
+                        <label>送货地址:</label><span><%=order[i].order.address%></span>
+                        <br/>
+                        <label>支付状态:</label><span class="status"><%if(4 != order[i].order.payment){%>已支付<%}else{%>未支付<%}%></span>
+                        <br />
+                        <label>总&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;额:</label><span class="fee number">¥<%=order[i].order.amount%></span>
+                    </section>
+                    <a class="user-phone phone" href="tel:<%=order[i].order.phone%>">联系客户</a>
+                </section>
+                <section class="shop-wrapper">
+                    <%for(var j in order[i].shop){%>
+                    <section class="shop">
+                        <section class="shop-info">
+                            <p class="contact">
+                                <label>取货地址:</label><span class="address"><%=order[i].shop[j].merchant.address%></span>
+                                <a tapmode="touch-down" class="shop-phone phone" href="tel:<%=order[i].shop[j].merchant.phone%>">联系商户</a>
+                            </p>
+                        </section>
+                        <%for(var k = 0; k < order[i].shop[j].goods.length; k++){%>
+                            <%if(0 == k){%>
+                                <%if(order[i].shop[j].goods.length > 1){%>
+                                    <section  tapmode="touch-down" class="goods first <%if(2 == order[i].shop[j].goods[k].status){%>less<%}%>">
+                                        <img  onload="onImageLoad(this,  <%=order[i].shop[j].goods[k].product_id%>);" src="../../../image/products/placeholder.JPG" />
+                                        <img class="goods-less" src="../../../image/icons/goods-less.png" />
+                                        <span class="title"><%=order[i].shop[j].goods[k].title%></span><span class="number">&nbsp;&nbsp;X&nbsp;&nbsp;<%=order[i].shop[j].goods[k].number%></span>
+                                        <span class="button"></span>
+                                        <%if(order[i].shop[j].goods[k].comment){%>
+                                            <p class="comment"><label>备注：</label><span><%=order[i].shop[j].goods[k].comment%></span></p>
+                                        <%}%>
+                                    </section>
+                                <%}else{%>
+                                    <section class="goods first <%if(2 == order[i].shop[j].goods[k].status){%>less<%}%>">
+                                        <img onload="onImageLoad(this, <%=order[i].shop[j].goods[k].product_id%>);" src="../../../image/products/placeholder.JPG" />
+                                        <img class="goods-less" src="../../../image/icons/goods-less.png" />
+                                        <span class="title"><%=order[i].shop[j].goods[k].title%></span><span class="number">&nbsp;&nbsp;X&nbsp;&nbsp;<%=order[i].shop[j].goods[k].number%></span>
+                                        <%if(order[i].shop[j].goods[k].comment){%>
+                                            <p class="comment"><label>备注：</label><span><%=order[i].shop[j].goods[k].comment%></span></p>
+                                        <%}%>
+                                    </section>
+                                <%}%>
+                            <%}else{%>
+                                <section class="goods  <%if(2 == order[i].shop[j].goods[k].status){%>less<%}%>">
+                                    <img onload="onImageLoad(this, <%=order[i].shop[j].goods[k].product_id%>);" src="../../../image/products/placeholder.JPG" />
+                                    <img class="goods-less" src="../../../image/icons/goods-less.png" />
+                                    <span class="title"><%=order[i].shop[j].goods[k].title%></span><span class="number">&nbsp;&nbsp;X&nbsp;&nbsp;<%=order[i].shop[j].goods[k].number%></span>
+                                    <%if(order[i].shop[j].goods[k].comment){%>
+                                         <p class="comment"><label>备注：</label><span><%=order[i].shop[j].goods[k].comment%></span></p>
+                                    <%}%>
+                                </section>
+                            <%}%>
+                        <%}%>
+                    </section>
+                    <%}%>
+                </section>
+            </section>
+            <%}%>
+        <%}else if(1 == page){%>
+            <p class="no-order">暂无订单</p>
+        <%}%>
+    </script>
+</html>
+<script type="text/javascript" src="../../../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../../../script/frame.js"></script>
+<script type="text/javascript" src="../../../script/app.js"></script>
+<script type="text/javascript" src="../../../script/api/server.js"></script>
+<script type="text/javascript" src="../../../script/model/market.js"></script>
+<script type="text/javascript" src="../../../script/window.js"></script>
+<script type="text/javascript" src="../../../script/vendor/template.js"></script>
+<script type="text/javascript">
+    var first = true;
+    var page = 1;
+    var year = 0;
+    var month = 0;
+    var day = 0;
+     function onImageLoad(dom, id){
+        loadImage(dom, id, '../../../image/products/no.JPG');
+    }
+    var monthlyStatistics = true;
+
+    function addPushUp(){
+        api.addEventListener({
+            name:'scrolltobottom',
+            extra:{
+                threshold:0
+            }
+        }, function(ret, err){
+            if(!$('.pushup').hasClass('show')){
+                if($('.no-order').length == 0){
+                    $('.pushup').addClass('show');
+                    request();
+                }
+            }
+        });
+    }
+
+    function setDate(_year, _month, _day){
+        first = true;
+        page = 1;
+        monthlyStatistics = true;
+        year = _year;
+        month = _month,
+        day = _day;
+        api.execScript({
+            script: 'loading();'
+        });
+        $('.container').css('display', 'none');
+        api.setFrameAttr({
+            name: api.frameName,
+            hidden:true
+        });
+        request();
+    }
+
+    function delegateEvent(){
+        touchEvent('.more', function(obj){
+            var dom = $(obj);
+            dom.siblings().toggleClass('show');
+            dom.toggleClass('expanded');
+        });
+        touchEvent('.goods.first', function(obj){
+            var dom  = $(obj).find('.button');
+            if(dom.hasClass('expanded')){
+                dom.parent().siblings('.goods').hide();
+            }
+            else{
+                dom.parent().siblings('.goods').show();
+            }
+            dom.toggleClass('expanded');
+        });
+
+        addPushUp();
+
+    }
+
+    function ajaxComplete(){
+        api.refreshHeaderLoadDone();
+        $('.pushup').removeClass('show');
+
+        if(first){
+            first = false;
+            api.setFrameAttr({
+                name: api.frameName,
+                hidden:false
+            });
+            api.execScript({
+                script: 'loaded();'
+            });
+        }
+    }
+
+    function render(params){
+        var data = {
+            order:params.order,
+            page:page
+        };
+
+        var html=baidu.template('template',data);
+        if(1 == page){
+            $('.container').html(html);
+        }
+        else{
+            $('.container').append(html);
+        }
+        if(params.amount.hasOwnProperty('monthly')){
+            api.execScript({
+                script: 'setMonthly(' + params.amount.monthly + ')'
+            });
+            monthlyStatistics = false;
+        }
+        if(params.amount.hasOwnProperty('daily')){
+            api.execScript({
+                script: 'setDaily(' + params.amount.daily + ')'
+            });
+        }
+        api.parseTapmode();
+        if('none' == $('.container').css('display')){
+            $('.container').fadeIn(200);
+        }
+    }
+
+    function request(){
+        var market = new Market();
+        var marketModel = market.getCurrent();
+        var marketID = marketModel.id;
+        var server = new Server();
+        var url = server.getOne() + "/delivery/order/statistics";
+        api.ajax({
+            url:url,
+            method:'post',
+            cache:false,
+            data:{
+                values:{
+                    id:marketID,
+                    page:page,
+                    year:year,
+                    month:month,
+                    day:day,
+                    monthly: monthlyStatistics? 1: 0
+                }
+            },
+            timeout:10,
+            dataType:'text',
+            returnAll:true,
+        },function(ret,err){
+            if(!err && 200 == ret.statusCode){
+                try{
+                    var result = JSON.parse(ret.body);
+                    if(result.code == 0){
+                        render(result.data);
+                        if(result.data.order.length > 0){
+                            page++;
+                        }
+                        else{
+                            if(page != 1){
+                                api.toast({
+                                    location:'middle',
+                                    msg:'没有数据啦～'
+                                });
+                            }
+                        }
+                    }else{
+                        api.toast({
+                            msg:'您还没有登陆, 请登陆后进行操作'
+                        });
+                    }
+                }catch(e){
+                }
+            }
+
+            ajaxComplete();
+        });
+    }
+
+	apiready = function() {
+        setDate(api.pageParam.year, api.pageParam.month, api.pageParam.day);
+		delegateEvent();
+		onNetworkChanged(function(){
+		    page = 1;
+		    monthlyStatistics =  true;
+		    request();
+		}, function(){
+		    page = 1;
+		    monthlyStatistics =  true;
+            request();
+		});
+	}
+</script>

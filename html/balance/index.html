@@ -1,296 +1,296 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
-    <meta name="format-detection" content="telephone=no" />
-    <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
-    <style>
-
-        .card {
-            margin:1rem;
-            border-radius:1rem;
-            background:#FFD705;
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+        <meta name="format-detection" content="telephone=no"/>
+        <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+        <style>
+            .card {
+                margin: 1rem;
+                border-radius: 1rem;
+                background: #FFD705;
+            }
+            .card p {
+                height: 2rem;
+                line-height: 2rem;
+                font-size: 1.3rem;
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .card label {
+                color: #6B450A;
+            }
+            .card .bank {
+                padding: 1rem;
+                position: relative;
+                border-bottom: 1px dashed #6B450A;
+                color: #6B450A;
+            }
+            .bank .status {
+                position: absolute;
+                right: 0;
+                top: 0.5rem;
+                width: 20%;
+                height: 3rem;
+                z-index: 1;
+            }
+            .card .status:before {
+                content: '处理中';
+                color: #6B450A;
+            }
+            .card.success  .status:before {
+                content: '成功';
+                color: green;
+            }
+            .card.failure .status:before {
+                content: '失败?';
+                color: red;
+            }
+            .card.failure .status {
+                border: 1px dashed #6B450A;
+                border-radius: 2rem;
+            }
+            .columns {
+                position: relative;
+                height: 4rem;
+                border-top: 1px dashed #6B450A;
+            }
+            .columns section {
+                position: absolute;
+                width: 50%;
+                height: 100%;
+            }
+            .columns p {
+                text-align: center;
+                height: 2rem;
+                line-height: 2rem;
+            }
+            .columns .label {
+                color: #6B450A;
+            }
+            .money-symbol {
+                font-size: 1.5rem;
+                color: red;
+            }
+            .score {
+                font-family: Helvetica;
+                font-size: 1.5rem;
+                color: red;
+            }
+            .column-left {
+                left: 0;
+            }
+            .column-right {
+                right: 0;
+            }
+            .pushup {
+                height: 6rem;
+                background-repeat: no-repeat;
+                background-size: contain;
+                background-position: 50%;
+                background-image: url('../../image/loading.gif');
+                display: none;
+            }
+            .pushup.show {
+                display: block;
+            }
+            .no-card{
+	            margin:1rem;
+	            background:#FFD705;
+	            border-radius: 1rem;
+	            color:#6B450A;
+	            height:9rem;
+	            line-height:9rem;
+	            font-size:1.4rem;
+	            text-align:center;
         }
-
-        .card p{
-            height:2rem;
-            line-height:2rem;
-            font-size:1.3rem;
-            padding-left:1rem;
-            padding-right:1rem;
-        }
-
-        .card label{
-            color:#6B450A;
-        }
-
-        .card .bank{
-            padding:1rem;
-            position:relative;
-            border-bottom:1px dashed #6B450A;
-            color:#6B450A;
-        }
-        .bank .status{
-            position:absolute;
-            right:0;
-            top:0.5rem;
-            width:20%;
-            height:3rem;
-            z-index:1;
-        }
-
-        .card .status:before{
-            content:'处理中';
-            color:#6B450A;
-        }
-
-        .card.success  .status:before{
-            content:'成功';
-            color:green;
-        }
-        .card.failure .status:before{
-            content:'失败?';
-            color:red;
-        }
-        .card.failure .status{
-            border:1px dashed #6B450A;
-            border-radius:2rem;
-        }
-        .columns{
-            position:relative;
-            height:4rem;
-            border-top:1px dashed #6B450A;
-        }
-
-        .columns section{
-            position:absolute;
-            width:50%;
-            height:100%;
-        }
-        .columns p{
-            text-align:center;
-            height:2rem;
-            line-height:2rem;
-        }
-        .columns .label{
-            color:#6B450A;
-        }
-        .money-symbol{
-            font-size:1.5rem;
-            color:red;
-        }
-        .score{
-            font-family: Helvetica;
-            font-size:1.5rem;
-            color:red;
-        }
-        .column-left{
-            left:0;
-        }
-
-        .column-right{
-            right:0;
-        }
-
-        .pushup {
-            height:6rem;
-            background-repeat:no-repeat;
-            background-size:contain;
-            background-position:50%;
-            background-image:url('../../image/loading.gif');
-            display:none;
-        }
-        .pushup.show{
-            display:block;
-        }
-
-    </style>
-</head>
-<body>
-    <section class="container">
-    </section>
-    <p class="pushup"></p>
-</body>
-<script id="template" type="text/html">
-    <%for(var i = 0; i < lists.length; i++){%>
-        <section class="card  <%if(1== lists[i].status){%>success<%}else if(2== lists[i].status){%>failure<%}%>">
-                <p class="bank"><span><%=lists[i].bank%></span><button class="status"></button></p>
-                <p class="account"><label>账号：</label><span class="value"><%=lists[i].account%></span></p>
-                <p class="name"><label>姓名：</label><span class="value"><%=lists[i].name%></span></p>
-                <p class="phone"><label>手机：</label><span class="value"><%=lists[i].phone%></span></p>
-
-                <section class="columns">
-                    <section class="column-left">
-                        <p class="label">兑换现金</p>
-                        <p class="money-symbol"><%=lists[i].amount%></p>
-                    </section>
-                    <section class="column-right">
-                        <p class="label">扣除积分</p>
-                        <p class="score"><%=lists[i].score%></p>
-                    </section>
+        </style>
+    </head>
+    <body>
+        <section class="container"></section>
+        <p class="pushup"></p>
+    </body>
+    <script id="template" type="text/html">
+     	<%if(lists.length > 0){%>
+        <%for(var i = 0; i < lists.length; i++){%>
+        <section data-comment="<%:v=lists[i].comment%>" class="card  <%if(1== lists[i].status){%>success<%}else if(2== lists[i].status){%>failure<%}%>">
+            <p class="bank"><span><%=lists[i].bank%></span><button class="status"></button></p>
+            <p class="account"><label>账号：</label><span class="value"><%=lists[i].account%></span></p>
+            <p class="name"><label>姓名：</label><span class="value"><%=lists[i].name%></span></p>
+            <section class="columns">
+                <section class="column-left">
+                    <p class="label">兑换现金</p>
+                    <p class="money-symbol"><%=lists[i].amount%></p>
+                </section>
+                <section class="column-right">
+                <%if(1 == lists[i].type){%>
+                    <p class="label">扣除积分</p>
+                <%}else if(2 == lists[i].type){ %>
+                    <p class="label">扣除余额</p>
+                <% } %>
+                    <p class="score"><%if(2 == lists[i].type){%>¥<%}%><%=lists[i].score%></p>
                 </section>
             </section>
-    <%}%>
-</script>
-<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
-<script type="text/javascript" src="../../script/api/server.js"></script>
-<script type="text/javascript" src="../../script/app.js"></script>
-<script type="text/javascript" src="../../script/frame.js"></script>
-<script type="text/javascript" src="../../script/vendor/template.js"></script>
-
-<script type="text/javascript">
-    var first = true;
-    var page = 1;
-    function render(data){
-        var data = {
-            lists:data
-        }
-
-        var html=baidu.template('template',data);
-        if(1 == page){
-            $('.container').html(html);
-        }
-        else{
-            $('.container').append(html);
-        }
-        api.parseTapmode();
-    }
-
-    function delegateEvent(){
-        api.addEventListener({
-            name:'scrolltobottom',
-            extra:{
-                threshold:0
+        </section>
+        <%}%>
+        <%}else if(1 == page){%>
+        	<p class="no-card">暂无记录</p>
+        <%}%>
+    </script>
+    <script type="text/javascript" src="../../script/vendor/zepto.js"></script>
+    <script type="text/javascript" src="../../script/api/server.js"></script>
+    <script type="text/javascript" src="../../script/app.js"></script>
+    <script type="text/javascript" src="../../script/frame.js"></script>
+    <script type="text/javascript" src="../../script/vendor/template.js"></script>
+    <script type="text/javascript">
+        var first = true;
+        var page = 1;
+        function render(data) {
+            var data = {
+                lists : data,
+                page:page
             }
-        }, function(ret, err){
-            if(!$('.pushup').hasClass('show')){
-                $('.pushup').addClass('show');
-                request();
+            var html = baidu.template('template', data);
+            if (1 == page) {
+                $('.container').html(html);
+            } else {
+                $('.container').append(html);
             }
-        });
-         touchEvent('.card.failure .status', mistake);
-    }
+            api.parseTapmode();
+        }
 
-    function ajaxComplete(){
-        api.refreshHeaderLoadDone();
-        $('.pushup').removeClass('show');
-        if(first){
-            first = false;
+        function delegateEvent() {
+            api.addEventListener({
+                name : 'scrolltobottom',
+                extra : {
+                    threshold : 0
+                }
+            }, function(ret, err) {
+                if (!$('.pushup').hasClass('show')) {
+                    $('.pushup').addClass('show');
+                    request();
+                }
+            });
+            touchEvent('.card.failure .status', function(obj) {
+                var comment = $(obj).parents('.card').attr('data-comment');
+                mistake(comment);
+            });
+        }
+
+        function ajaxComplete() {
+            api.refreshHeaderLoadDone();
+            $('.pushup').removeClass('show');
+            if (first) {
+                first = false;
+                api.setFrameAttr({
+                    name : api.frameName,
+                    hidden : false
+                });
+                api.execScript({
+                    script : 'loaded();'
+                });
+            }
+        }
+
+        function request() {
+            var server = new Server();
+            var url = server.getOne() + '/user/score/lists';
+            api.ajax({
+                url : url,
+                cache : false,
+                timeout : 10,
+                dataType : 'text',
+                returnAll : true,
+                method : "post",
+                data : {
+                    values : {
+                        page : page
+                    }
+                }
+            }, function(ret, err) {
+                if (!err && 200 == ret.statusCode) {
+                    try {
+                        var body = JSON.parse(ret.body);
+                        if (0 == body.code) {
+                            render(body.data);
+                            if (0 != body.data.length) {
+                                page += 1;
+                            } else {
+                                if (page != 1) {
+                                    api.toast({
+                                        location : 'middle',
+                                        msg : '没有数据啦～'
+                                    });
+                                }
+                            }
+                        }
+                    } catch(e) {
+                    }
+                }
+                ajaxComplete();
+            });
+        }
+
+        function mistake(comment) {
+            var dialogBox = api.require('dialogBox');
+            dialogBox.alert({
+                texts : {
+                    title : '提现失败原因',
+                    content : comment,
+                    rightBtnTitle : '朕知道了'
+                },
+                tapClose : true,
+                styles : {
+                    bg : '#fff',
+                    w : 300,
+                    corner : 10,
+                    title : {
+                        marginT : 10,
+                        titleColor : '#000',
+                        titleSize : 14
+                    },
+                    content : {
+                        color : '#000',
+                        size : 13
+                    },
+                    right : {
+                        marginB : 10,
+                        marginL : 50,
+                        w : 200,
+                        h : 40,
+                        corner : 10,
+                        bg : '#FFD705',
+                        color : '#6B450A',
+                        size : 14
+                    }
+                }
+            }, function(ret) {
+                if (ret.eventType == 'right') {
+                    dialogBox.close({
+                        dialogName : 'alert',
+                    });
+                }
+            });
+        }
+
+        apiready = function() {
             api.setFrameAttr({
-	            name: api.frameName,
-	            hidden:false
+                name : api.frameName,
+                hidden : true
             });
             api.execScript({
-	            script: 'loaded();'
+                script : 'loading();'
             });
-        }
-    }
-    
-    function request(){
-		var server = new Server();
-        var url = server.getOne() + '/user/score/lists';
-        api.ajax({
-            url:url,
-            cache:false,
-            timeout:10,
-            dataType:'text',
-            returnAll:true,
-            method:"post",
-            data:{
-                values:{
-                    SID:server.getCookie(),
-                    page:page
-                }
-            }
-        },function(ret,err){
-            if(!err && 200 == ret.statusCode){
-                try{
-                //上拉加载实现代码
-                   var body = JSON.parse(ret.body);
-                   if(0 == body.code){
-                       render (body.data);
-                       if(0 != body.data.length){
-                           page += 1;
-                       }
-                       else{
-                           if(page != 1){
-                               api.toast({
-                                   location:'middle',
-                                   msg:'没有数据啦～'
-                               });
-                           }
-                       }
-                   }
-                }catch(e){
-                }
-            }
-            ajaxComplete();
-        });
-    }
-
-
-    function mistake(){
-       var dialogBox = api.require('dialogBox');
-       dialogBox.sendMessage ({
-       texts:{
-        title: '失败原因',          
-        content:'由于您使用的兑换次数超过了本月限制,所以不能完成兑换交易',              
-        rightBtnTitle: '知道了'
-    },
-    styles:{
-        bg: '#fff',
-        w: 300,
-        title:{                     
-            h: 40,                
-            show: {
-                marginL: 120,
-                titleSize: 15,
-                titleColor: '#000'
-            }
-        },
-        content:{  
-            color: '#000',         
-            size: 12          
-        },
-        right:{            
-            marginB: 7,      
-            marginL: 85,      
-            w: 130,           
-            h: 35,
-            corner: 2,       
-            bg: '#FFD705',
-            color:'#6B450A',   
-            size: 12    
-        }
-    }
-  },function(ret){
-	    if (ret.eventType == 'right') {
-	        var dialogBox = api.require('dialogBox');
-	        dialogBox.close ({
-	            dialogName: 'sendMessage'
-        });
-    }
-  });
-}
-    apiready = function(){
-        api.setFrameAttr({
-	        name: api.frameName,
-	        hidden:true
-        });
-        api.execScript({
-	        script: 'loading();'
-        });
-        request();
-        onNetworkChanged(function(){
-            page = 1;
             request();
-        }, function(){
-            page = 1;
-            request();
-        });
-        delegateEvent();
-    };
-
-</script>
+            onNetworkChanged(function() {
+                page = 1;
+                request();
+            }, function() {
+                page = 1;
+                request();
+            });
+            delegateEvent();
+        };
+    </script>
 </html>

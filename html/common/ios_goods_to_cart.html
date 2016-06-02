@@ -30,10 +30,11 @@
 <script type="text/javascript">
 	apiready = function(){
 		var params = api.pageParam;
-		var id = params.id;
-
-		var image = '../../image/products/' + id + '.JPG';
-
+		var image = params.image;
+        if(image.match(/\.\.\//)){
+            image = image.replace(/\.\.\//g, '');
+            image = '../../' + image;
+        }
 		$('img').attr('src', image);
 	};
 </script>

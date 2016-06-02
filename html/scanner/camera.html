@@ -13,12 +13,13 @@
     function close(){
         api.closeWin({
             animation:{
-                type:'none'
+                type:'fade',
+                duration:500
             }
         });
     }
 
-    function openInvite(uri){
+    function openInvite(id){
         var server = new Server();
         if(server.cookieIsExpired()){
             api.openWin({
@@ -36,7 +37,7 @@
                 },
                 bgColor:'#FFFFFF',
                 pageParam:{
-                    uri:uri
+                    id:id
                 }
             });
         }
@@ -59,7 +60,6 @@
                         render(ret.content);
                     break;
                 }
-                console.log(JSON.stringify(ret));
             }
         });
     }
@@ -67,13 +67,12 @@
     function render(uri){
         var schema = new Schema();
         if(schema.isHTTP(uri)){
-            close();
             openURL(uri);
         }
-        else if(schema.isInvited(uri)){
-            close();
-            openInvite(uri);
+        else if(schema.isFans(uri)){
+            openInvite(schema.getFansID(uri));
         }
+        close();
     }
 
 	apiready = function(){

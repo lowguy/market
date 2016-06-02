@@ -41,8 +41,8 @@
 <script type="text/javascript" src="../script/model/market.js"></script>
 <script type="text/javascript" src="../script/model/cart.js"></script>
 <script type="text/javascript" src="../script/vendor/zepto.js"></script>
+<script type="text/javascript" src="../script/model/schema.js"></script>
 <script type="text/javascript">
-  //var mkeyTime=new Date().getTime();
     function initFrames(){
         var footerHeight = parseInt($('footer').height());
         var winHeight = parseInt(api.winHeight);
@@ -57,14 +57,40 @@
 	        vScrollBarEnabled:false
         });
     }
+
+    function dispathSchema(uri){
+        var schema = new Schema();
+        if(schema.isGoods(uri)){
+            goGoods(schema.getGoods(uri));
+        }
+    }
+
+    function goGoods(title){
+        api.openWin({
+            name: 'search',
+            url: 'widget://html/search.html',
+            slidBackEnabled:false,
+            animation:{
+                type:'none'
+            },
+            delay:1000,
+            vScrollBarEnabled:false,
+            reload:true,
+            pageParam:{
+                title:title
+            }
+        });
+    }
+
     apiready = function() {
+        api.removeLaunchView({
+            animation: {
+                type: 'fade',
+                duration: 500
+            }
+        });
         initNavigator();
         initFrames();
-        onMarketChange(function(){
-            var market = new Market();
-            var current = market.getCurrent();
-            $('header .market span').html(current.district);
-        });
         api.addEventListener({
 	        name:'viewappear'
         },function(ret,err){
@@ -73,7 +99,14 @@
          api.addEventListener({
             name:'keyback'
         },function(ret,err){
-        api.toLauncher();
+            api.toLauncher();
+        });
+
+        api.addEventListener({
+            name:'appintent'
+        },function(ret,err){
+            var uri = ret.data;
+            dispathSchema(uri);
         });
     }
 </script>

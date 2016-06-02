@@ -100,7 +100,7 @@
  		</section>
  		<section class="field">
  			<p class="protocol-wrapper">
- 				<span class="checkbox checked">&nbsp;</span><span>我已阅读并同意<span class="protocol">《小小家用户协议》<span></span>
+ 				<span class="checkbox checked">&nbsp;</span><span>我已阅读并同意<span class="protocol">《小小家用户协议》</span></span>
  			</p>
  		</section>
 	</section>
@@ -110,6 +110,14 @@
 <script type="text/javascript" src="../../script/app.js"></script>
 <script type="text/javascript">
 	function initFront(){
+	    touchEvent('.protocol', function(obj){
+	         api.openWin({
+                name: 'document_user',
+                url: 'widget://html/document/user.html',
+                vScrollBarEnabled:false
+            });
+	    });
+
 		$('button').on('touchend', function(){
 			if($(this).hasClass('no-checked')){
                	return;
@@ -169,7 +177,6 @@
                 });
 		    }
 		});
-
 		$('.checkbox').on('touchend', function(){
 			$(this).toggleClass('checked');
 			$('button').toggleClass('no-checked');

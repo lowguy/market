@@ -100,6 +100,7 @@
 <script type="text/javascript" src="../../script/app.js"></script>
 <script type="text/javascript" src="../../script/api/server.js"></script>
 <script type="text/javascript">
+
     function delegateEvent(){
 
         $('.content').on('touchstart', function(event){
@@ -166,16 +167,14 @@
 	        data:{
 	            values:{
 	            	order_no:api.pageParam.order,
-	                score:score,
-	                SID:server.getCookie()
+	                score:score
 	            }
 	        },
 	        timeout:10,
 	        dataType:'text',
 	        returnAll:true,
 	    },function(ret,err){
-	    var tip = '服务器忙，请稍候再试...';
-	    console.log(JSON.stringify(ret));
+	        var tip = '服务器忙，请稍候再试...';
 	        if(!err && 200 == ret.statusCode){
 	            try{
 	                var result = JSON.parse(ret.body);              
@@ -198,7 +197,6 @@
       	});
      }
  }
-
 	apiready = function(){
 	    delegateEvent();	
 	};

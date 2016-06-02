@@ -75,6 +75,8 @@ header .scanner{
 	font-weight:bold;
 	border-top:1px solid #EFEFEF;
 	font-size:1.2rem;
+    background-color:#FFFFFF;
+    z-index:1000;
 }
 
 .navigator section{

@@ -16,12 +16,31 @@
 			height:100%;
     	}
     	.thumb{
-			width:70%;
-			margin:0 auto;
+			padding:15%;
+			position:relative;
+			text-align:center;
     	}
 		.thumb img{
-			width:100%;
+			width:70%;
 		}
+		.thumb .daily{
+		    position:absolute;
+		    top:0;
+		    left:0;
+		    width:15%;
+		    z-index:1;
+		    display:none;
+		}
+
+        .thumb .hot{
+            position:absolute;
+            top:0;
+            left:0;
+            width:15%;
+            z-index:1;
+            display:none;
+        }
+
 		.title{
 			text-align:center;
 			font-size:1.4rem;
@@ -32,7 +51,7 @@
 		.advertisement{
 			text-align:center;
 			font-size:1.2rem;
-			color:#808080;
+			color:red;
 			height:2rem;
 			line-height:2rem;
 			padding:0 1rem;
@@ -115,12 +134,21 @@
 			background-repeat:no-repeat;
 			background-image:url("../../image/icons/close.png");
 		}
+        .money-symbol.origin{
+            font-size:1rem;
+            text-decoration: line-through;
+            color:#808080;
+            font-weight:normal;
+            display:none;
+        }
     </style>
 </head>
 <body>
 	<section class="container">
 		<section class="thumb">
-			<img />
+			<img class="goods-thumb" onload="onImageLoad(this);" />
+			<img class="hot" src="../../image/icons/product-hot.png">
+			<img class="daily" src="../../image/icons/product-discount.png">
 		</section>
 		<section class="title">
 		</section>
@@ -137,7 +165,8 @@
 				</span> 
 
 			</span>
-			<span class="money-symbol"></span>
+			<span class="money-symbol price"></span>
+	        <span class="money-symbol origin"></span>
 		</section>
 		<section class="divider"></section>
 		<section class="close">
@@ -151,6 +180,15 @@
 <script type="text/javascript" src="../../script/model/cart.js"></script>
 <script type="text/javascript">
 	var id = 0;
+	var version = 0;
+	var price = 0;
+	var discount = 0;
+    var activity = 0;
+
+    function onImageLoad(dom){
+        loadImage(dom, id, '../../image/products/no.JPG', version);
+    }
+
 	function hideContainer(){
 		$('.container').fadeOut(200);
 	}
@@ -177,8 +215,24 @@
 			$('.operation .sub').removeClass('show');
 			$('.operation .number').html(number).removeClass('show');
 		}
-
+        showPrice(number);
 	}
+
+    function showPrice(number){
+        if(0 != activity){
+            if(1 == activity){
+                if(number > 2){
+                    $('.money-symbol.price').text(price);
+                }
+                else{
+                    $('.money-symbol.price').text(discount);
+                }
+            }
+            else if(2== activity){
+                $('.money-symbol.price').text(discount);
+            }
+        }
+    }
 
 	function addCart(){
 		var marketModel = new Market();
@@ -189,11 +243,18 @@
         		script: 'updateCartNumber();'
 		});
     	showNumber();
-    	if(-1 != ['mall', 'search'].indexOf(api.winName)){
-	    	api.execScript({
-    			frameName:api.winName + '_index',
-	        	script: 'showNumber();'
-        	});	
+    	if(-1 != ['home', 'mall', 'search', 'activity'].indexOf(api.winName)){
+            if('home' == api.winName && 'ios' == api.systemType){
+                api.execScript({
+                    script: 'showNumber();'
+                });
+            }
+            else{
+                api.execScript({
+                    frameName:api.winName + '_index',
+                    script: 'showNumber();'
+                }); 
+            }
     	}
 	}
 
@@ -208,11 +269,18 @@
 		});
 
     	showNumber();
-		if(-1 != ['mall', 'search'].indexOf(api.winName)){
-	    	api.execScript({
-    			frameName:api.winName + '_index',
-	        	script: 'showNumber();'
-        	});	
+		if(-1 != ['home', 'mall', 'search', 'activity'].indexOf(api.winName)){
+		    if('home' == api.winName && 'ios' == api.systemType){
+		        api.execScript({
+	                script: 'showNumber();'
+                });
+		    }
+		    else{
+    		    api.execScript({
+                    frameName:api.winName + '_index',
+                    script: 'showNumber();'
+                }); 
+		    }
     	}
 	}
 
@@ -252,7 +320,7 @@
 				var offset_x = offset.left;
 				var page_y = offset.top - $(window).scrollTop();
 				var params = [];
-				params.push(id);
+				params.push("'" + origin.attr('src') + "'");
 				params.push(offset_x);
 				params.push(page_y);
 				params.push(width);
@@ -286,17 +354,38 @@
 	}
 
 	apiready = function(){
-		var params = api.pageParam;
-		id = params.id;
-		title = params.title;
-		price = params.price;
-		slogan = params.slogan;
-		var image = '../../image/products/' + id + '.JPG';
-		$('img').attr('src', image);
+		var goods = api.pageParam.goods;
+		id = goods.id;
+		version = goods.version;
+		$('.goods-thumb').attr('src', '../../image/products/placeholder.JPG');
+		var title = goods.title;
+		price = goods.price;
+		discount = goods.discount;
+		var slogan = goods.slogan;
+
+		activity = parseInt(goods.activity);
+		if(NaN == activity){
+		    activity = 0;
+		}
+
 		$('.title').html(title);
-		$('.money-symbol').html(price);
+        $('.money-symbol.origin').html(price);
 		$('.advertisement').html(slogan);
-		$('.container').fadeIn(300, initFront);	
+		if([1,2].indexOf(activity) > -1){
+		     $('.money-symbol.origin').show();
+		     if(1 == activity){
+		        $('.thumb .hot').show();
+		     }
+		     else{
+		        $('.thumb .daily').show();
+		     }
+             $('.money-symbol.price').text(discount);
+		}
+		else{
+             $('.money-symbol.price').text(price);
+		}
+
+		$('.container').fadeIn(300, initFront);
 	};
 </script>
 </html>

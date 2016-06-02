@@ -71,6 +71,25 @@
 			background-color:#FFFFFF;
 			position: relative;
 		}
+		.input-clear{
+		    position:absolute;
+		    right:0;
+		    top:0;
+		    height:100%;
+		    z-index:1;
+		}
+		.input-clear .icon{
+		    display:inline-block;
+		    height:2rem;
+		    width:2rem;
+		    margin:1.5rem 1rem;
+		    background-color:#EFEFEF;
+		    border-radius:1rem;
+		    background-size:1rem;
+            background-repeat:no-repeat;
+            background-position:50%;
+            background-image:url('../image/icons/close.png');
+		}
 		.phone{
 			background-image:url("../image/icons/phone.png");
 		}
@@ -121,11 +140,13 @@
  		<section class="field">
  			<section class="wrapper phone">
  				<input type="tel" placeholder="请输入手机号码"/>
+ 				<span tapmode="touch-down" class="input-clear hidden"><span class="icon"></span></span>
  			</section>
  		</section>
  		<section class="field">
  			<section class="wrapper password">
  				<input type="password" placeholder="请输入密码"/>
+                <span tapmode="touch-down" class="input-clear hidden"><span class="icon"></span></span>
  			</section>
  		</section>
  		<section class="field login">
@@ -148,6 +169,17 @@ function initFront(){
    	$('.back').on('touchend', function(){
    		api.closeWin();
    	});
+   	
+   	$('input').on('focus', function(){
+   	    $(this).siblings('.input-clear').removeClass('hidden');
+   	});
+   	$('input').on('blur', function(){
+        $(this).siblings('.input-clear').addClass('hidden');
+    });
+
+    $('.input-clear').on('touchstart', function(){
+        $(this).siblings('input').val('');
+    });
 
    	$('.add').on('touchend', function(){
    		api.openWin({

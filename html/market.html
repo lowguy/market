@@ -6,6 +6,11 @@
 		<title>云API</title>
 		<link rel="stylesheet" type="text/css" href="../css/base.css"/>
 		<style>
+
+		    html, body{
+		      height:100%;
+		    }
+
 			.header{
 				height: 4rem;
 				background-color: #FFFFFF;
@@ -129,6 +134,7 @@
 				<p class="title">城市列表</p>
 			</section>
 		</header>
+        <p class="network-error"></p>
 		<section class="container">
 		</section>
 	</body>
@@ -186,7 +192,9 @@
 <script type="text/javascript" src="../script/vendor/zepto.js"></script>
 <script type="text/javascript" src="../script/vendor/template.js"></script>
 <script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/window.js"></script>
 <script type="text/javascript" src="../script/model/market.js"></script>
+<script type="text/javascript" src="../script/api/server.js"></script>
 <script type="text/javascript">
 	function initFront() {
 
@@ -207,10 +215,8 @@
 				$(this).addClass('current');
 				var market = new Market();
 				var city = $(this).text();
-				market.load(function(){
-					var markets = market.getMarketsOfCity(city);
-					renderDistricts(markets);
-				});
+				var markets = market.getMarketsOfCity(city);
+				renderDistricts(markets);
 			}
 		});
 	}
@@ -255,9 +261,11 @@
 
 	}
 
-	function load(){
+	function request(){
+	    loading();
 		var market = new Market();
 		market.load(function(){
+		    loaded();
 			var current = market.getCurrent();
 			var markets = market.getMarketsOfCity(current.city);
 			var cities = market.getCities();
@@ -270,17 +278,33 @@
    			hideMarket();
    		});
 
-		onMarketChange(function(){
-			load();
-		});
+		request();
 
-		load();
         api.addEventListener({
 	        name:'viewappear'
         },function(ret,err){
             api.setStatusBarStyle({
                 style: 'dark' 
             });
+        });
+        
+        
+        if(api.connectionType == 'none' || api.connectionType == 'unknown'){
+            $('.network-error').addClass('show');
+        }
+
+        api.addEventListener({
+            name:'offline'
+        },function(ret,err){
+            $('.network-error').addClass('show');
+        });
+
+        api.addEventListener({
+            name:'online'
+        },function(ret,err){
+            $('.network-error').removeClass('show');
+            $('.container').html('');
+            request();
         });
 	}
 </script>

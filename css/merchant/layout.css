@@ -70,11 +70,11 @@ header .market span{
 	background-position: 50%;
 }
 
-.navigator .home .icon{
+.navigator .goods .icon{
 	background-image: url(../../image/icons/mall.png);
 }
 
-.navigator .active.home .icon{
+.navigator .active.goods .icon{
 	background-image: url(../../image/icons/mall-active.png);
 }
 

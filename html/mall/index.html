@@ -12,11 +12,16 @@
 			.goods .item {
 				position: relative;
 				padding-top:0.25rem;
-				display:none;
+				height:8rem;
 			}
 
 			.item .goods-thumb {
-				width: 30%;
+			    height:8rem;
+				width: 8rem;
+				position:absolute;
+				top:0.25rem;
+				left:0;
+				z-index:1;
 			}
 
 			.item .hot{
@@ -26,6 +31,7 @@
                 background-image: url('../../image/icons/product-hot.png');
                 background-size:contain;
                 background-repeat:no-repeat;
+                z-index:2;
 			}
 
 	        .item .discount{
@@ -35,6 +41,7 @@
                 background-image: url('../../image/icons/product-discount.png');
                 background-size:contain;
                 background-repeat:no-repeat;
+                z-index:2;
             }
 
 			.item.not-enough .goods-thumb{
@@ -52,38 +59,33 @@
 				height: 2rem;
 				font-size: 1.3rem;
 				line-height: 2rem;
-				left: 30%;
-				width:70%;
+				padding-left: 8rem;
 				overflow:hidden;
 				white-space: nowrap;
     			text-overflow: ellipsis;
-    			position:absolute;
 			}
 			.item .title span{
 				padding:0 0.5rem;
 			}
 			.item .advertisement {
-				width:70%;
+                padding-left: 8rem;
 				font-size: 1.2rem;
 				height: 2rem;
 				line-height: 2rem;
 				overflow: hidden;
 				white-space: nowrap;
     			text-overflow: ellipsis;
-				color: #808080;
-				position: absolute;
-				left: 30%;
-				top: 2rem;
+				color: red;
+				padding-left: 8rem;
 			}
 			.item .advertisement span{
 				padding-left:0.5rem;
 			}
 			.item .bottom {
 
-				width: 70%;
 				height:3rem;
-				position: absolute;
-				left: 30%;
+				position: relative;
+				left: 0rem;
 				bottom:0;
 				padding-bottom:0.5rem;
 				border-bottom:1px solid #EFEFEF;
@@ -98,7 +100,7 @@
                 padding-left:0.5rem;
                 height:3rem;
                 line-height:1.5rem;
-                left:0;
+                left:8rem;
                 font-family: Helvetica;
                 color:red;
                 font-weight:bold;
@@ -159,7 +161,7 @@
 			.bottom .sub .icon {
 				background-image: url("../../image/icons/sub.png");
 			}
-
+            
 			.bottom .number {
 			    line-height:3rem;
 				font-size:1.2rem;
@@ -177,10 +179,19 @@
 			.bottom .number.show{
 				visibility:visible;
 			}
-
 			.container{
 				display:none;
 			}
+			.no-goods {
+    			margin:1rem;
+                background:#FFD705;
+                border-radius: 1rem;
+                color:#6B450A;
+                height:9rem;
+                line-height:9rem;
+                font-size:1.4rem;
+                text-align:center;
+            }
 		</style>
 	</head>
 	<body>
@@ -189,65 +200,72 @@
 		</section>
 	</body>
 	<script id="goods" type="text/html">
+	 <%if(goods.length > 0){%>
 		<section class="goods">
 			<%for(var i = 0; i < goods.length; i++){%>
-			    <%if(goods[i].status && goods[i].stock > 0){%>
-    				<section class="item" data-activity="<%=goods[i].activity%>" data-discount="<%=goods[i].discount%>" data-category-id="<%=goods[i].category_id%>" data-id="<%=goods[i].id%>" data-price="<%=goods[i].price%>" data-title="<%=goods[i].title%>" data-slogan="<%=goods[i].slogan%>">
-    				    <%if(1 == goods[i].activity){%>
-    				        <p class="hot"></p>
-    				    <%}else if(2 == goods[i].activity){%>
-    				        <p class="discount"></p>
-    				    <%}%>
-    					<p class="title">
-    						<span><%=goods[i].title%></span>
-    					</p>
-    					<img tapmode="touch-down" class="goods-thumb" src="../../image/products/<%=goods[i].id%>.JPG"/>
-    					<p class="advertisement">
-    						<span><%=goods[i].slogan%></span>
-    					</p>
-    					<section class="bottom text-ellipsis">
-                            <p class="price-sales">
-                                <span class="money-symbol current"><%=goods[i].price%></span>
-                                <%if(0 != goods[i].activity){%>
-                                <span class="money-symbol origin"><%=goods[i].price%></span>
-                                <%}%>
-                                <br />
-                                <span class="sales"><%=goods[i].sales%></span>
-                            </p>
-							<p class="operation"> 
+				<section 
+				    data-id="<%=goods[i].id%>" 
+				    class="item <%if(!goods[i].status || goods[i].stock < 1){%>not-enough<%}%>" 
+				    data-goods="<%=JSON.stringify(goods[i])%>" 
+				    data-category-id="<%=goods[i].category_id%>"
+				    <%if(category != 0 && goods[i].category_id != category){%>
+				        style="display:none"
+				    <%}%>
+			    >
+				    <%if(1 == goods[i].activity){%>
+				        <p class="hot"></p>
+				    <%}else if(2 == goods[i].activity){%>
+				        <p class="discount"></p>
+				    <%}%>
+					<p class="title">
+						<span><%=goods[i].title%></span>
+					</p>
+					<img
+					   onload="onImageLoad(this, <%=goods[i].id%>, <%=goods[i].version%>);"
+                       tapmode="touch-down" class="goods-thumb" 
+
+					   <% 
+					       var selector = '.item[data-id="' + goods[i].id + '"]';
+					       var dom = $(selector).find('.goods-thumb');
+				       %>
+					   <%if(dom.length){%>
+					      src="<%=dom.attr('src');%>"
+					   <%}else{%>
+					      src="../../image/products/placeholder.JPG"
+					   <%}%>
+				    />
+					<p class="advertisement">
+						<span><%=goods[i].slogan%></span>
+					</p>
+					<section class="bottom text-ellipsis">
+                        <p class="price-sales">
+                            <span class="money-symbol current"><%=goods[i].price%></span>
+                            <br />
+                            <%if(0 != goods[i].activity){%>
+                            <span class="money-symbol origin"><%=goods[i].price%></span>
+                            <%}%>
+                            <span class="sales"><%=goods[i].sales%></span>
+                        </p>
+						<p class="operation">
+                            <%if(goods[i].status && goods[i].stock > 0){%>
 							    <span tapmode="touch-down" class="sub"> 
-							        <span class="icon"></span> 
-							    </span> 
-							    <span class="number">0</span> 
-							    <span tapmode="touch-down" class="add"> 
-							        <span class="icon"></span>
-							    </span>
-							</p>
-    					</section>
-    				</section>
-    			<%}else{%>
-                     <section class="item not-enough" data-activity="<%=goods[i].activity%>" data-discount="<%=goods[i].discount%>" data-category-id="<%=goods[i].category_id%>" data-id="<%=goods[i].id%>" data-price="<%=goods[i].price%>" data-title="<%=goods[i].title%>" data-slogan="<%=goods[i].slogan%>">
-                        <p class="title">
-                            <span><%=goods[i].title%></span>
-                        </p>
-                        <img tapmode="touch-down" class="goods-thumb" src="../../image/products/<%=goods[i].id%>.JPG"/>
-                        <p class="advertisement">
-                            <span><%=goods[i].slogan%></span>
-                        </p>
-                        <section class="bottom text-ellipsis">
-                            <p class="price-sales">
-                                <span class="money-symbol"><%=goods[i].price%></span>
-                                <br />
-                                <span class="sales"><%=goods[i].sales%></span>
-                            </p>
-                            <p class="operation"> 
-                                <span class="stock-less">补货中...</span>
-                            </p>
-                        </section>
-                    </section>
-    			<%}%>
+                                    <span class="icon"></span> 
+                                </span> 
+                                <span class="number">0</span> 
+                                <span tapmode="touch-down" class="add"> 
+                                    <span class="icon"></span>
+                                </span>
+							 <%}else{%>
+                                 <span class="stock-less">补货中...</span>
+                            <%}%>
+						</p>
+					</section>
+				</section>
 			<%}%>
 		</section>
+		<%}else{%>
+		      <p class="no-goods">暂无商品</p>
+          <%}%>
 	</script>
 </html>
 <script type="text/javascript" src="../../script/vendor/template.js"></script>
@@ -264,13 +282,16 @@
 	var first = true;
 	var lastUpdated = 0;
 	var categoryID = 0;
-
+	var lowCategoryID = 0;
+    function onImageLoad(dom, id,version){
+        loadImage(dom, id, '../../image/products/no.JPG',version);
+    }
 	function addCart(obj){
 		var marketModel = new Market();
 		var current = marketModel.getCurrent();
 		var cart = new Cart();
-		var goodsID = $(obj).parents('.item').attr('data-id');
-		cart.add(current.id, goodsID);
+		var goods = JSON.parse($(obj).parents('.item').attr('data-goods'));
+		cart.add(current.id, goods.id);
 		api.execScript({
         	script: 'updateCartNumber();'
     	});
@@ -281,8 +302,8 @@
 		var marketModel = new Market();
 		var current = marketModel.getCurrent();
 		var cart = new Cart();
-		var goodsID = $(obj).parents('.item').attr('data-id');
-		cart.sub(current.id, goodsID);
+        var goods = JSON.parse($(obj).parents('.item').attr('data-goods'));
+		cart.sub(current.id, goods.id);
 		api.execScript({
         	script: 'updateCartNumber();'
     	});
@@ -290,58 +311,70 @@
 	}
 
     function showPrice(dom, number){
-        var activity = dom.attr('data-activity') || 0;
+        var goods = JSON.parse(dom.attr('data-goods'));
+        var activity = goods.activity || 0;
         if(0 != activity){
-            if(1 == activity){
-                if(number > 2){
-                    dom.find('.money-symbol.current').text(dom.attr('data-price'));
+            if(dom.hasClass('not-enough')){
+                dom.find('.money-symbol.current').text(goods.discount);
+            }
+            else{
+                if(1 == activity){
+                    if(number > 2){
+                        dom.find('.money-symbol.current').text(goods.price);
+                    }
+                    else{
+                        dom.find('.money-symbol.current').text(goods.discount);
+                    }
                 }
                 else{
-                    dom.find('.money-symbol.current').text(dom.attr('data-discount'));
+                    dom.find('.money-symbol.current').text(goods.discount);
                 }
-            }
-            else if(2== activity){
-                dom.find('.money-symbol.current').text(dom.attr('data-discount'));
             }
         }
     }
 
-	function showNumber(){
-		var market = new Market();
-		var current = market.getCurrent();
-		var cart = new Cart();
-		var cartGoods = cart.list(current.id);
-		var cartGoodsID = [];
-		for(var i = 0; i < cartGoods.length; i++){
-			var dom = $('.item[data-id="' + cartGoods[i].id + '"]');
-			dom.find('.sub').addClass('show');
-			dom.find('.number').html(cartGoods[i].number).addClass('show');
-			cartGoodsID.push(parseInt(cartGoods[i].id));
-            showPrice(dom, cartGoods[i].number);
-		}
 
-		$.each($('.item'), function(index, dom){
-			if(-1 == cartGoodsID.indexOf(parseInt($(dom).attr('data-id')))){
-				$(dom).find('.sub').removeClass('show');
-				$(dom).find('.number').html(0).removeClass('show');
-	            showPrice($(dom), 0);
-			}
-		});
-	}
-	
+    function showNumber(){
+        $.each($('.item'), function(i, dom){
+            var market = new Market();
+            var current = market.getCurrent();
+            var cart = new Cart();
+            var cartGoods = cart.list(current.id);
+            var inCart = false;
+            var number = 0;
+            var goods = $(dom).attr('data-goods');
+            goods = JSON.parse(goods);
+            $.each(cartGoods, function(j, item){
+                if(goods.id == item.id)
+                {
+                    inCart = true;
+                    number = item.number;
+                    return false;
+                }               
+            });
+            
+            if(inCart)
+            {
+                $(dom).find('.sub').addClass('show');
+                $(dom).find('.number').html(number).addClass('show');
+            }
+            else
+            {
+                $(dom).find('.sub').removeClass('show');
+                $(dom).find('.number').html(number).removeClass('show');
+            }
+            showPrice($(dom), number);
+        });
+    }
+
 	function openGoodsDetail(obj){
-		var _this = $(obj).parents('.item');
-		var goods = [];
-		goods.push($(_this).attr('data-id'));
-		goods.push("'" + $(_this).attr('data-price') + "'");
-		goods.push("'" + $(_this).attr('data-title') + "'");
-		goods.push("'" + $(_this).attr('data-slogan') + "'");
-
+		var dom = $(obj).parents('.item');
+		var goods = dom.attr('data-goods');
 		api.execScript({
-            script: 'openGoodsFrame(' + goods.join(',') + ')'
+            script: 'openGoodsFrame(' + goods + ')'
         });
 	}
-	
+
 	function delegateEvent(){
 		
 		if ('ios' == api.systemType) {
@@ -378,7 +411,7 @@
 				var offset_x = parseInt(api.winWidth) - parseInt(api.frameWidth);
 				var page_y = offset.top - $(window).scrollTop();
 				var params = [];
-				params.push($(this).parents('.item').attr('data-id'));
+                params.push("'" + origin.attr('src') + "'");
 				params.push(offset_x);
 				params.push(page_y);
 				params.push(width);
@@ -407,7 +440,8 @@
 
 	function render(goods){
         var data = {
-            goods:goods
+            goods:goods,
+            category:lowCategoryID
         }
         var html=baidu.template('goods',data);
         $('.container').html(html);
@@ -449,44 +483,32 @@
 	        dataType:'text',
 	        returnAll:true,
         },function(ret,err){
-            ajaxComplete();
             if(!err && 200 == ret.statusCode){
                 try{
                      var result = JSON.parse(ret.body);
-                     console.log(ret.body);
                      var categories = {
                           current:result.data.current,
                           all:result.data.all
                      };
-                     if(0 == categories.current.length && 0 == categories.all.length){
-                         return;
-                     }
+ 
                      var goodsModel = new Goods();
-                     goodsModel.load(function(){
-                         var data = goodsModel.merge(result.data.goods);
-                         var params = [];
-                         var low = [];
+                     var data = goodsModel.merge(result.data.goods);
+                     var params = [];
 
-                         $.each(data, function(index, item){
-                             if(-1 == $.inArray(item.category_id, low)){
-                                 low.push(item.category_id);
-                             }
-                         });
+                     params.push(JSON.stringify(categories.all));
+                     categories.current[1].unshift([0, '全部商品']);
+                     params.push(JSON.stringify(categories.current));
+                     render(data);
+                     api.execScript({
+                         script: 'render(' + params.join(',') + ');' 
+                     });
 
-                         params.push(JSON.stringify(categories.all));
-                         params.push(JSON.stringify(low));
-                         params.push(categories.current);
-                         render(data);
-                         console.log(JSON.stringify(data));
-                         api.execScript({
-                             script: 'render(' + params.join(',') + ');' 
-                         });
-                    });
-    
                     lastUpdated = timestamp();
                 }catch(e){
                 }
             }
+
+            ajaxComplete();
 	    });
 
 	}
@@ -505,19 +527,26 @@
 	}
 
 	function lowCategory(id){
-        $('.item').hide();
-        $('.item[data-category-id="' +  id +'"]').show().last().find('.bottom').css('border-bottom', '0');
+	    lowCategoryID = id;
+	    if(id != 0){
+           $('.item').hide();
+           $('.item[data-category-id="' +  id +'"]').show();
+	    }
+	    else{
+	       $('.item').show();
+	    }
 	}
 
 	apiready = function() {
 		categoryID = api.pageParam.categoryID || 0;
+        api.execScript({
+            script: 'loading();'
+        });
 		api.setFrameAttr({
             name: api.frameName,
             hidden:true
         });
-		api.execScript({
-	        script: 'loading();'
-        });
+
 
         request();
         
@@ -526,7 +555,7 @@
 		onNetworkChanged(request, function(){
 	    	var now = timestamp();
 			if(now - lastUpdated > 10){
-				api.refreshHeaderLoading();
+				request();
 			}
 		});
 
@@ -540,9 +569,9 @@
 		    name:'resume'
 		},function(ret,err){
 			var now = timestamp();
-			if(now - lastUpdated > 3600){
+			if(now - lastUpdated > 600){
 				setTimeout(function(){
-					api.refreshHeaderLoading();
+					request();
 				}, 200);
 			}
 		});

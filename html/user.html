@@ -209,8 +209,8 @@
         .need-pay{
             background-image:url('../image/icons/need-pay.png');
         }
-        .delivery{
-            background-image:url('../image/icons/delivery.png');
+        .dispatch{
+            background-image:url('../image/icons/dispatch.png');
         }
         .praise{
             background-image:url('../image/icons/praise.png');
@@ -241,7 +241,7 @@
  		</section>
         <div class="order-tab">
              <p tapmode="touch-down" class="need-pay go-order" data-status="1"><span>待付款</span><span class="number">0</span></p>
-             <p tapmode="touch-down" class="delivery go-order" data-status="2"><span>待收货</span><span class="number">0</span></p>
+             <p tapmode="touch-down" class="dispatch go-order" data-status="2"><span>待收货</span><span class="number">0</span></p>
              <p tapmode="touch-down" class="praise go-order" data-status="4"><span>待评价</span><span class="number">0</span></p>
         </div>
         <section class="divider"></section>
@@ -353,7 +353,6 @@ function openWallet(){
         });
     }
 }
-
 function openAccount(){
     api.openWin({
         name: 'account',
@@ -369,8 +368,8 @@ function openAddress(){
 
 function openRoleWin(role){
     api.openWin({
-        name:role + '_home',
-        url:'widget://html/' + role + '/home.html',
+        name:role + '_user',
+        url:'widget://html/' + role + '/user.html',
         slidBackEnabled:false,
         animation:{
             type:'none',
@@ -396,16 +395,17 @@ function openWork(){
     else{
         var userModel = new User();
         var user = userModel.get();
-        if(user.roles.length == 1){
-            var role = 'merchant';
-            if(101 == user.roles[0]){
-                role = 'delivery';
-            }
-            openRoleWin(role);
+        var merchant = user.roles.indexOf('100');
+        var delivery = user.roles.indexOf('101');
+        
+        if(merchant >= 0 && delivery >= 0){
+        	openRoleSelection();
+        }else if(merchant >= 0){
+        	openRoleWin('merchant');
+        }else if(delivery >= 0){
+        	openRoleWin('delivery');
         }
-        else{
-            openRoleSelection();
-        }
+        
     }
 }
 //订单
@@ -464,12 +464,12 @@ function render(data){
     else{
         $('.need-pay .number').removeClass('show');
     }
-    $('.delivery .number').text(data.order[1]);
+    $('.dispatch .number').text(data.order[1]);
     if(data.order[1] > 0){
-        $('.delivery .number').addClass('show');
+        $('.dispatch .number').addClass('show');
     }
     else{
-        $('.delivery .number').removeClass('show');
+        $('.dispatch .number').removeClass('show');
     }
     $('.praise .number').text(data.order[2]);
     if(data.order[2] > 0){
@@ -487,11 +487,6 @@ function request(){
         url:url,
         method:'post',
         cache:false,
-        data:{
-            values:{
-                SID:server.getCookie()
-            }
-        },
         timeout:10,
         dataType:'text',
         returnAll:true,

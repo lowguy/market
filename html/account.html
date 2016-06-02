@@ -52,10 +52,14 @@
             border-left:0;
             border-right:0;
         }
+        .clean{
+         border-bottom:1px solid #EFEFEF;
+        }
         .quit{
             color:red;
             border-bottom:1px solid #EFEFEF;
         }
+        
     </style>
 </head>
 <body>
@@ -71,7 +75,9 @@
         </section>
         <section class="button-wrapper">
             <button tapmode="touch-down" class="password">修改密码</button>
+            <button tapmode="touch-down" class="clean">清除缓存</button>
             <button tapmode="touch-down" class="quit">退出</button>
+            
         </section>
     </section>
 </body>
@@ -81,7 +87,18 @@
 <script type="text/javascript" src="../script/model/user.js"></script>
 <script type="text/javascript" src="../script/api/server.js"></script>
 <script type="text/javascript">
-
+function clean(dom){
+    var dom = dom;
+	api.clearCache({
+        timeThreshold : 1
+	},function(){
+	    api.toast({
+	        msg:'清除完成',
+	        location:'middle'
+	    });
+	});
+	dom.removeClass('button-loading');
+}
 function initFront(){
     fixStatusBar($('header'));
     genQRCode();
@@ -98,6 +115,13 @@ function initFront(){
     $('button.quit').on('touchend',function(){
 		logout();
     });
+    $('button.clean').on('touchend',function(){
+      var dom =$(this);
+      if(!dom.hasClass('button-loading')){
+        dom.addClass('button-loading');
+      }
+		clean(dom);
+    });
 }
 
 function logout(){
@@ -109,12 +133,7 @@ function logout(){
         timeout:10,
         dataType:'text',
         returnAll:true,
-        method:"post",
-        data:{
-            values:{
-                SID:server.getCookie()
-            }
-        }
+        method:"post"
     },function(ret,err){
         if(!err && 200 == ret.statusCode){
             try{
@@ -123,6 +142,7 @@ function logout(){
                		var user = new User();
                		user.setLogin(0);
 					server.clear();
+					pushAddAlias('00000000000');
 					api.closeWin();
                }else{
                    api.toast({
@@ -137,7 +157,7 @@ function genQRCode(callback){
     var scanner = api.require('FNScanner');
     var userModel = new User();
     var user = userModel.get();
-    var content = 'xiaoxiaojia://' + user.id;
+    var content = 'xiaoxiaojia://fans/' + user.id;
     var path = 'fs://xiaoxiaojia/qrcode.png';
     scanner.encodeImg({
         content: content,

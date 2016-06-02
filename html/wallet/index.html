@@ -165,7 +165,11 @@
      touchEvent('.about', about);
     }
     function about(){
-    
+    api.openWin({
+	    name: 'document_score',
+	    url: 'widget://html/document/score.html',
+	    vScrollBarEnabled:false
+    });
     }
     function ajaxComplete(){
         api.refreshHeaderLoadDone();
@@ -191,11 +195,6 @@
             dataType:'text',
             returnAll:true,
             method:"post",
-            data:{
-                values:{
-                    SID:server.getCookie()
-                }
-            }
         },function(ret,err){
             if(!err && 200 == ret.statusCode){
                 try{

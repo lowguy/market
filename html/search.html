@@ -35,7 +35,29 @@
                 right:1rem;
                 top:1rem;
 			}
-
+			
+		    header .search p{
+		      position:relative;
+		    }
+            .input-clear{
+                position:absolute;
+                right:0;
+                top:0;
+                height:100%;
+                z-index:1;
+            }
+            .input-clear .icon{
+                display:inline-block;
+                height:2rem;
+                width:2rem;
+                margin:0.5rem;
+                background-color:#EFEFEF;
+                border-radius:1rem;
+                background-size:1rem;
+                background-repeat:no-repeat;
+                background-position:50%;
+                background-image:url('../image/icons/close.png');
+            }
 			header .search input {
 				height: 3rem;
 				width: 100%;
@@ -49,6 +71,7 @@
 				outline: none;
 				font-size:1.3rem;
 				border:0;
+				-webkit-appearance: none;
 			}
 			.history-title{
 				height:3rem;
@@ -86,22 +109,13 @@
 			}
 
 			.clear{
-				width: 100%;
-				text-align: center;
-			}
-			.clear span{
-				display: block;
-				width:40%;
-				margin:1rem auto;
-				background:#EFEFEF;
+			    float:right;
+				padding-right:1rem;
 				height:3rem;
 				line-height:3rem;
-				border-radius:0.3rem;
 				font-size:1.2rem;
 			}
-			footer{
-				display:none;
-			}
+
 		</style>
 	</head>
 	<body>
@@ -113,18 +127,19 @@
 					</p>
 				</section>
 				<form class="search">
-					<input type="search" autofocus="autofocus" class="search-input" placeholder="请输入商品名称" oninput="closeFrame(this.value)"/>
+				    <p>
+     				   <input type="search" autofocus="autofocus" class="search-input" placeholder="请输入商品名称" oninput="closeFrame(this.value)"/>
+   	                   <span tapmode="touch-down" class="input-clear hidden"><span class="icon"></span></span>
+					</p>
 				</form>
 			</section>
 		</header>
 		<section class="container hidden">	
 		</section>
-		<section class="clear hidden" tapmode="touch-down"><span>清除历史记录</span></section>
-		<footer></footer>
 		<script id="history" type="text/html">
 		<%if(history.length > 0){%>
 			<section class="divider"></section>
-			<section class="history-title">最近搜索</section>
+			<section class="history-title"><span>最近搜索</span><span tapmode="touch-down" class="clear">清空记录</span></section>
 			<section class="divider"></section>
 			<section class="keyword">
 				<%for(var i = 0; i < history.length; i++){%>
@@ -149,20 +164,50 @@
 	function updateCartNumber(){
 		
 	}
-	function initFront() {
-		$('.keyword p').on('touchend',function(){
-			var title = $(this).attr('data-object').replace(/\"/g, "");
 
-			$('.search input').val(title);
-			searchRes(title);
-		});
+	function delegateEvent(){
+	   touchEvent('.back', function(){
+	        var animation = {
+                type : 'none',
+                duration : 500
+            };
+            api.closeWin({
+                animation : animation
+            });
+	   });
 
-		$('.clear').on('touchend',function(){
-			var search = new Search();
-			search.clear();
-			$('.container,.clear').fadeOut('slow',history);
-		});
-		
+
+        $('.search input').keydown(function(event) {        
+            if (13 == event.keyCode) {
+                searchRes($('input').val());
+                event.preventDefault();
+            }                   
+        });
+
+        touchEvent('.keyword p', function(obj){
+            var title = $(obj).attr('data-object').replace(/\"/g, "");
+
+            $('.search input').val(title);
+            searchRes(title);
+        });
+
+        touchEvent('.clear', function(){
+            var search = new Search();
+            search.clear();
+            $('.container').fadeOut('slow',history);
+        });
+
+        $('.search-input').on('focus', function(){
+            $(this).siblings('.input-clear').removeClass('hidden');
+        });
+
+        $('.search-input').on('blur', function(){
+            $(this).siblings('.input-clear').addClass('hidden');
+        });
+
+        $('.input-clear').on('touchstart', function(){
+            $(this).siblings('.search-input').val('');
+        });
 	}
 
 	function closeFrame(title){
@@ -180,24 +225,21 @@
 		if(history.length){
 			var html=baidu.template('history',{history:history});
 			$('.container').html(html);
-			$('.container,.clear').fadeIn('slow');
-			initFront();
+			$('.container').fadeIn('slow');
 		}
 	}
 
 	function searchRes(title){
 	    if('ios' != api.systemType){
             keyBoard = api.require('keyBoard');
-            setTimeout(function(){
-                keyBoard.closeKeyBoard();
-            },200);
+            keyBoard.closeKeyBoard();
         }
 		var header = parseInt($('header').height());
 		var winHeight = parseInt(api.winHeight);
 		var height = winHeight - header;
 		var search = new Search();
 		search.add(title);
-		$('.search input').blur();
+		$('.search-input').blur();
 		api.openFrame({
 		    name: 'search_index',
 		    url: 'widget://html/search/index.html',
@@ -210,9 +252,8 @@
 		    vScrollBarEnabled:false,
 		    reload:true,
 		    animation:{
-		    	type:'fade',
-		    	subType:'from_bottom',
-		    	duration:300
+		    	type:'none',
+		    	duration:500
 		    },
 		    pageParam:{
 		    	title:title
@@ -222,30 +263,23 @@
 	}
 
 	apiready = function() {
+	    var timeout = 0;
 		fixStatusBar($('header'));
         if('ios' != api.systemType){
             keyBoard = api.require('keyBoard');
-            setTimeout(function(){
+            timeout = setTimeout(function(){
                 keyBoard.openKeyBoard();
-            },200);
+            },600);
         }
-		$('.back').on('touchend', function() {
-			var animation = {
-				type : 'fade',
-				duration : 300
-			};
-			api.closeWin({
-				animation : animation
-			});
-		});
 
-		$('.search input').keydown(function(event) {		
-			if (13 == event.keyCode) {
-				searchRes($('input').val());
-				event.preventDefault();
-			}					
-		});
-		
+        if(api.pageParam.title){
+            clearTimeout(timeout);
+            $('.search-input').val(api.pageParam.title).blur();
+            searchRes(api.pageParam.title);
+        }
+
+		delegateEvent();
+
 		api.addEventListener({
 	        name:'viewappear'
         },function(ret,err){

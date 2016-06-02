@@ -196,7 +196,7 @@
         <section class="divider"></section>
         <section class="field">
             <p class="protocol-wrapper">
-                <span class="checkbox checked">&nbsp;</span><span>我已阅读并同意<span class="protocol">《小小家用户协议》<span></span>
+                <span class="checkbox checked">&nbsp;</span><span>我已阅读并同意<span class="protocol">《小小家用户协议》</span></span>
             </p>
         </section>
     </section>
@@ -238,15 +238,13 @@ function request(){
         data: {
            values : {
                 id : current.id,
-                role:role,
-                SID:server.getCookie()
+                role:role
             }
         }
     },function(ret, err){
         if(!err && 200 == ret.statusCode){
             try{
                 var body = JSON.parse(ret.body);
-                console.log(ret.body);
                 if(body.code == 0){
                     api.toast({
 	                    msg:'申请成功，请静候佳音'
@@ -300,8 +298,16 @@ function delegateEvent(){
     $('.submit').on('touchend', function(){
         request();
     });
+     $('.protocol').on('touchend',function(){
+       
+           api.openWin({
+	           name: 'document_commercial',
+	           url: 'widget://html/document/commercial.html',
+	           vScrollBarEnabled:false
+           });
+    });
 }
-
+   
 function initMarket(){
     var market = new Market();
     var current = market.getCurrent();

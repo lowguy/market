@@ -101,7 +101,6 @@
     function request(){
         var server = new Server();
         var url = server.getOne() + '/user/fans/add';
-        console.log(url);
         api.ajax({
             url:url,
             cache:false,
@@ -111,8 +110,7 @@
             method:"post",
             data:{
                 values:{
-                    id:id,
-                    SID:server.getCookie()
+                    id:id
                 }
             }
         },function(ret,err){
@@ -120,7 +118,6 @@
             if(!err && 200 == ret.statusCode){
                 try{
                    var body = JSON.parse(ret.body);
-                   console.log(ret.body);
                    var dom = $('.result');
                    if(body.code == 0){
                        dom.addClass('success');
@@ -147,8 +144,7 @@
     apiready = function() {
         initFront();
         loading();
-        var uri = api.pageParam.uri;
-        id = uri.replace('xiaoxiaojia://', '');
+        id = api.pageParam.id;
         request();
         api.addEventListener({
             name:'viewappear'

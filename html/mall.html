@@ -95,6 +95,9 @@
 			.categories p:first-child {
 				border-top:0;
 			}
+			.text-left{
+			  display: none;
+			}
 		</style>
 	</head>
 	<body class="loading">
@@ -149,10 +152,10 @@
 				<li>
 					<% var row = top[i] %>
 					<%for(var j = 0; j < row.length; j++){%>
-						<%if(row[j].id == current){%>
-							<span tapmode="touch-down" data-id="<%=row[j].id%>" class="current"><%=row[j].name%></span>
+						<%if(row[j][0] == current){%>
+							<span tapmode="touch-down" data-id="<%=row[j][0]%>" class="current"><%=row[j][1]%></span>
 						<%}else{%>
-							<span tapmode="touch-down" data-id="<%=row[j].id%>" ><%=row[j].name%></span>
+							<span tapmode="touch-down" data-id="<%=row[j][0]%>" ><%=row[j][1]%></span>
 						<%}%>
 					<%}%>
 				</li>
@@ -160,10 +163,11 @@
 		</ul>
 	</script>
 	<script id="low" type="text/html">
-		<section class="categories text-left">
+	
+		<section class="categories <%if(low.length<1){%>text-left<%}%>">
 			<section>
 				<%for(var i = 0; i < low.length; i++){%>
-					<p tapmode="touch-down" data-id="<%=low[i].id%>"><%=low[i].name%></p>
+					<p tapmode="touch-down" data-id="<%=low[i][0]%>"><%=low[i][1]%></p>
 				<%}%>
 			</section>
 		</section>
@@ -178,15 +182,14 @@
 <script type="text/javascript" src="../script/goods.frame.js"></script>
 <script type="text/javascript" src="../script/model/market.js"></script>
 <script type="text/javascript" src="../script/model/cart.js"></script>
-<script type="text/javascript" src="../script/model/category.js"></script>
 <script type="text/javascript">
 	var frameResized = false;
 	var topScroll = null;
 	var lowScroll = null;
 	var categoryID = 0;
 	var lowCategoryID = 0;
-	function _iosGoodsToCart(goods_id, offset_x, page_y, width, height, ratio){
-		iosGoodsToCart(goods_id, offset_x, page_y - $('.top-category-area').height(), width, height, ratio);
+	function _iosGoodsToCart(image, offset_x, page_y, width, height, ratio){
+		iosGoodsToCart(image, offset_x, page_y - $('.top-category-area').height(), width, height, ratio);
 	}
 
 	function refreshTopScroll(){
@@ -263,7 +266,7 @@
 		var page = 1;
 		for(var i = 0; i < top.length; i++){
 			for(var j = 0; j < top[i].length; j++){
-				if(top[i][j].id == current){
+				if(top[i][j][0] == current){
 					page = i;
 				}
 			}
@@ -320,18 +323,10 @@
         api.parseTapmode();
 	}
 
-	function render(top, low, current){
-
-		var category = new Category();
-
-		category.load(function(){
-			var topCategories = category.listTop(top);
-
-			var lowCategories = category.listLow(current, low);
-
-			renderTop(topCategories, current);
-			renderLow(lowCategories);
-		});
+	function render(all, current){
+	    categoryID = current[0];
+		renderTop(all, current[0]);
+		renderLow(current[1]);
 	}
 
 	function initFrames() {
@@ -387,6 +382,7 @@
 			return;
 		}
 		categoryID = category_id;
+		closeGoodsFrame();
 		api.closeFrame({
 	        name: 'mall_index'
         });

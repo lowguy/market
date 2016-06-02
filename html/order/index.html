@@ -56,8 +56,13 @@
             content:'去评价';
         }
 
-        .order.delivery .order-header .operation{
-            display:none;
+        .order.delivery .order-header .operation a{
+            display:inline-block;
+            height:3rem;
+            width:100%;
+            line-height:3rem;
+            color:red;
+            text-decoration:none;
         }
 
         .order.finished .order-header .operation{
@@ -74,11 +79,16 @@
             background:#FFFFFF;
             display:none;
         }
+        .goods-comment{
+            border-top:1px dashed #EFEFEF;
+        }
+        .goods-comment label{
+            color:red;
+        }
         .goods.show{
             display: block;
         }
         .goods:first-child{
-            height:4rem;
             border-top:0;
             display: block;
         }
@@ -86,9 +96,12 @@
         .goods .img{
             height:4rem;
             width:4rem;
-            background-repeat:no-repeat;
-            background-size:contain;
         }
+
+        .goods .img img{
+            height:4rem;
+        }
+
         .goods-info{
             margin-left:4rem;
             position:absolute;
@@ -179,7 +192,7 @@
                 class="order 
                 <%if(order[i].status == 1){%>
                     need-pay
-                <%}else if(order[i].status == 2 || order[i].status == 3){%>
+                <%}else if(2 == order[i].status || order[i].status == 3){%>
                     delivery
                 <%}else if(order[i].status == 4){%>
                     praise
@@ -188,7 +201,13 @@
                 <%}%>" data-id="<%=order[i].order_no%>" >
                 <p class="order-header">
                     <span><%=order[i].created_at%></span>
-                    <button class="operation" data-id="<%=order[i].order_no%>" ></button>
+                    <button tapmode="touch-down" class="operation" data-id="<%=order[i].order_no%>" >
+                        <%if(3 == order[i].status){%>
+                            <a href="tel:<%=order[i].delivery_phone%>">联系配送员</a>
+                        <%}else if(2 == order[i].status){%>
+                             待配送
+                        <%}%>
+                    </button>
                 </p>
                 <section class="order-info">
                     <p class="total"><label>商品总价：</label><span class="value money-symbol"><%=order[i].amount%>（含配送费<%=order[i].deliver%>）</span></p>
@@ -199,12 +218,22 @@
                 <section class="order-goods">
                     <%for(var j = 0; j < order[i].goods.length; j++){%>
                          <section class="goods">
-                            <section class="img" style="background-image:url('../../image/products/<%=order[i].goods[j].product_id%>.JPG')">
+                            <section class="img">
+                                <%if(2 != order[i].goods[j].status){%>
+                                    <img onload="onImageLoad(this, <%=order[i].goods[j].product_id%>);" src="../../image/products/placeholder.JPG"/>
+                                <%}else{%>
+                                    <img class="goods-less" src="../../image/icons/goods-less.png" />
+                                <%}%>
                             </section>
                             <section class="goods-info">
-                                <p class="title"><%=order[i].goods[j].title%> X <%=order[i].goods[j].number%></p>
+                                <p class="title"><%=order[i].goods[j].title%><span class="number">&nbsp;&nbsp;X&nbsp;&nbsp;<%=order[i].goods[j].number%></span></p>
                                 <p class="money-symbol"><%=order[i].goods[j].amount%></p>
                             </section>
+                            <%if(order[i].goods[j].comment){%>
+                                <p class="goods-comment">
+                                    <label>备注：</label><span><%=order[i].goods[j].comment;%></span>
+                                </p>
+                            <%}%>
                          </section>
                     <%}%>
                     <%if(order[i].goods.length > 1){%>
@@ -238,6 +267,9 @@
 var first = true;
 var status = 1;
 var page = 1;
+function onImageLoad(dom, id){
+    loadImage(dom, id, '../../image/products/no.JPG');
+}
 function addPushUp(){
     api.addEventListener({
         name:'scrolltobottom',
@@ -318,7 +350,6 @@ function request(){
         data:{
             values:{
                 status:status,
-                SID:server.getCookie(),
                 page:page
             }
         },

@@ -38,56 +38,12 @@
 			color:#808080;
 		}
 
-        .pay-type{
-            height:auto;
-            font-weight:bold;
-        }
-        .pay-type p{
-            position:relative;
-            height:4rem;
-            line-height:4rem;
-            padding:1rem 1rem 1rem 5rem;
-            background-size:4rem;
-            background-position:1rem 50%;
-            background-repeat:no-repeat;
-            text-indent:0.5rem;
-        }
-        .wxpay{
-            background-image: url('../../image/icons/weixin.png');
-        }
-        .alipay{
-            background-image: url('../../image/icons/alipay.png');
-        }
-        .pay-type .checkbox{
-            position:absolute;
-            right:1rem;
-            top:2rem;
-            height:2rem;
-            width:2rem;
-            background-color:#EFEFEF;
-            border-radius:1rem;
-        }
-        .checkbox a{
-            display:block;
-            height:1rem;
-            width:1rem;
-            margin:0 auto;
-            margin-top:0.5rem;
-            background-color: transparent;
-            border-radius:0.5rem;
-        }
-        .checkbox.checked{
-            background-color: #FFD705;
-        }
-        .checkbox.checked a{
-            background-color: #FFFFFF;
-        }
-        .pay-type p:last-child{
-            border-top:1px solid #EFEFEF;
-        }
         .goods .item {
 			position: relative;
             border-bottom:1px solid #EFEFEF;
+		}
+		.item.has-comment{
+		    border-bottom-style: dashed;
 		}
 		.item .goods-thumb {
 			width:20%;
@@ -115,7 +71,6 @@
 		}
 		.item .title {
 			font-size: 1.3rem;
-			font-weight:bold;
 		}
 
 		.item .price {
@@ -126,6 +81,22 @@
 		.item:nth-last-child(1) {
 			border-bottom: 0;
 		}
+
+        .goods-comment{
+            line-height:2rem;
+            border-bottom:1px solid #EFEFEF;
+            padding:0 1rem;
+            font-size:1.3rem;
+        }
+        .goods-comment label{
+            color:red;
+            text-align:center;
+        }
+
+        .goods-comment span{
+            text-indent:1rem;
+            overflow:auto;
+        }
 	</style>
 </head>
 <body>
@@ -148,8 +119,8 @@
             <section class="divider"></section>
             <section class="goods">
             <%for(var i = 0; i < goods.length; i++){%>
-					<section class="item" >
-                        <img class="goods-thumb" src="../../image/products/<%=goods[i].product_id%>.JPG"/>
+					<section class="item <%if(goods[i].comment){%> has-comment <%}%>" >
+                        <img onload="onImageLoad(this, <%=goods[i].product_id%>);" src="../../image/products/placeholder.JPG" class="goods-thumb" />
 						<section>
 							<button class="title"><span><%=goods[i].title%> x <%=goods[i].number%></span></button>
 	                        <button class="price">
@@ -157,6 +128,11 @@
                             </button>
 						</section>
 					</section>
+				    <%if(goods[i].comment){%>
+                        <p class="goods-comment">
+                          <label>备注：</label><span><%=goods[i].comment%></span>
+                        </p>
+                    <%}%>
              <%}%>
 			</section>
             <section class="divider"></section>
@@ -173,67 +149,47 @@
 <script type="text/javascript">
 var first = true;
 var order_no;
-function delegateEvent(){
-	touchEvent('.pay-type p',choosePayment);
-}
-function initFront(){
-
-}
-function choosePayment(obj){
-    var checkbox = $(obj).children('.checkbox');
-    if(!checkbox.hasClass('checked')){
-        $('.pay-type .checked').removeClass('checked');
-        checkbox.addClass('checked');
-    }
+function onImageLoad(dom, id){
+   loadImage(dom, id, '../../image/products/no.JPG');
 }
 function request(){
-		var server = new Server();
-		var url = server.getOne() + "/order/index/detail";
-		api.ajax({
-	        url:url,
-	        method:'post',
-	        cache:false,
-	        data:{
-	        	values:{
-	        		order_no:order_no,
-	        		SID:server.getCookie()
-	        	}
-	        },
-	        timeout:10,
-	        dataType:'text',
-	        returnAll:true,
-        },function(ret,err){
-	        if(!err && 200 == ret.statusCode){
-				try{
-					var result = JSON.parse(ret.body);
-					if(result.code == 0){
-						var data = {
-							goods:result.data.goods,
-							address:result.data.order
-						}
-						api.execScript({
-	                        script: 'setOrder(' + JSON.stringify(result.data.order) + ')'
-                        });
-
-						api.execScript({
-		                    script : '$(".amount").html(' + result.data.order.amount + ')'
-		                });
-		                
-		                api.execScript({
-		                    script : '$(".deliver").html(' + result.data.order.deliver + ')'
-		                });
-		                
-		                api.execScript({
-		                    script : 'setLimitTime(' + result.data.countdown + ')'
-		                });
-						var html=baidu.template('template',data);
-						$('.container').html(html);
+	var server = new Server();
+	var url = server.getOne() + "/order/index/detail";
+	api.ajax({
+        url:url,
+        method:'post',
+        cache:false,
+        data:{
+        	values:{
+        		order_no:order_no
+        	}
+        },
+        timeout:10,
+        dataType:'text',
+        returnAll:true,
+    },function(ret,err){
+        if(!err && 200 == ret.statusCode){
+			try{
+				var result = JSON.parse(ret.body);
+				if(result.code == 0){
+					var data = {
+						goods:result.data.goods,
+						address:result.data.order
 					}
-				}catch(e){
-				}	
-			}		
-		  	ajaxComplete();
-		});
+					var order = result.data.order;
+					order.countdown = result.data.countdown;
+					api.execScript({
+                        script: 'setOrder(' + JSON.stringify(order) + ')'
+                    });
+
+					var html=baidu.template('template',data);
+					$('.container').html(html);
+				}
+			}catch(e){
+			}	
+		}		
+	  	ajaxComplete();
+	});
 }
 function ajaxComplete(){
 	api.refreshHeaderLoadDone();
@@ -261,8 +217,6 @@ apiready = function(){
 
 	var params = api.pageParam;
 	order_no = params.order;
-	initFront();
-	delegateEvent();
 	onNetworkChanged(request,request);
 	api.addEventListener({
 	    name:'viewappear'

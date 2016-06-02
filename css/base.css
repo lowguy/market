@@ -84,30 +84,26 @@ button{
 }
 
 .network-error {
-	width: 100%;
-	text-align: center;
-	height: 0;
-	font-size:1.2rem;
+    padding:1rem 0;
+    height: 2rem;
+    display:none;
+    text-align: center;
+	font-size:1.3rem;
 	font-weight: bold;
 	line-height: 2rem;
 	background: #FFFFFF;
 	background-image: url('../image/icons/warning.png');
 	background-repeat: no-repeat;
-	background-size: contain;
+	background-size: 2rem;
 	background-position: 5% 50%;
-	-webkit-transition: height 0.2s;
-	opacity:0;
 	overflow: hidden;
-    webkit-transform: translate3d(0,0,0); 
-    transform: translate3d(0,0,0);
+    color:red;
 }
 .network-error:after {
 	content: "您掉线啦..."
 }
 .network-error.show {
-    padding:1rem 0;
-	height: 2rem;
-	opacity:1;
+    display:block;
 }
 
 .container {

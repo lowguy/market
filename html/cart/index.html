@@ -6,9 +6,6 @@
 		<meta name="format-detection" content="telephone=no" />
 		<link rel="stylesheet" type="text/css" href="../../css/base.css"/>
 		<style>
-			.container{
-				display:none;
-			}
 
 			.delivery{
 				margin: 0.5rem 0;
@@ -92,6 +89,11 @@
 				background-position:75% 50%;
 				color:red;
 			}
+			.outof-service{
+			    text-align:center;
+			    color:red;
+			    display:none;
+			}
 			.goods {
 				width: 100%;
 				background: white;
@@ -102,11 +104,16 @@
 				position: relative;
 				padding-top:0.25rem;
                 border-bottom:1px solid #EFEFEF;
+                min-height:6rem;
 			}
 
 			.item .goods-thumb {
-				width: 20%;
+			    position:absolute;
+			    top:0.25rem;
+				width: 6rem;
+				height:6rem;
 			}
+
 	        .item .hot{
                 position:absolute;
                 height:3rem;
@@ -114,6 +121,7 @@
                 background-image: url('../../image/icons/product-hot.png');
                 background-size:contain;
                 background-repeat:no-repeat;
+                z-index:1;
             }
 
             .item .discount{
@@ -123,17 +131,16 @@
                 background-image: url('../../image/icons/product-discount.png');
                 background-size:contain;
                 background-repeat:no-repeat;
+                z-index:1;
             }
 			.item .title {
 				height: 2rem;
 				font-size: 1.3rem;
 				line-height: 2rem;
-				left: 20%;
-				width:80%;
+				padding-left: 6rem;
 				overflow:hidden;
 				white-space: nowrap;
     			text-overflow: ellipsis;
-    			position:absolute;
 			}
 			.item .title span{
 				padding:0 0.5rem;
@@ -168,6 +175,18 @@
             .item.not-enough .status:after{
                 content:'库存不足'
             }
+            .item.enable-comment .bottom{
+                bottom:4rem;
+            }
+            .item.enable-comment .goods-comment{
+                display:block;
+            }
+            .item.not-enough .bottom{
+                bottom:0;
+            }
+            .item.not-enough .goods-comment{
+                display:none;
+            }
             .item.not-ready .status{
                 display:block;
             }
@@ -197,12 +216,12 @@
 				-webkit-filter: grayscale(1); 
 				filter: grayscale(1); 
             }
+
 			.item .bottom {
-				width: 80%;
 				height:3rem;
-				position: absolute;
-				left: 20%;
-				bottom:0;
+				position: relative;
+				margin-left: 6rem;
+				top:0rem;
 				padding-bottom:0.5rem;
 			}
 			.bottom p{
@@ -271,7 +290,38 @@
     			word-wrap: normal;
     			overflow: hidden;
 			}
+            .goods-comment{
+                height:4rem;
+                position:relative;
+                line-height:4rem;
+                display:none;
+                border-top:1px dashed #EFEFEF;
+            }
+            .goods-comment label{
+                display:inline-block;
+                height:4rem;
+                width:20%;
+                color:red;
+                text-align:center;
+            }
 
+            .goods-comment span{
+                position:absolute;
+                right:1rem;
+                top:0;
+                width:80%;
+                height:4rem;
+                text-indent:1rem;
+                font-size:1.3rem;
+                color:#808080;
+            }
+            .goods-comment span.comment-added{
+                color:#222222;
+            }
+
+            .goods-comment:nth-last-child(1){
+                border-bottom:0;
+            }
 			.item:nth-last-child(1) {
 				border-bottom: 0;
 			}
@@ -366,6 +416,7 @@
 				您还没有挑选任何商品
 			</section>
 		<%}else{%>
+            <p class="outof-service">您的收货地址不在小小家(<span></span>)配送范围内，请谨慎下单</p>
             <section class="divider"></section>
             <section class="delivery" tapmode="touch-down">
                 <%if(address){%>
@@ -394,11 +445,22 @@
     				    <%if(!goods[i].status){%>
     				        class = "item not-ready"
     				    <%}else if(goods[i].stock < goods[i].number){%>
-    				        class = "item not-enough"
+    				        <%if(goods[i].enableComment){%>
+                                class = "item not-enough enable-comment"
+                            <%}else{%>
+                                class = "item not-enough"
+                            <%}%>
     				    <%}else{%>
-    				        class = "item"
+    				        <%if(goods[i].enableComment){%>
+    				            class = "item enable-comment"
+    				        <%}else{%>
+    				            class = "item"
+    				        <%}%>
     				    <%}%>
-					   data-activity="<%=goods[i].activity%>" data-discount="<%=goods[i].discount%>" data-id="<%=goods[i].id%>" data-price="<%=goods[i].price%>" data-title="<%=goods[i].title%>" data-slogan="<%=goods[i].slogan%>" data-stock="<%=goods[i].stock%>">
+					   data-goods="<%=JSON.stringify(goods[i])%>"
+					   data-id="<%=goods[i].id%>"
+				    >
+					   
                        <%if(1 == goods[i].activity){%>
                             <p class="hot"></p>
                         <%}else if(2 == goods[i].activity){%>
@@ -407,7 +469,18 @@
 						<p class="title">
 							<span><%=goods[i].title%></span>
 						</p>
-						<img class="goods-thumb" src="../../image/products/<%=goods[i].id%>.JPG"/>
+						<img onload="onImageLoad(this, <%=goods[i].id%>,<%=goods[i].version%>);"
+						     class="goods-thumb"
+						     <%
+                                var selector = '.item[data-id="' + goods[i].id + '"]';
+                                var dom = $(selector).find('.goods-thumb');
+                             %>
+                             <%if(dom.length){%>
+                                 src="<%=dom.attr('src');%>"
+                             <%}else{%>
+                                 src="../../image/products/placeholder.JPG"
+                             <%}%> 
+						 />
 
 						<section class="bottom text-ellipsis">
                             <p class="price-sales">
@@ -430,13 +503,21 @@
                                 </span>
                             </p>
 						</section>
+				        <p tapmode="touch-down" class="goods-comment">
+                            <label>备注：</label>
+                            <%if(goods[i].comment){%>
+                                <span class="text-ellipsis comment-added" data-placeholder="例如不要辣, 不要葱、姜、蒜等"><%=goods[i].comment%></span>
+                            <%}else{%>
+                                <span class="text-ellipsis" data-placeholder="例如不要辣, 不要葱、姜、蒜等">例如不要辣, 不要葱、姜、蒜等</span>
+                            <%}%>
+                        </p>
 					</section>
 				<%}%>
 			</section>
             <section class="buy-wrapper">
                 <p class="delivery-notice">0元起送，满29元免配送费</p>
                 <div>
-                    <span>合计:</span><span class="money-symbol"></span>
+                    <span>商品合计:</span><span class="money-symbol"></span>
                     <br/>
                     <span>配送:</span><span class="money-symbol">0</span>
                     <button tapmode="touch-down" class="buy-button">结算</button>
@@ -475,6 +556,14 @@
 	var first = true;
 	var iosOverScroll = false;
 	var freeArea = [];
+	 function onImageLoad(dom, id,version){
+        loadImage(dom, id, '../../image/products/no.JPG',version);
+    }
+	String.prototype.trim=function()
+    {
+         return this.replace(/(^\s*)|(\s*$)/g, '');
+    }
+
 	function setDefaultAddress(){
 		var cartGoods = getCartGoods();
 		var server = new Server();
@@ -532,6 +621,7 @@
         data.address = defaultAddress;
         var html=baidu.template('delivery',data);
         $('.delivery').html(html);
+        checkAddress();
 	}
 	function openAddress(){
 	    var name = 'address';
@@ -588,7 +678,7 @@
                     var offset_x = offset.left;
                     var page_y = offset.top - $(window).scrollTop();
                     var params = [];
-                    params.push($(this).parents('.item').attr('data-id'));
+                    params.push("'" + origin.attr('src') + "'");
                     params.push(offset_x);
                     params.push(page_y);
                     params.push(width);
@@ -608,37 +698,69 @@
 		touchEvent('.delivery',openAddress);
 		touchEvent('.buy-button', buy);
 		touchEvent('.not-ready .delete',removeGoodsInCart);
+
+		touchEvent('.goods-comment', function(dom){
+            $(dom).addClass('input-current');
+            var inputField = api.require('inputField');
+            var text = '';
+            if($(dom).find('span').hasClass('comment-added')){
+                text = $(dom).find('span').text();
+            }
+
+            inputField.setMsg({
+                msg:text
+            }, function(ret, err){
+            });
+            inputField.becomeFirstResponder();
+            inputField.show();
+		});
 	}
+
 	function removeGoodsInCart(obj){
-		var goodsID = $(obj).parents('.item').attr('data-id');
+		var goods = JSON.parse($(obj).parents('.item').attr('data-goods'))
 		var marketModel = new Market();
         var market = marketModel.getCurrent();
 		var marketID = market.id;
 		var cart = new Cart();
-		cart.remove(marketID, goodsID);
-			
+		cart.remove(marketID, goods.id);
+
 		api.execScript({
 	        script: 'updateCartNumber();'
-        });      
-        
+        });
+
         $(obj).parents('.item').remove();
         if(!$('.item').length){
-        	renderEmpty();
+        	render(market.id, []);
         }
 	}
-	function renderEmpty(){	
-		var data = {
-			goods:[],
-		}
-		var html=baidu.template('template',data);
-		$('.container').html(html);
-		initFront();
-		if('none' == $('.container').css('display')){
-		    setTimeout(function(){
-		        $('.container').fadeIn(200);
-		    }, 100);
-		}
+
+	function checkAddress(){
+        var map = api.require('xMap');
+        var addressModel = new Address();
+        var marketModel = new Market();
+        var market = marketModel.getCurrent();
+        $('.outof-service span').text(market.district);
+        var address = addressModel.getDefault(market.id);
+        if(address && freeArea.length){
+            map.isPolygonContantsPoint({
+                point: {
+                     lon:address.lon,
+                     lat:address.lat
+                 },
+                points:freeArea
+            },function(ret){
+                 if(!ret.status){
+                     $('.outof-service').show();
+                 }
+                 else{
+                     $('.outof-service').hide();
+                 }
+            });
+        }else{
+            $('.outof-service').hide();
+        }
 	}
+
 	function buy(obj){
 	    var server = new Server();
 	    if(server.cookieIsExpired()){
@@ -686,11 +808,17 @@
 		var goods= [];
 		$.each($('.item:not(.not-enough)'),function(i,e){
 		        if(!$(e).hasClass('not-ready')){
-                      var id = $(e).attr('data-id');
+		              var domGoods = JSON.parse($(e).attr('data-goods'));
                       var number = parseInt($(e).find('.number').text());
+                      var commentDom = $(e).find('.goods-comment span.comment-added');
+                      var comment = '';
+                      if(commentDom.length > 0){
+                          comment = commentDom.first().text();
+                      }
                       goods.push({
-                          id:id,
-                          number:number
+                          id:domGoods.id,
+                          number:number,
+                          comment:comment
                       });
 		        }
 		});
@@ -707,8 +835,7 @@
                 values:{
                     id:marketID,
                     goods:goods,
-                    address:defaultAddress,
-                    SID:server.getCookie()
+                    address:defaultAddress
                 }
             };
 			var server = new Server();
@@ -728,9 +855,10 @@
 						  	if(result.code == 0){
 						  		manageCart(marketID,goods,result.data);
 						  	}else if(result.code == 1){
-						  		api.toast({
-		                         	msg:'您的收货地址不在小小家的配送范围内，暂时无法提供服务'
-	                         	});
+			  		            api.openWin({
+                                    name: 'login',
+                                    url: 'widget://html/login.html'
+                                });
  	                            dom.removeClass('button-loading');
 						  	}
 						}catch(e){
@@ -769,7 +897,6 @@
 		api.parseTapmode();
 	}
 	function addCart(obj){
-		var stock = parseInt($(obj).parents('.item').attr('data-stock'));
 		var number = parseInt($(obj).siblings('.number').text());
 		if($(obj).parents('.item').hasClass('not-enough')){
 		    return;
@@ -778,9 +905,10 @@
 		var current = marketModel.getCurrent();
 		var cart = new Cart();
 		
-		var goodsID = $(obj).parents('.item').attr('data-id');
-		cart.add(current.id, goodsID);
+		var goods = JSON.parse($(obj).parents('.item').attr('data-goods'));
+		cart.add(current.id, goods.id);
 		number += 1;
+        var stock = goods.stock;
 		if(number > stock){
 		    $(obj).parents('.item').addClass('not-enough');
 		}
@@ -797,10 +925,10 @@
 		var current = marketModel.getCurrent();
 		var cart = new Cart();
 
-		var goodsID = $(obj).parents('.item').attr('data-id');
-		cart.sub(current.id, goodsID);
+        var goods = JSON.parse($(obj).parents('.item').attr('data-goods'));
+		cart.sub(current.id, goods.id);
 		var number = $(obj).siblings('.number').text();
-		var stock = $(obj).parents('.item').attr('data-stock');
+		var stock = goods.stock;
 		stock = parseInt(stock);
 		number = parseInt(number);
 		number -= 1;
@@ -808,16 +936,16 @@
 		    $(obj).parents('.item').removeClass('not-enough');
 		}
 		var list = cart.list(current.id);
-		
+
 		if(list.length == 0){
 			$('.container').hide();
 			render(current.id,[]);
 		}
-		
+
 		api.execScript({
 	        script: 'updateCartNumber();'
         });
-        
+
         showNumber();
 	}
 
@@ -831,19 +959,18 @@
 		
 	}
     function showPrice(dom, number){
-        var activity = dom.attr('data-activity') || 0;
-        if(0 != activity){
-            if(1 == activity){
-                if(number > 2){
-                    dom.find('.money-symbol.current').text(dom.attr('data-price'));
-                }
-                else{
-                    dom.find('.money-symbol.current').text(dom.attr('data-discount'));
-                }
+        var goods = JSON.parse(dom.attr('data-goods'));
+        var activity = goods.activity || 0;
+        if(1 == activity){
+            if(number > 2){
+                dom.find('.money-symbol.current').text(goods.price);
             }
-            else if(2== activity){
-                dom.find('.money-symbol.current').text(dom.attr('data-discount'));
+            else{
+                dom.find('.money-symbol.current').text(goods.discount);
             }
+        }
+        else if(2== activity){
+            dom.find('.money-symbol.current').text(goods.discount);
         }
     }
 
@@ -855,15 +982,16 @@
 			var inCart = false;
 			$.each(cartGoods, function(j, goods){
 				var price = 0;
-				if($(dom).attr('data-id') == goods.id){
+				var domGoods = JSON.parse($(dom).attr('data-goods')); 
+				if(domGoods.id == goods.id){
 					inCart = true;
 					showPrice($(dom), goods.number);
 					number = goods.number;
 					if(!$(dom).hasClass('not-enough') && !$(dom).hasClass('not-ready')){
-                        price = $(dom).attr('data-price');
-					    var activity = parseInt($(dom).attr('data-activity')) || 0;
+                        price = domGoods.price;
+					    var activity = domGoods.activity;
 					    if([1,2].indexOf(activity) > -1){
-					        var discount = $(dom).attr('data-discount');
+					        var discount = domGoods.discount;
 					        if(1 == activity){
                                 if(goods.number > 2){
                                     money += (goods.number - 2) * price;
@@ -890,12 +1018,22 @@
 				$(dom).find('.number').html(number);
 			}
 		});
-		
-		$('.buy-wrapper .money-symbol').first().text(money.toFixed(2));
+		money = money.toFixed(2);
+		$('.buy-wrapper .money-symbol').first().text(money);
+		if(money < 29){
+		    if(0 == money){
+                $('.buy-wrapper .money-symbol').last().text('0.00');
+		    }
+		    else{
+                $('.buy-wrapper .money-symbol').last().text('4.00');
+		    }
+		}
+		else{
+                $('.buy-wrapper .money-symbol').last().text('0.00');
+		}
 	}
 
 	function render(marketID,goods){
-
 		var address = new Address();
 		var defaultAddress = address.getDefault(marketID);
 		
@@ -904,16 +1042,11 @@
 		$.each(goods,function(index,item){
 			$.each(cartGoods,function(i,e){
 				if(e.id == item.id){
-					if(e.number > item.number && item.number > 0){
-						cart.sub(marketID,e.id,(e.number-item.number));
-						api.execScript({
-					        script: 'updateCartNumber();'
-				        });
-					}
+					item.number = e.number;
+					item.comment = e.comment;
 				}
 			});
 		});
-		
 		var data = {
 			goods:goods,
 			address:defaultAddress
@@ -927,6 +1060,7 @@
 		        $('.container').fadeIn(200);
 		    }, 100);
 		}
+        checkAddress();
 
 	}
 
@@ -976,7 +1110,6 @@
 			});
 			var data = {values:{id:current.id,goods:goodsIDs}};
 			var server = new Server();
-            data.values.SID = server.getCookie();
 			var url = server.getOne() + "/customer/cart/index";	
 			api.ajax({
 		        url:url,
@@ -992,6 +1125,8 @@
 						var result = JSON.parse(ret.body);
                         initFreeArea(result.data.free_area);
                         var goods = result.data.goods;
+                        var goodsModel = new Goods();
+                        goods= goodsModel.mergeWithComment(goods);
                         for(var i = 0; i < goods.length; i++){
                             for(var j = 0; j < cartGoods.length; j++){
                                 if(goods[i].id == cartGoods[j].id){
@@ -1001,18 +1136,14 @@
                         }
                         var data = [];
                         for(var i = 0; i < goods.length; i++){
-                            if(goods[i].status && goods[i].stock >= goods[i].number){
+                            if(goods[i].status > 0 && goods[i].stock >= goods[i].number){
                                 data.unshift(goods[i]);
                             }
                             else{
                                 data.push(goods[i]);
                             }
                         }
-						var goodsModel = new Goods();
-						goodsModel.load(function(){
-					      	goods= goodsModel.merge(data);
-					  	  	render(current.id,goods);
-			  	  		});
+				  	  	render(current.id,data);
 					}catch(e){
 					}	
 				}		
@@ -1030,18 +1161,71 @@
     	first = true;
 	}
 
+    function initCommentInput(){
+        inputField = api.require('inputField');
+        inputField.open({
+                bgColor:'#FFD705',
+                lineColor:'#FFD705',
+                fileBgColor:'#FFFFFF',
+                borderColor:'#FFFFFF',
+                sendImg:'widget://image/icons/button.png',
+                sendImgHighlight:'widget://image/icons/button_down.png',
+                maxLines:6,
+                placeholder:'输入您的其他要求,最多50字'
+            }, function(ret, err){
+                if('ios' == api.systemType){
+                    inputField.hide();
+                }
+                inputField.resignFirstResponder();
+                if(ret){
+                    var message = ret.msg.trim();
+                    var dom = $('.goods-comment.input-current');
+                    dom.removeClass('input-current');
+                    var span =  dom.find('span');
+                    if(message){
+                       span.text(message.substr(0, 50)).addClass('comment-added');
+                    }
+                    else{
+                        span.text(span.attr('data-placeholder')).removeClass('comment-added');
+                    }
+                    var cartModel = new Cart();
+                    var marketModel = new Market();
+                    var current = marketModel.getCurrent();
+                    var goods = JSON.parse(dom.parent('.item').attr('data-goods'));
+                    cartModel.comment(current.id, goods.id ,message);
+
+                }
+        });
+
+        inputField.hide();
+
+        inputField.setInputFieldListener(function(ret, err){    
+            if( ret ){
+                if("move" == ret.eventType){
+                    if(0 == ret.chatViewH){
+                        inputField.hide();
+                    }
+                }
+            }
+        });
+    }
 	apiready = function() {
 		api.setFrameAttr({
             name: api.frameName,
             hidden:true
         });
+
+        initCommentInput();
+
 		onNetworkChanged(request,request);
 
 		api.execScript({
 	        script: 'loading();'
         });
 
-        request();
+        if('ios' == api.systemType){
+            request();
+        }
 
 		delegateEvent();		
 	    api.addEventListener({

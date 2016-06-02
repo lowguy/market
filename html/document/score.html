@@ -4,20 +4,38 @@
 	<meta charset="utf-8">
     <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
     <title>title</title>
-    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/base.css"/>
+    <link rel="stylesheet" type="text/css" href="../../css/document.css"/>
     <style>
-    	body{
-    		
-    	}
+     .text-two{
+	text-indent: 2em;
+	}
     </style>
 </head>
 <body>
-	
+    <header>
+	    <p tapmode="touch-down" class="back">返回</p>
+	    <p>积分规则</p>
+    </header>
+    <h2>1、如何获取小小家平台正常积分和冻结积分？</h2>
+    <h3 class="text-two">1.1 用户在小小家平台购买赠送积分的商品后，小小家平台会自动在交易完成后增加用户的正常积分（可购物可提现）。</h3>
+    <h3 class="text-two">1.2 用户推荐的好友在小小家平台购买赠送积分的商品后，用户可获得相应的冻结积分（可转化为正常积分）。</h3>
+    <h2>2、冻结积分如何转化为正常积分？</h2>
+    <h3 class="text-two">有冻结积分的用户在一周之内在小小家平台购物后，冻结积分就自动转化为正常积分，转化周期为一个星期。</h3>
+    <h2>3、正常积分如何提现？</h2>
+    <h3 class="text-two">用户按照小小家平台相应的要求填写银行卡号或者支付宝账号后，48小时之内到账。</h3>
+    <h2>4、正常积分有什么功能？</h2>
+    <h3 class="text-two">根据小小家平台规则，用户拥有的正常积分可在小小家平台用于购物也可提现。</h3>
 </body>
-<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../../script/app.js"></script>
+<script type="text/javascript" src="../../script/vendor/zepto.js"></script>
 <script type="text/javascript">
 	apiready = function(){
-		
-	};
+	 fixStatusBar($('header'));
+	 touchEvent('.back', function(){
+            api.closeWin({
+            });
+        });
+	}
 </script>
 </html>

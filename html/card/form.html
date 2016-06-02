@@ -130,26 +130,22 @@
             <section class="alipay">
                 <section class="field-group">
                     <label for="account">支付宝账号</label>
-                    <input tapmode="touch-down" placeholder="必填，请输入您的支付宝账号" id="account" name="account"/>
+                    <input tapmode="touch-down" maxlength="30" placeholder="必填，请输入您的支付宝账号" id="account" name="account"/>
                 </section>
             </section>
             <section class="bank hidden">
                 <section class="field-group">
                     <label for="ali-account">开户行</label>
-                    <input tapmode="touch-down" placeholder="必填，例如工商银行" id="bank" name="bank"/>
+                    <input tapmode="touch-down" maxlength="20" placeholder="必填，例如工商银行" id="bank" name="bank"/>
                 </section>
                 <section class="field-group">
                     <label for="ali-account" type="tel">银行卡号</label>
-                    <input type="tel" tapmode="touch-down" placeholder="必填，请输入您的银行卡号" id="card" name="card"/>
+                    <input type="tel" maxlength="30" tapmode="touch-down" placeholder="必填，请输入您的银行卡号" id="card" name="card"/>
                 </section>
             </section>
             <section class="field-group">
                 <label for="name">姓名</label>
-                <input tapmode="touch-down" placeholder="必填，请输入您的真实姓名" id="name" name="name"/>
-            </section>
-            <section class="field-group">
-                <label for="phone">手机号码</label>
-                <input type="tel" id="phone" name="phone" placeholder="必填，请输入您的手机号码" />
+                <input tapmode="touch-down" maxlength="8" placeholder="必填，请输入您的真实姓名" id="name" name="name"/>
             </section>
             <p class="save" tapmode="touch-down">
                 保存
@@ -194,6 +190,16 @@
         });
     }
 
+    function isCard(card){
+        result = false;
+        card = card.replace(/\s/g, '');
+        if(card){
+            var pattern = /^[0-9]{13,19}$/;
+            result = pattern.test(card);
+        }
+        return result;
+    }
+
     function save() {
         var dom = $('.save');
         var type = $('.checkbox.checked').attr('data-type');
@@ -202,21 +208,40 @@
             var card = $('#card').val();
             var bank = $('#bank').val();
             var name = $('#name').val();
-            var phone = $('#phone').val();
+
             if (type == 1) {
                 account = card;
-                if (!card || !bank || !name || !phone) {
+                if(!bank){
                     api.toast({
-                        msg : '请完善您的信息，谢谢！'
+                        msg:'请输入您的开户行',
+                        location:'middle'
                     });
                     return;
                 }
-            } else if (!account || !name || !phone) {
+                if(!isCard(card)){
                     api.toast({
-                        msg : '请完善您的信息，谢谢！'
+                        msg:'请输入正确的银行卡号',
+                        location:'middle'
                     });
                     return;
                 }
+            }
+            else{
+                if(!isCellPhone(account) && !isMail(account)){
+                    api.toast({
+	                    msg:'请输入正确的支付宝账号，手机号或邮箱',
+                        location:'middle'
+                    });
+                    return;
+                }
+            }
+            if(!name){
+                api.toast({
+                    msg:'请输入您的真实姓名',
+                    location:'middle'
+                });
+                return;
+            }
             dom.addClass('button-loading');
             var server = new Server();
             var url = server.getOne() + "/user/card/index";
@@ -229,14 +254,12 @@
                         type : type,
                         account : account,
                         bank : bank,
-                        name : name,
-                        phone : phone,
-                        SID : server.getCookie()
+                        name : name
                     }
                 },
                 timeout : 10,
                 dataType : 'text',
-                returnAll : true,
+                returnAll : true
             }, function(ret, err) {
                 var tip = '服务器忙，请稍候再试...';
                 if (!err && 200 == ret.statusCode) {

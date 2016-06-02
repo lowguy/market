@@ -35,11 +35,11 @@
 		.title{
 			font-size:1.4rem;
 		}
-		
+
 		.pay-warning{
 			width: 100%;
 			text-align: center;
-			height: 0;
+			height: 4rem;
 			font-size: 1.4rem;
 			line-height: 4rem;
 			background: #FFD705;
@@ -51,10 +51,7 @@
 			opacity:0;
 			overflow: hidden;
 		}
-		.pay-warning.show {
-			height: 4rem;
-			opacity:1;
-		}
+
 		.buy-wrapper{
 			position:fixed;
 			width:100%;
@@ -63,8 +60,8 @@
 			height:auto;
             background: #FFFFFF;
             z-index:1;
-            border-top:1px solid #EFEFEF; 
-
+            border-top:1px solid #EFEFEF;
+            opacity:0;
 		}
 		.buy-wrapper div{
 		    padding:0 1rem;
@@ -111,7 +108,7 @@
 			<p class="title">订单支付</p>
 		</section>
 	</header>
-	<p class="pay-warning show"><time></time>后订单自动取消，请您尽快支付</p>
+	<p class="pay-warning"><span class="time"></span>后订单自动取消，请您尽快支付</p>
 	<section class="buy-wrapper">
         <div>
             <span>合计:</span><span class="money-symbol amount"></span>
@@ -128,22 +125,25 @@
 <script type="text/javascript" src="../script/api/server.js"></script>
 <script type="text/javascript" src="../script/window.js"></script>
 <script type="text/javascript">
-var   order_no,
-		order = null,
-		interval = 0,
-		countdown =300;
+var order_no,
+	order = null,
+	interval = 0,
+	countdown =900;
 
 function setOrder(obj){
     order = obj;
+    $(".amount").text(order.amount);
+    $(".deliver").text(order.deliver);
+    setLimitTime(order.countdown);
+    if(!$('.pay-warning').hasClass('js-show')){
+        $('.pay-warning,.buy-wrapper').fadeIn(300).addClass('js-show');
+    }
 }
 
 function delegateEvent(){
 	touchEvent('.buy-button',payModel);
 }
 
-function ajaxComplete(){
-		api.refreshHeaderLoadDone();
-}
 function initFront(){
    	fixStatusBar($('header'));
    	$('.back').on('touchend', function(){
@@ -165,9 +165,9 @@ function timer(){
 	var seconds = parseInt(countdown%60);
 	if(minutes>0){
 		seconds = seconds >= 10 ? seconds : "0"+seconds;　
-		$('time').html(minutes + ":" +seconds);
+		$('.time').html(minutes + ":" +seconds);
 	}else if(seconds > 0){
-		$('time').html(seconds + "秒");
+		$('.time').html(seconds + "秒");
 	}else{
 		api.closeWin();
 	}
@@ -264,9 +264,28 @@ function payModel(){
 	});
 }
 function wxPay(){
-	api.toast({
-	    msg:'微信支付'
-    });
+	var wxPay = api.require('wxPay');
+	wxPay.config({
+  	}, function(ret, err){
+	   if (ret.status) {
+		    wxPay.pay({
+		     description : '小小家－生活助手',
+		     totalFee : String(parseInt(order.amount * 100)),
+		     tradeNo : order.order_no
+		    }, function(ret, err) {
+		    	if(ret.status){
+		    		paySuccess();
+                	return;
+		    	}else{
+		    		api.toast({
+				        msg:'支付失败',
+				        location:'middle'
+			        });
+		    	}
+		    });
+	   } else {
+	   }
+  	});
 }
 function integralPay(){
 	var server = new Server();
@@ -277,29 +296,39 @@ function integralPay(){
         cache:false,
         data:{
         	values:{
-        		order_no:order_no,
-        		SID:server.getCookie()
+        		order_no:order_no
         	}
         },
         timeout:10,
         dataType:'text',
         returnAll:true,
     },function(ret,err){
-    	var tip = true;
+        var message = '服务器忙, 请稍后再试';
     	if(!err && 200 == ret.statusCode){
 			try{
-				var result = JSON.parse(ret.body);				
-				if(result.code == 0){
-					paySuccess();
-                	return;
+				var result = JSON.parse(ret.body);
+				switch(result.code){
+				    case 0:
+    				    paySuccess();
+    				    return;
+				    break;
+				    case 1:
+				        message = '您还没有登陆，请登陆后再试'
+				    break;
+				    case 2:
+                        message = '订单信息有误，暂时无法支付'
+                    break;
+                    case 3:
+                        message = '您的积分不足' + Math.ceil(order.amount * 10) + ', 无法完成支付'
+                    break;
 				}
 			}catch(e){
 			}	
 		}
-		api.toast({
-	        msg:'支付失败',
-	        location:'middle'
-        });	
+	    api.toast({
+           msg:message,
+           location:'middle'
+        });
 	});
 }
 function cashPay(){
@@ -311,8 +340,7 @@ function cashPay(){
         cache:false,
         data:{
         	values:{
-        		order_no:order_no,
-        		SID:server.getCookie()
+        		order_no:order_no
         	}
         },
         timeout:10,
@@ -334,29 +362,6 @@ function cashPay(){
 	        location:'middle'
         });
 	});
-}
-function paySuccess(){
-    var header = $('header').height();
-    var winHeight = parseInt(api.winHeight);
-    var height = winHeight - header;
-    api.openFrame({
-        name: 'pay_success',
-        url: 'widget://html/pay/success.html',
-        rect: {
-            x: 0,
-            y: header,
-            w: api.winWidth,
-            h: height
-        },
-        bounces: true,
-        bgColor: 'rgba(255,255,255,1)',
-        vScrollBarEnabled: false,
-        hScrollBarEnabled: false,
-        animation:{
-            type:'fade',
-            duration:300
-        }
-    });
 }
 
 function aliPay(){
@@ -381,6 +386,31 @@ function aliPay(){
         });
     });
 }
+
+function paySuccess(){
+    var header = $('header').height();
+    var winHeight = parseInt(api.winHeight);
+    var height = winHeight - header;
+    api.openFrame({
+        name: 'pay_success',
+        url: 'widget://html/pay/success.html',
+        rect: {
+            x: 0,
+            y: header,
+            w: api.winWidth,
+            h: height
+        },
+        bounces: true,
+        bgColor: 'rgba(255,255,255,1)',
+        vScrollBarEnabled: false,
+        hScrollBarEnabled: false,
+        animation:{
+            type:'fade',
+            duration:300
+        }
+    });
+}
+
 
 apiready = function(){
 	var params = api.pageParam;

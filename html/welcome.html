@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <title>title</title>
+    <link rel="stylesheet" type="text/css" href="../css/base.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/flexslider.css"/>
+    <style>
+    	html,body{
+    		height:100%;
+    		width:100%;
+    		background-color:#FFFFFF;
+    		overflow: hidden;
+    	}
+    	.flexslider{
+    	   height:100%;
+    	   width:100%;
+    	   margin:0;
+    	}
+    	.slides,.slides li{
+    	   height:100%;
+    	}
+    	.flexslider .slides img{
+    	    max-height:80%;
+    	    margin:0 auto;
+    	    width:auto;
+    	}
+    	.flex-control-nav{
+    	    top:80%;
+    	}
+    	.flex-control-paging li a{
+    	    background: rgba(0, 0, 0, 0.3);
+    	}
+    	.flex-control-paging li a.flex-active{
+    	    background: rgba(0, 0, 0, 0.9);
+    	}
+    </style>
+</head>
+<body>
+    <div class="flexslider">
+      <ul class="slides">
+        <li>
+          <img src="../image/welcome/1.jpg" />
+        </li>
+        <li>
+          <img src="../image/welcome/2.jpg" />
+        </li>
+        <li>
+          <img class="last" tapmode="touch-down" src="../image/welcome/3.jpg" />
+        </li>
+      </ul>
+    </div>
+</body>
+<script type="text/javascript" src="../script/app.js"></script>
+<script type="text/javascript" src="../script/vendor/jquery-2.2.4.min.js"></script>
+<script type="text/javascript" src="../script/vendor/jquery.flexslider.js"></script>
+<script type="text/javascript">
+    function goHome() {
+        var postFix = 'ios' == api.systemType ? 'ios' : 'android';
+        api.openWin({
+            name : 'home',
+            url : 'widget://html/home_' + postFix + '.html',
+            slidBackEnabled : false,
+            animation : {
+                type : 'none',
+                duration : 300
+            },
+            bounces : false,
+            reload : false
+        });
+    }
+
+	apiready = function(){
+        api.removeLaunchView({
+            animation: {
+                type: 'fade',
+                duration: 500
+            }
+        });
+        $('.flexslider').flexslider({
+            animation: "slide",
+            animationLoop:false,
+            itemWidth: api.winWidth || $(window).width(),
+            itemMargin: 0,
+            directionNav: false,
+            slideshow:false,
+            animationSpeed: 600
+        });
+
+        touchEvent('.last', function(){
+            api.setPrefs({
+                key: 'welcome',
+                value: api.appVersion
+            });
+
+            goHome();
+            api.closeWin({
+            });
+        });
+	};
+</script>
+</html>

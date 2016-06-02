@@ -37,6 +37,22 @@
             line-height:10rem;
            /* font-weight:bold;*/
         }
+        .user-info .mall{
+            height:4rem;
+            line-height: 6rem;
+            position:absolute;
+            right:1rem;
+            top:-4rem;
+            font-size:1rem;
+            color:#6B450A;
+            background-size:2rem;
+            background-position:50% 0rem;
+            background-repeat:no-repeat;
+            background-image:url('../../image/icons/mall-active.png');
+            width:5rem;
+            border:0.1rem solid #6B450A;
+            border-radius:2.5rem;
+        }
         .menu{
             padding:1rem;
             height:3rem;
@@ -130,13 +146,13 @@
         .menu.open .icon{
             background-image:url('../../image/icons/work-status.png');
         }
-        .menu.mall .icon{
-            background-image: url('../../image/icons/work.png');
-        }
+
         .menu.open-time .icon{
             background-image:url('../../image/icons/time.png');
         }
-
+        .menu.order .icon{
+            background-image:url('../../image/icons/order.png');
+        }
     </style>
 </head>
 <body>
@@ -150,6 +166,7 @@
         <section class="user-info">
             <p class="no-login"></p>
             <p class="login"></p>
+            <button tapmode="touch-down" class="mall">商城</button>
         </section>
         <section tapmode="touch-down" class="menu open">
              <section class="icon"></section>
@@ -163,15 +180,15 @@
              <section class="detail">设置</section>
         </section>
         <section class="divider"></section>
-        <section tapmode="touch-down" class="menu mall">
+        <section tapmode="touch-down" class="menu order">
              <section class="icon"></section>
-             <section class="title">商城入口</section>
-             <section class="detail">我要购物</section>
+             <section class="title">我的订单</section>
+             <section class="detail">&nbsp;</section>
         </section>
         <section class="divider"></section>
     </section>
     <footer class="navigator text-center">
-        <section class="home">
+        <section class="goods">
             <div class="icon">
             </div>
             <span>商品</span>
@@ -229,22 +246,42 @@ function delegateEvent(){
 
     touchEvent('.open', function(){
         var dom = $('.open .switcher');
-        dom.addClass('loading');
-        var status = 0;
-        if(dom.hasClass('closed')){
-        	status = 1;
+        if(!dom.hasClass('loading')){
+            dom.addClass('loading');
+            var status = 0;
+            if(dom.hasClass('closed')){
+                status = 1;
+            }
+            setStatus(status);
         }
-        setStatus(status);
     });
 
     touchEvent('.mall', function(){
-        goHome();
+        api.openWin({
+            name: 'user',
+            url: 'widget://html/user.html',
+            slidBackEnabled:false,
+            animation:{
+                type:'none',
+                duration:300
+            },
+            vScrollBarEnabled:false,
+            bounces:false,
+            reload:false
+        });
     });
 
     touchEvent('.open-time',function(){
         api.openWin({
             name: 'merchant_setting',
             url: 'widget://html/merchant/setting.html'
+        });
+    });
+
+    touchEvent('.order',function(){
+        api.openWin({
+            name: 'merchant_order',
+            url: 'widget://html/merchant/order.html'
         });
     });
 
@@ -260,9 +297,7 @@ function delegateEvent(){
     },function(ret,err){
         updateUserInfo();
         request();
-    });
-    
-    
+    }); 
 }
 
 function setStatus(status){
@@ -277,7 +312,6 @@ function setStatus(status){
         data:{
             values:{
                 id:current.id,
-                SID:server.getCookie(),
                 status:status
             }
         },
@@ -285,7 +319,6 @@ function setStatus(status){
         dataType:'text',
         returnAll:true,
     },function(ret,err){
-        $('.open .switcher').toggleClass('loading');
         if(!err && 200 == ret.statusCode){
             try{
                 var result = JSON.parse(ret.body);
@@ -300,6 +333,7 @@ function setStatus(status){
             }catch(e){
             }   
         }
+        $('.open .switcher').removeClass('loading');
     });
 }
 function request(){
@@ -313,8 +347,7 @@ function request(){
         cache:false,
         data:{
             values:{
-                id:current.id,
-                SID:server.getCookie()
+                id:current.id
             }
         },
         timeout:10,
@@ -340,21 +373,6 @@ function request(){
 function initFront(){
     fixStatusBar($('header'));
     initNavigator();
-}
-
-function goHome(){
-    var postFix = 'ios' == api.systemType ? 'ios' : 'android';
-    api.openWin({
-        name: 'home',
-        url: 'widget://html/home_' + postFix + '.html',
-        slidBackEnabled:false,
-        animation:{
-            type:'none',
-            duration:300
-        },
-        bounces:false,
-        reload:false
-    });
 }
 
 apiready = function(){

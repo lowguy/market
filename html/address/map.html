@@ -102,7 +102,6 @@
                 try {
                     var result = JSON.parse(ret.body);
                     if (result.code == 0) {
-                        console.log(JSON.stringify(result.data.free_area));
                         initFreeArea(result.data.free_area);
                     }
                 } catch(e) {

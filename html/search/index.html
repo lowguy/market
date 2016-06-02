@@ -39,7 +39,8 @@
 				margin-left:0.1rem;
 			}
 			.item .goods-thumb {
-				width: 80%;
+				width:12rem;
+				height:12rem;
 			}
 			.item .title {
 				height: 1.5rem;
@@ -50,6 +51,17 @@
 				white-space: nowrap;
 				text-overflow: ellipsis;
 			}
+			
+	        .item .advertisement {
+                height: 1.5rem;
+                font-size: 1.2rem;
+                line-height: 1.5rem;
+                padding:0 1rem;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                color: red;
+            }
 
 			.item .bottom {
 				width: 100%;
@@ -58,13 +70,52 @@
 				font-weight: bold;
 				padding-bottom:0.5rem;
 			}
-
+	        .item.not-enough .goods-thumb{
+                -webkit-filter:grayscale(100%);
+                filter:grayscale(100%);
+            }
+            .item.not-enough .stock-less{
+                color:red;
+                font-weight:bold;
+                text-align:center;
+                height:3rem;
+                line-height:3rem;
+                padding-bottom: 0.5rem;
+                margin-right:1rem;
+            }
+            
+            .bottom .price-sales{
+                position:absolute;
+                height:3rem;
+                line-height:1.5rem;
+                left:1rem;
+                font-family: Helvetica;
+                color:red;
+                font-weight:bold;
+                text-align:left;
+            }
+            .price-sales .money-symbol{
+                font-size:1.5rem;
+            }
+            .money-symbol.origin{
+                font-size:1rem;
+                text-decoration: line-through;
+                color:#808080;
+                font-weight:normal;
+            }
+            .bottom .sales{
+                color:#808080;
+                font-weight:normal;
+                font-size:1rem;
+            }
+            .bottom .sales:before{
+                content:'已售'
+            }
 			.bottom .operation {
 				text-align: right;
 				position:absolute;
 				right:0;
 				display: inline-block;
-				width: 75%;
 				height:3rem;
 			}
 
@@ -88,18 +139,6 @@
 
 			.bottom .add .icon {
 				background-image: url("../../image/icons/add.png");
-			}
-
-			.money-symbol {
-			    position:absolute;
-				text-align: left;
-				font-size:1.5rem;
-				left: 1rem;
-				display: inline-block;
-				width: 20%;
-				height: 3rem;
-				line-height:3rem;
-				color:red;
 			}
 
 			.bottom .sub {
@@ -169,6 +208,36 @@
 			    text-overflow: ellipsis;
 			    background-color: red;
 			}
+			.item .hot{
+			    position:absolute;
+			    height:3rem;
+			    width:3rem;
+                background-image: url('../../image/icons/product-hot.png');
+                background-size:contain;
+                background-repeat:no-repeat;
+                z-index:1;
+			}
+
+	        .item .discount{
+                position:absolute;
+                height:3rem;
+                width:3rem;
+                background-image: url('../../image/icons/product-discount.png');
+                background-size:contain;
+                background-repeat:no-repeat;
+                z-index:1;
+            }
+            .no-goods {
+    			margin:1rem;
+                background:#FFD705;
+                border-radius: 1rem;
+                color:#6B450A;
+                height:9rem;
+                line-height:9rem;
+                font-size:1.4rem;
+                text-align:center;
+            }
+
 		</style>
 	</head>
 	<body class="loading">
@@ -182,36 +251,67 @@
 			</div>
 		</section>	
 
-		<script id="goods" type="text/html">
-			<section class="goods">
-			<%for(var i = 0; i < goods.length; i++){%>
-				<section class="goods-wrapper">
-					<section class="item" data-id="<%=goods[i].id%>" data-price="<%=goods[i].price%>" data-title="<%=goods[i].title%>" data-slogan="<%=goods[i].slogan%>">
-						<p class="text-center">
-							<img tapmode="touch-down" class="goods-thumb" src="../../image/products/<%=goods[i].id%>.JPG"/>
-						</p>
-						<p class="title">
-							<span><%=goods[i].title%></span>
-						</p>
-						<section class="bottom text-ellipsis">
-							<p>
-								<span class="money-symbol"><%=goods[i].price%></span>
-								<span class="operation"> 
-									<span tapmode="touch-down" class="sub"> 
-										<span class="icon"></span> 
-									</span> 
-									<span class="number">1</span> 
-									<span tapmode="touch-down" class="add"> 
-										<span class="icon"></span> 
-									</span> 
-								</span>
-							</p>
-						</section>
-					</section>
-				</section>
-			<%}%>
-			</section>
-		</script>
+        <script id="goods" type="text/html">
+            <section class="goods">
+           <%if(goods.length > 0){%>
+            <%for(var i = 0; i < goods.length; i++){%>
+                <section class="goods-wrapper">
+                    <section class="item <%if(!goods[i].status || goods[i].stock < 1){%>not-enough<%}%>" data-id="<%=goods[i].id%>" data-goods="<%=JSON.stringify(goods[i])%>">
+                        <%if(1 == goods[i].activity){%>
+                            <p class="hot"></p>
+                        <%}else if(2 == goods[i].activity){%>
+                            <p class="discount"></p>
+                        <%}%>
+                        <p class="text-center">
+                            <img
+                                tapmode="touch-down" class="goods-thumb" 
+                                onload="onImageLoad(this,<%=goods[i].id%>,<%=goods[i].version%>);"
+                                <%
+                                    var selector = '.item[data-id="' + goods[i].id + '"]';
+                                    var dom = $(selector).find('.goods-thumb');
+                                %>
+                                <%if(dom.length){%>
+                                    src="<%=dom.attr('src');%>"
+                                <%}else{%>
+                                    src="../../image/products/placeholder.JPG"
+                                <%}%>
+                             />
+                        </p>
+                        <p class="title">
+                            <span><%=goods[i].title%></span>
+                        </p>
+                        <p class="advertisement"><%=goods[i].slogan%></p>
+                        <section class="bottom text-ellipsis">
+                            <p class="price-sales">
+                                <span class="money-symbol current"><%=goods[i].price%></span>
+                                <br />
+                                <%if(0 != goods[i].activity){%>
+                                    <span class="money-symbol origin"><%=goods[i].price%></span>
+                                <%}%>
+                                <span class="sales"><%=goods[i].sales%></span>
+                            </p>
+                            <p class="operation">
+                                <%if(goods[i].status && goods[i].stock > 0){%>
+                                <span tapmode="touch-down" class="sub"> 
+                                    <span class="icon"></span> 
+                                </span>
+                                <span class="number">1</span> 
+                                <span tapmode="touch-down" class="add"> 
+                                    <span class="icon"></span> 
+                                </span> 
+                                <%}else{%>
+                                    <span class="stock-less">补货中...</span>
+                                <%}%>
+                            </p>
+                        </section>
+                    </section>
+                </section>
+            <%}%>
+            <%}else{%>
+		      <p class="no-goods">暂无相关商品，请换个关键词试试</p>
+          <%}%>
+            </section>
+        </script>
 	</body>
 </html>
 <script type="text/javascript" src="../../script/app.js"></script>
@@ -227,6 +327,11 @@
 	var lastUpdated = 0;//数据最后更新时间
 	var title;
 	var iosOverScroll = false;
+	
+	 function onImageLoad(dom, id,version){
+        loadImage(dom, id, '../../image/products/no.JPG',version);
+    }
+	
 	apiready = function() {
 		var res = api.pageParam;
 		title = res.title;
@@ -290,10 +395,8 @@
 	            try{
 	                var result = JSON.parse(ret.body);
 					var goodsModel = new Goods();
-					goodsModel.load(function(){
-						var data = goodsModel.merge(result.data.all);
-					  	  render(data);
-					});
+					var data = goodsModel.merge(result.data.all);
+    			  	render(data);
 					lastUpdated = timestamp();
 	            }catch(e){
 	            }
@@ -307,18 +410,13 @@
 	}
 
 	function openGoodsDetail(obj){
-		var _this = $(obj).parents('.item');
-		var goods = [];
-		goods.push($(_this).attr('data-id'));
-		goods.push("'" + $(_this).attr('data-price') + "'");
-		goods.push("'" + $(_this).attr('data-title') + "'");
-		goods.push("'" + $(_this).attr('data-slogan') + "'");
-
-		api.execScript({
-            script: 'openGoodsFrame(' + goods.join(',') + ')'
+        var dom = $(obj).parents('.item');
+        var goods = dom.attr('data-goods');
+        api.execScript({
+            script: 'openGoodsFrame(' + goods + ')'
         });
 	}
-	
+
 	function delegateEvent(){
 		if ('ios' == api.systemType) {
 			$(document).on('touchmove', function(event) {
@@ -358,7 +456,7 @@
 				var cart_x = cart.offset().left + cart.width()/2;
 				var cart_y = cart.offset().top + cart.height()/2;
 				var params = [];
-				params.push($(this).parents('.item').attr('data-id'));
+                params.push("'" + origin.attr('src') + "'");
 				params.push(offset_x);
 				params.push(page_y);
 				params.push(width);
@@ -414,10 +512,12 @@
 			var cartGoods = cart.list(current.id);
 			var inCart = false;
 			var number = 0;
-			$.each(cartGoods, function(j, goods){
-				if($(dom).attr('data-id') == goods.id){
+			var goods = $(dom).attr('data-goods');
+			goods = JSON.parse(goods);
+			$.each(cartGoods, function(j, item){
+				if(goods.id == item.id){
 					inCart = true;
-					number = goods.number;
+					number = item.number;
 					return false;
 				}				
 			});
@@ -429,6 +529,7 @@
 				$(dom).find('.sub').removeClass('show');
 				$(dom).find('.number').html(number).removeClass('show');
 			}
+			showPrice($(dom), number);
 		});
 
 		var marketModel = new Market();
@@ -440,12 +541,35 @@
 		
 	}
 
+    function showPrice(dom, number){
+        var goods = JSON.parse(dom.attr('data-goods'));
+        var activity = goods.activity || 0;
+        if(0 != activity){
+            if(1 == activity){
+                if(!dom.hasClass('not-enough')){
+                    if(number > 2){
+                        dom.find('.money-symbol.current').text(goods.price);
+                    }
+                    else{
+                        dom.find('.money-symbol.current').text(goods.discount);
+                    }
+                }
+                else{
+                    dom.find('.money-symbol.current').text(goods.discount);
+                }
+            }
+            else if(2== activity){
+                dom.find('.money-symbol.current').text(goods.discount);
+            }
+        }
+    }
+
 	function addCart(obj){
 		var marketModel = new Market();
 		var current = marketModel.getCurrent();
 		var cart = new Cart();
-		var goodsID = $(obj).parents('.item').attr('data-id');
-		cart.add(current.id, goodsID);
+		var goods = JSON.parse($(obj).parents('.item').attr('data-goods'));
+		cart.add(current.id, goods.id);
 		api.execScript({
         	script: 'updateCartNumber();'
     	});
@@ -456,8 +580,8 @@
 		var marketModel = new Market();
 		var current = marketModel.getCurrent();
 		var cart = new Cart();
-		var goodsID = $(obj).parents('.item').attr('data-id');
-		cart.sub(current.id, goodsID);
+        var goods = JSON.parse($(obj).parents('.item').attr('data-goods'));
+		cart.sub(current.id, goods.id);
 		api.execScript({
         	script: 'updateCartNumber();'
     	});

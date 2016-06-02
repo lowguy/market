@@ -1,4 +1,4 @@
-function iosGoodsToCart(goods_id, offset_x, page_y, width, height, ratio, cart_x, cart_y){
+function iosGoodsToCart(image, offset_x, page_y, width, height, ratio, cart_x, cart_y){
 
 		ratio = ratio || 0.01;
 		var frame_name = 'to_cart_' + Math.random();
@@ -14,7 +14,7 @@ function iosGoodsToCart(goods_id, offset_x, page_y, width, height, ratio, cart_x
             },
             bgColor:'rgba(0,0,0,0)',
             pageParam:{
-            	id:goods_id
+            	image:image
             },
             reload:true
         });
@@ -64,8 +64,8 @@ function openNavigator(dom){
 
 	var animation = {
        		type:'none',
-       		duration:100
-       };
+       		duration:500
+    };
 
     var delay = 0;
 
@@ -94,7 +94,7 @@ function openNavigator(dom){
 function openSearch(){
 	var animation = {
        		type:'none',
-            duration:300
+            duration:500
         };
     var delay = 0;
 
@@ -105,14 +105,15 @@ function openSearch(){
         slidBackEnabled:false,
         animation:animation,
         reload:false,
-        delay:delay
+        delay:delay,
+        vScrollBarEnabled:false
     });
 }
 
 function openScanner(){
     var animation = {
             type:'none',
-            duration:300
+            duration:500
     };
     var delay = 0;
     api.openWin({
