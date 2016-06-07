@@ -58,7 +58,7 @@
     }
 
     function autoLogin() {
-        setInterval(login, 30000);
+        setInterval(login, 60000);
     }
 
     function welcome(){
@@ -187,7 +187,6 @@
             name : 'resume'
         }, function(ret, err) {
             setTimeout(function() {
-                login();
                 clearCache();
             }, 200);
         });
@@ -197,6 +196,8 @@
         autoLogin();
         initPush();
         delegateEvent();
+        var server = new Server();
+        server.clear();
         login();
         clearCache();
         goHome();

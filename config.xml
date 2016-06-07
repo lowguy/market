@@ -11,7 +11,7 @@
   <preference name="autoLaunch" value="false"/>  
   <preference name="autoUpdate" value="true"/>  
   <preference name="smartUpdate" value="true"/>  
-  <preference name="debug" value="true"/>  
+  <preference name="debug" value="false"/>  
   <preference name="iOS7StatusBarAppearance" value="true"/>  
   <preference name="customRefreshHeader" value="UIPullRefreshFlash"/>  
   <preference name="urlScheme" value="xiaoxiaojia"/>  
